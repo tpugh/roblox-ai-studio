@@ -1,7 +1,6 @@
 # Roblox AI Studio — agent operating instructions
 
-This repository is the source of truth for a 55-agent studio system (the
-README's "38" predates the agents added in `ADDED_AGENTS.md`). Markdown specs in
+This repository is the source of truth for a 55-agent studio system. Markdown specs in
 `agents/` define behaviour; generated artifacts are derived from them; two
 runtimes enforce the protocols:
 

@@ -112,7 +112,7 @@ jobs:
       - name: Count agents and report
         run: |
           total=$(find agents -name "*.md" | wc -l)
-          echo "Total agent files: $total (expected: 38 original + additions)"
+          echo "Total agent files: $total (expected: 55)"
           find agents -name "*.md" | sort
 
   runtime-checks:
