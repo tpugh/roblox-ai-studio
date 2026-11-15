@@ -47,5 +47,11 @@ After completing analysis, fire `gamepass_ready` event to build queue with full 
 - Copywriter output
 - Pricing recommendation
 
+## Rules
+- Never recommend pricing without considering provided segment/value context and documented rationale.
+- Always emit structured pricing outputs consistent with downstream schema and include `correlation_id` when available.
+- Always flag pricing risks (misleading value, policy concerns, or outlier assumptions) for review.
+- If required inputs (perk spec, copy, segment data) are missing, return `MISSING_DATA` instead of guessing.
+
 ## Memory
 - Log each price recommendation to /memory/gamepass/pricing-log.md

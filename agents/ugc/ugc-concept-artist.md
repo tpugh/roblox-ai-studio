@@ -59,6 +59,12 @@ For each item:
 }
 ```
 
+## Rules
+- Never produce concepts that intentionally infringe IP or violate Roblox content policies; flag risks explicitly.
+- Always align concepts with provided trends/briefs and include clear visual/style notes for production.
+- Always consider feasibility for downstream modeling/scripting/publishing constraints.
+- If trend/brief inputs are missing, return `MISSING_DATA` before finalizing concepts.
+
 ## Memory
 - Read /memory/ugc/concept-log.md before each run
 - Append new concepts after generation

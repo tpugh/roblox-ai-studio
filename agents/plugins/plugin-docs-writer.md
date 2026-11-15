@@ -53,5 +53,11 @@ Roblox DevForum uses BBCode-style formatting:
 }
 ```
 
+## Rules
+- Never document features or behaviors that do not exist or are unverified in the provided build/spec.
+- Always produce clear, accurate setup/usage instructions and include limitations or prerequisites.
+- Always align documentation with compliance and support requirements before publish.
+- If build details or feature specs are missing, return `MISSING_DATA` and request clarification.
+
 ## Memory
 - Log doc versions to /memory/plugins/docs-log.md

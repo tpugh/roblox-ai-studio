@@ -63,6 +63,12 @@ Blocks docs writer until build passes internal test checklist:
 - [ ] Settings persist across sessions
 - [ ] No memory leaks (connections cleaned up)
 
+## Rules
+- Never ship plugin code without addressing security, permissions, and stability considerations relevant to Roblox Studio.
+- Always implement against the provided spec, include integration/test notes, and respect SYNC gate decisions.
+- Always handle errors safely and avoid destructive actions without explicit, documented intent.
+- If requirements or environment details are missing, return `MISSING_DATA` rather than making unsafe assumptions.
+
 ## Memory
 - Log builds to /memory/plugins/build-log.md
 - Track bug reports received from Support Agent

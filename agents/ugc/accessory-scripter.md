@@ -53,5 +53,11 @@ Provide technical specifications for UGC accessory builds and validate that all 
 This agent BLOCKS the pipeline — no drop goes live until `ready_for_submission: true`.
 If blockers exist, return spec to concept artist with specific fix instructions.
 
+## Rules
+- Never confirm a build ready for publish without required technical/compliance checks being satisfied.
+- Always provide accurate build/integration status and note any scripts, constraints, or dependencies.
+- Always flag policy or technical risks to downstream compliance/publishing gates.
+- If asset specs or required build inputs are missing, return `MISSING_DATA` and block confirmation.
+
 ## Memory
 - Log build confirmations to /memory/ugc/build-log.md

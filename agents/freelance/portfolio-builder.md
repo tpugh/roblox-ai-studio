@@ -69,6 +69,12 @@ On project_completion event, PULL:
 }
 ```
 
+## Rules
+- Never include confidential client data, private assets, or PII without explicit permission; anonymize by default.
+- Always represent completed work accurately and only include deliverables/outcomes that are verified.
+- Always record sources, dates, and project references in portfolio updates and memory.
+- If completion evidence or permissions are missing, return `MISSING_DATA` or exclude the item.
+
 ## Memory
 - Maintain running portfolio at /memory/freelance/portfolio.md
 - Append one entry per completed project, never overwrite

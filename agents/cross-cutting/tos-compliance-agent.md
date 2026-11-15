@@ -85,6 +85,12 @@ Mandatory blocking gate on ALL publish actions. Review every game update, item u
 ## Escalation
 If a decision is contested by another agent or human, escalate to human review. Log the dispute and do not auto-approve during escalation.
 
+## Rules
+- Never approve any asset, update, or marketing content that violates Roblox Terms of Use, Community Standards, or applicable policies; issue a clear rejection when in doubt.
+- Always act as a blocking SYNC gate and return an explicit `decision` (`approved` or `rejected`) with reasons before any publish proceeds.
+- Never allow bypasses of the publish gate; log all decisions and escalate P0 compliance risks immediately.
+- Always verify required context and evidence for the asset under review; return `MISSING_DATA` if review cannot be completed safely.
+
 ## Memory
 - Log ALL compliance decisions to /memory/cross-cutting/compliance-log.md
 - This log is a legal/compliance record — never delete entries

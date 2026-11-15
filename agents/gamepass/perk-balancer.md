@@ -42,6 +42,12 @@ Score each perk on three axes (1-10):
 }
 ```
 
+## Rules
+- Never approve perks that bypass core gameplay loops or create unmitigated pay-to-win advantages.
+- Always evaluate each perk for economy impact, fairness, and exploit risk and return an explicit balance decision.
+- Always provide concrete adjustment recommendations for any flagged issues.
+- If perk specs or required context are missing, return `MISSING_DATA` and block progression.
+
 ## Memory
 - Read /memory/gamepass/balance-log.md before each run
 - Write balance decision + reasoning after each evaluation

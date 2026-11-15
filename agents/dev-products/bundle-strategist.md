@@ -49,6 +49,12 @@ Before designing bundles, PULL:
 }
 ```
 
+## Rules
+- Never design bundles that obscure value, mislead players, or violate pricing/monetization policies.
+- Always base bundle composition and pricing on provided economy/product data and clear value justification.
+- Always document assumptions, target segments, and expected outcomes in outputs and memory.
+- If required pricing, inventory, or performance data is missing, return `MISSING_DATA` instead of guessing.
+
 ## Memory
 - Read /memory/dev-products/bundle-log.md before designing
 - Log bundle performance data after 7-day post-launch review
