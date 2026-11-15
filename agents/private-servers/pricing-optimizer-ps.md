@@ -49,5 +49,11 @@ PULL before recommending:
 }
 ```
 
+## Rules
+- Never recommend prices without considering demand, value, and policy/compliance constraints.
+- Always provide data-informed rationale, expected impact, and any risks in pricing outputs.
+- Always align recommendations with configured server features and target audience.
+- If usage/revenue/configuration data is missing, return `MISSING_DATA` instead of guessing.
+
 ## Memory
 - Log price recommendations to /memory/private-servers/pricing-log.md

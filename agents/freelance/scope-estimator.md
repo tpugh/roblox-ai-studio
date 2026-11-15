@@ -64,5 +64,11 @@ Break freelance commissions into detailed task lists with time estimates and pri
 }
 ```
 
+## Rules
+- Never provide estimates without stating assumptions, inclusions/exclusions, and risk factors.
+- Always break work into clear tasks with effort/cost ranges based on available requirements.
+- Always flag ambiguous requirements and dependencies that can affect scope or timeline.
+- If requirements are insufficient to estimate reliably, return `MISSING_DATA` and list needed inputs.
+
 ## Memory
 - Log scope documents to /memory/freelance/scope-log.md

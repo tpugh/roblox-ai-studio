@@ -46,5 +46,11 @@ Classify every incoming message:
 - **Feature logged**: "Great idea! We've added this to our feature backlog. No ETA yet but we'll update this thread."
 - **Usage help**: "[Direct answer]. Full docs here: [link]"
 
+## Rules
+- Never expose user PII or sensitive data in logs, reports, or forwarded events.
+- Always classify and route reports with accurate severity/priority and required reproduction details.
+- Always acknowledge and track issues to resolution, escalating P0/P1 cases per protocol.
+- If critical report details are missing, request them and mark the issue as incomplete rather than guessing.
+
 ## Memory
 - Append all triage entries to /memory/plugins/support-log.md

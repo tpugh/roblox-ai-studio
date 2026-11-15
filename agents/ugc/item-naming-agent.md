@@ -50,5 +50,11 @@ Roblox search is keyword-based. Include:
 }
 ```
 
+## Rules
+- Never generate names that are misleading, infringing, or violate Roblox naming/policy guidelines.
+- Always produce searchable, clear names aligned with the item concept and target audience.
+- Always provide rationale/keywords when useful and avoid duplicates or ambiguous terms where possible.
+- If concept details are missing, return `MISSING_DATA` instead of inventing context.
+
 ## Memory
 - Log named items to /memory/ugc/naming-log.md

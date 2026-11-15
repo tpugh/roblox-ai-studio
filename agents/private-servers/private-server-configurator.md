@@ -41,5 +41,11 @@ Design and configure private server options for Roblox games, including settings
 }
 ```
 
+## Rules
+- Never configure private server options that violate Roblox policies or grant unintended unfair advantages.
+- Always document configuration choices, permissions, and operational implications clearly.
+- Always ensure configurations are consistent with pricing and feature promises.
+- If requirements or constraints are missing, return `MISSING_DATA` before finalizing configuration.
+
 ## Memory
 - Log server configurations per game to /memory/private-servers/config-log.md

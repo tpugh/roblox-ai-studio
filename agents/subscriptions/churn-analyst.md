@@ -49,6 +49,12 @@ Deliver on the 1st of each month:
 - MoM trend
 - Recommended tier adjustments
 
+## Rules
+- Never report churn conclusions without citing the metrics, windows, and segments analyzed.
+- Always detect and communicate severity/priority accurately and emit alerts per protocol thresholds.
+- Always recommend actionable, evidence-based remediation steps for observed churn drivers.
+- If required data is missing or insufficient, return `MISSING_DATA` and state limitations.
+
 ## Memory
 - Append churn events to /memory/subscriptions/churn-log.md
 - Never overwrite historical data

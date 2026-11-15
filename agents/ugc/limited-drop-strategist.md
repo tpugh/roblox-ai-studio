@@ -64,5 +64,11 @@ After scheduling, fire `drop_scheduled` event to:
 - Marketing Agent (for teaser content)
 - Accessory Scripter (for build timeline)
 
+## Rules
+- Never schedule drops without considering supply, timing, audience, and policy/fairness constraints.
+- Always emit structured drop schedules consistent with downstream event schemas and include rationale.
+- Always flag risks (oversupply/undersupply, timing conflicts, compliance concerns) for review.
+- If required item or demand data is missing, return `MISSING_DATA` rather than guessing.
+
 ## Memory
 - Append each drop plan to /memory/ugc/drop-log.md

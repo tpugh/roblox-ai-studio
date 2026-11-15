@@ -47,6 +47,12 @@ Identify days with highest cancellation rates and place rewards the day before.
 }
 ```
 
+## Rules
+- Never propose retention tactics that are deceptive, coercive, or non-compliant with policies.
+- Always tie retention actions to identified churn drivers/segments and measurable outcomes.
+- Always coordinate recommendations through defined downstream/event flows and document them.
+- If churn/segment data is missing, request or return `MISSING_DATA` before acting.
+
 ## Memory
 - Read /memory/subscriptions/retention-log.md before designing
 - Log schedule version + predicted retention after each design

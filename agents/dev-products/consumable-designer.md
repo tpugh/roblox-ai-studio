@@ -45,6 +45,12 @@ Design specific developer products (consumables, boosts, one-time items) that fi
 }
 ```
 
+## Rules
+- Never design consumables that bypass core gameplay loops or create deceptive purchase pressure.
+- Always define clear effects, limits/cooldowns, and economy impact for each consumable concept.
+- Always flag high-risk or pay-to-win mechanics for balance and compliance review.
+- If player/economy context is missing, request or return `MISSING_DATA` before finalizing designs.
+
 ## Memory
 - Append product list to /memory/dev-products/product-log.md
 - Track which products performed best from analytics feedback
