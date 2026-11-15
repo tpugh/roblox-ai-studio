@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "title": "Roblox AI Studio — Event Schema Registry",
-  "version": "1.0.0",
-  "description": "All named events that agents can fire and subscribe to",
+  "version": "1.1.0",
+  "description": "All named events that agents can fire and subscribe to (extended with build/production/integration events)",
   "events": {
     "analytics_opportunity": {
       "description": "Fired by Analytics Agent when a monetization opportunity is detected in player data",
       "source": "analytics-agent",
-      "subscribers": ["gamepass-designer", "consumable-designer"],
+      "subscribers": ["gamepass-designer", "consumable-designer", "gameplay-systems-designer"],
       "priority": "P2",
       "fields": {
         "segment": { "type": "string", "description": "Player segment identifier" },
@@ -61,7 +61,7 @@
     "drop_scheduled": {
       "description": "Fired by Limited Drop Strategist after scheduling a UGC item drop",
       "source": "limited-drop-strategist",
-      "subscribers": ["accessory-scripter", "community-manager"],
+      "subscribers": ["accessory-scripter", "community-manager", "ugc-3d-modeler", "creative-asset-agent"],
       "priority": "P2",
       "fields": {
         "item_name": { "type": "string" },
@@ -74,7 +74,7 @@
     "bug_reported": {
       "description": "Fired by Plugin Support Agent when a bug is reported",
       "source": "plugin-support-agent",
-      "subscribers": ["plugin-lua-developer"],
+      "subscribers": ["plugin-lua-developer", "roblox-lua-engineer"],
       "priority": "P1",
       "fields": {
         "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
@@ -165,7 +165,7 @@
     "update_scheduled": {
       "description": "Fired by Update Scheduler when a release is added to the calendar",
       "source": "update-scheduler",
-      "subscribers": ["community-manager", "all_pipeline_agents"],
+      "subscribers": ["community-manager", "project-production-manager", "creative-asset-agent", "all_pipeline_agents"],
       "priority": "P3",
       "fields": {
         "release_date": { "type": "string", "format": "date-time" },
@@ -173,6 +173,79 @@
         "pipeline": { "type": "string" },
         "description": { "type": "string" },
         "community_post_required": { "type": "boolean" }
+      }
+    },
+    "implementation_requested": {
+      "description": "Requests engineering implementation for an approved design/spec",
+      "source": "gameplay-systems-designer",
+      "subscribers": ["roblox-lua-engineer", "ui-ux-builder", "level-world-builder"],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": { "type": "string" },
+        "spec_title": { "type": "string" },
+        "systems": { "type": "array", "items": { "type": "string" } },
+        "acceptance_criteria": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "build_ready_for_test": {
+      "description": "Signals that a build is ready for QA/playtest",
+      "source": "build-release-agent",
+      "subscribers": ["qa-playtest-agent", "code-review-security-agent"],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": { "type": "string" },
+        "place_id": { "type": "string" },
+        "version": { "type": "string" },
+        "change_summary": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "publish_requested": {
+      "description": "Requests platform publish/sync for an approved artifact or release",
+      "source": "build-release-agent",
+      "subscribers": ["roblox-api-publishing-agent", "tos-compliance-agent"],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": { "type": "string" },
+        "action": { "type": "string" },
+        "target": { "type": "object" },
+        "artifact_count": { "type": "number" }
+      }
+    },
+    "publish_result": {
+      "description": "Reports outcome of a platform publish/sync action",
+      "source": "roblox-api-publishing-agent",
+      "subscribers": ["analytics-agent", "moderation-status-monitor", "community-manager", "build-release-agent"],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": { "type": "string" },
+        "decision": { "type": "string", "enum": ["completed", "partial", "failed", "blocked"] },
+        "action": { "type": "string" },
+        "platform_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "moderation_status_update": {
+      "description": "Emitted when moderation/review status changes for a tracked item",
+      "source": "moderation-status-monitor",
+      "subscribers": ["analytics-agent", "tos-compliance-agent", "project-production-manager"],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": { "type": "string" },
+        "platform_id": { "type": "string" },
+        "item_type": { "type": "string" },
+        "status": { "type": "string", "enum": ["approved", "pending", "rejected", "taken_down", "action_required"] },
+        "detail": { "type": "string" }
+      }
+    },
+    "moderation_alert": {
+      "description": "Critical alert for rejection/takedown/action required on live or release-blocking items",
+      "source": "moderation-status-monitor",
+      "subscribers": ["analytics-agent", "tos-compliance-agent", "community-manager", "project-production-manager"],
+      "priority": "P1",
+      "fields": {
+        "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
+        "platform_id": { "type": "string" },
+        "reason": { "type": "string" },
+        "recommended_action": { "type": "string" }
       }
     }
   }
