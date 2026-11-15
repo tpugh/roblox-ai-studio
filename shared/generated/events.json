@@ -1,0 +1,626 @@
+{
+  "version": "1.1.0",
+  "events": {
+    "analytics_opportunity": {
+      "name": "analytics_opportunity",
+      "description": "Fired by Analytics Agent when a monetization opportunity is detected in player data",
+      "source": "analytics-agent",
+      "subscribers": [
+        "gamepass-designer",
+        "consumable-designer",
+        "gameplay-systems-designer"
+      ],
+      "priority": "P2",
+      "fields": {
+        "segment": {
+          "type": "string",
+          "description": "Player segment identifier"
+        },
+        "avg_session_minutes": {
+          "type": "number"
+        },
+        "top_activity": {
+          "type": "string"
+        },
+        "drop_off_point": {
+          "type": "string"
+        },
+        "player_count": {
+          "type": "number"
+        }
+      }
+    },
+    "gamepass_ready": {
+      "name": "gamepass_ready",
+      "description": "Fired by Pricing Analyst when a gamepass package is ready for implementation",
+      "source": "pricing-analyst",
+      "subscribers": [
+        "lua-script-writer",
+        "build-queue"
+      ],
+      "priority": "P2",
+      "fields": {
+        "perk_spec": {
+          "type": "object"
+        },
+        "copy": {
+          "type": "object"
+        },
+        "pricing": {
+          "type": "object"
+        },
+        "correlation_id": {
+          "type": "string"
+        }
+      }
+    },
+    "trigger_identified": {
+      "name": "trigger_identified",
+      "description": "Fired by Spending Trigger Analyst when a purchase moment is detected",
+      "source": "spending-trigger-analyst",
+      "subscribers": [
+        "economy-architect"
+      ],
+      "priority": "P2",
+      "fields": {
+        "trigger_type": {
+          "type": "string",
+          "enum": [
+            "death",
+            "inventory_full",
+            "level_fail",
+            "timer_pressure",
+            "aspiration",
+            "celebration"
+          ]
+        },
+        "score": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "player_segment": {
+          "type": "string"
+        },
+        "avg_currency_held": {
+          "type": "number"
+        },
+        "avg_session_spend": {
+          "type": "number"
+        },
+        "context": {
+          "type": "string"
+        }
+      }
+    },
+    "churn_spike": {
+      "name": "churn_spike",
+      "description": "Fired by Churn Analyst when subscription cancellations exceed threshold",
+      "source": "churn-analyst",
+      "subscribers": [
+        "subscription-designer",
+        "analytics-agent"
+      ],
+      "priority": "P1",
+      "fields": {
+        "severity": {
+          "type": "string",
+          "enum": [
+            "warning",
+            "critical"
+          ]
+        },
+        "metric": {
+          "type": "string"
+        },
+        "current_rate": {
+          "type": "number"
+        },
+        "baseline_rate": {
+          "type": "number"
+        },
+        "affected_tier": {
+          "type": "string",
+          "enum": [
+            "bronze",
+            "gold",
+            "diamond",
+            "all"
+          ]
+        },
+        "likely_cause": {
+          "type": "string"
+        },
+        "recommended_action": {
+          "type": "string"
+        }
+      }
+    },
+    "drop_scheduled": {
+      "name": "drop_scheduled",
+      "description": "Fired by Limited Drop Strategist after scheduling a UGC item drop",
+      "source": "limited-drop-strategist",
+      "subscribers": [
+        "accessory-scripter",
+        "community-manager",
+        "ugc-3d-modeler",
+        "creative-asset-agent"
+      ],
+      "priority": "P2",
+      "fields": {
+        "item_name": {
+          "type": "string"
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "hype",
+            "event"
+          ]
+        },
+        "drop_datetime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "supply_cap": {
+          "type": "number"
+        },
+        "price_robux": {
+          "type": "number"
+        }
+      }
+    },
+    "bug_reported": {
+      "name": "bug_reported",
+      "description": "Fired by Plugin Support Agent when a bug is reported",
+      "source": "plugin-support-agent",
+      "subscribers": [
+        "plugin-lua-developer",
+        "roblox-lua-engineer"
+      ],
+      "priority": "P1",
+      "fields": {
+        "severity": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "plugin_name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "reported_by": {
+          "type": "string"
+        },
+        "steps_to_reproduce": {
+          "type": "string"
+        },
+        "studio_version": {
+          "type": "string"
+        }
+      }
+    },
+    "feature_requested": {
+      "name": "feature_requested",
+      "description": "Fired by Plugin Support Agent when a feature request is received",
+      "source": "plugin-support-agent",
+      "subscribers": [
+        "plugin-ideation-agent"
+      ],
+      "priority": "P3",
+      "fields": {
+        "plugin_name": {
+          "type": "string"
+        },
+        "request": {
+          "type": "string"
+        },
+        "requester_type": {
+          "type": "string",
+          "enum": [
+            "developer",
+            "user"
+          ]
+        },
+        "votes": {
+          "type": "number",
+          "default": 1
+        }
+      }
+    },
+    "qualified_lead": {
+      "name": "qualified_lead",
+      "description": "Fired by Client Comms Agent when a freelance lead is qualified",
+      "source": "client-comms-agent",
+      "subscribers": [
+        "scope-estimator"
+      ],
+      "priority": "P2",
+      "fields": {
+        "client_id": {
+          "type": "string",
+          "description": "Anonymized client identifier"
+        },
+        "project_type": {
+          "type": "string",
+          "enum": [
+            "scripting",
+            "building",
+            "ui",
+            "full_game",
+            "other"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "budget_range": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "currency": {
+              "type": "string",
+              "enum": [
+                "USD",
+                "Robux"
+              ]
+            }
+          }
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "qualification_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 40
+        }
+      }
+    },
+    "devex_ready": {
+      "name": "devex_ready",
+      "description": "Fired by DevEx Optimizer when Robux balance hits a conversion threshold",
+      "source": "devex-optimizer",
+      "subscribers": [
+        "tax-finance-assistant"
+      ],
+      "priority": "P2",
+      "fields": {
+        "current_balance": {
+          "type": "number"
+        },
+        "usd_equivalent": {
+          "type": "number"
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "notify",
+            "recommend",
+            "strong_recommend",
+            "immediate"
+          ]
+        },
+        "optimal_timing": {
+          "type": "string"
+        },
+        "tax_note": {
+          "type": "string"
+        },
+        "rate_per_robux": {
+          "type": "number"
+        }
+      }
+    },
+    "analytics_alert": {
+      "name": "analytics_alert",
+      "description": "Fired by Analytics Agent for metric-based alerts to relevant pipeline agents",
+      "source": "analytics-agent",
+      "subscribers": [
+        "varies_by_affected_pipeline"
+      ],
+      "priority": "P0|P1|P2|P3",
+      "fields": {
+        "priority": {
+          "type": "string",
+          "enum": [
+            "P0",
+            "P1",
+            "P2",
+            "P3"
+          ]
+        },
+        "metric": {
+          "type": "string"
+        },
+        "current_value": {
+          "type": "number"
+        },
+        "target_value": {
+          "type": "number"
+        },
+        "delta_percent": {
+          "type": "number"
+        },
+        "affected_pipeline": {
+          "type": "string"
+        },
+        "recommended_agent": {
+          "type": "string"
+        },
+        "action_required": {
+          "type": "string"
+        }
+      }
+    },
+    "project_completion": {
+      "name": "project_completion",
+      "description": "Fired when a freelance commission project is fully delivered",
+      "source": "client-comms-agent",
+      "subscribers": [
+        "portfolio-builder",
+        "revenue-tracker"
+      ],
+      "priority": "P3",
+      "fields": {
+        "project_id": {
+          "type": "string"
+        },
+        "client_id": {
+          "type": "string",
+          "description": "Anonymized"
+        },
+        "project_type": {
+          "type": "string"
+        },
+        "deliverables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "total_usd": {
+          "type": "number"
+        },
+        "completion_date": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "update_scheduled": {
+      "name": "update_scheduled",
+      "description": "Fired by Update Scheduler when a release is added to the calendar",
+      "source": "update-scheduler",
+      "subscribers": [
+        "community-manager",
+        "project-production-manager",
+        "creative-asset-agent",
+        "all_pipeline_agents"
+      ],
+      "priority": "P3",
+      "fields": {
+        "release_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "release_type": {
+          "type": "string",
+          "enum": [
+            "hotfix",
+            "minor",
+            "feature",
+            "major",
+            "event",
+            "ugc_drop"
+          ]
+        },
+        "pipeline": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "community_post_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "implementation_requested": {
+      "name": "implementation_requested",
+      "description": "Requests engineering implementation for an approved design/spec",
+      "source": "gameplay-systems-designer",
+      "subscribers": [
+        "roblox-lua-engineer",
+        "ui-ux-builder",
+        "level-world-builder"
+      ],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": {
+          "type": "string"
+        },
+        "spec_title": {
+          "type": "string"
+        },
+        "systems": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "build_ready_for_test": {
+      "name": "build_ready_for_test",
+      "description": "Signals that a build is ready for QA/playtest",
+      "source": "build-release-agent",
+      "subscribers": [
+        "qa-playtest-agent",
+        "code-review-security-agent"
+      ],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": {
+          "type": "string"
+        },
+        "place_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "change_summary": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "publish_requested": {
+      "name": "publish_requested",
+      "description": "Requests platform publish/sync for an approved artifact or release",
+      "source": "build-release-agent",
+      "subscribers": [
+        "roblox-api-publishing-agent",
+        "tos-compliance-agent"
+      ],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "target": {
+          "type": "object"
+        },
+        "artifact_count": {
+          "type": "number"
+        }
+      }
+    },
+    "publish_result": {
+      "name": "publish_result",
+      "description": "Reports outcome of a platform publish/sync action",
+      "source": "roblox-api-publishing-agent",
+      "subscribers": [
+        "analytics-agent",
+        "moderation-status-monitor",
+        "community-manager",
+        "build-release-agent"
+      ],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": {
+          "type": "string"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "partial",
+            "failed",
+            "blocked"
+          ]
+        },
+        "action": {
+          "type": "string"
+        },
+        "platform_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "moderation_status_update": {
+      "name": "moderation_status_update",
+      "description": "Emitted when moderation/review status changes for a tracked item",
+      "source": "moderation-status-monitor",
+      "subscribers": [
+        "analytics-agent",
+        "tos-compliance-agent",
+        "project-production-manager"
+      ],
+      "priority": "P2",
+      "fields": {
+        "correlation_id": {
+          "type": "string"
+        },
+        "platform_id": {
+          "type": "string"
+        },
+        "item_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "pending",
+            "rejected",
+            "taken_down",
+            "action_required"
+          ]
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "moderation_alert": {
+      "name": "moderation_alert",
+      "description": "Critical alert for rejection/takedown/action required on live or release-blocking items",
+      "source": "moderation-status-monitor",
+      "subscribers": [
+        "analytics-agent",
+        "tos-compliance-agent",
+        "community-manager",
+        "project-production-manager"
+      ],
+      "priority": "P1",
+      "fields": {
+        "priority": {
+          "type": "string",
+          "enum": [
+            "P0",
+            "P1",
+            "P2"
+          ]
+        },
+        "platform_id": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "recommended_action": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Roblox AI Studio — Agent System
 
-A multi-agent AI system for running a profitable Roblox development studio. 38 specialized agents across 10 revenue categories, coordinated through a central analytics hub with strict communication protocols.
+A multi-agent AI system for running a profitable Roblox development studio. 55 specialized agents across 10 revenue categories, coordinated through a central analytics hub with strict communication protocols.
 
 ---
 
@@ -8,17 +8,21 @@ A multi-agent AI system for running a profitable Roblox development studio. 38 s
 
 | Category | Agents | Revenue Type |
 |----------|--------|-------------|
-| Gamepass | 4 | One-time in-game purchases |
+| Gamepass | 5 | One-time in-game purchases |
 | Dev Products | 4 | Repeatable purchases / consumables |
 | Subscriptions | 3 | Monthly recurring Robux |
 | Private Servers | 2 | Monthly server fees |
-| UGC Items | 5 | Avatar marketplace sales |
-| Clothing | 3 | Shirt / pants / t-shirt catalog |
+| UGC Items | 6 | Avatar marketplace sales |
+| Clothing | 4 | Shirt / pants / t-shirt catalog |
 | Plugins | 4 | Studio tool sales |
 | Freelance | 4 | Commissioned development work |
 | DevEx / Finance | 3 | Robux → USD conversion + accounting |
-| Cross-cutting | 6 | Analytics, compliance, SEO, community, intel, scheduling |
-| **Total** | **38** | All Roblox revenue streams |
+| Cross-cutting | 20 | Analytics, compliance, SEO, community, intel, scheduling |
+| **Total** | **55** | All Roblox revenue streams |
+
+Counts reflect every spec in `agents/` (verified by `tools/build_registry.py` from
+file metadata, not by hand). The original design shipped 38; the 17 added later
+are summarized in [`ADDED_AGENTS.md`](ADDED_AGENTS.md).
 
 ---
 
@@ -182,6 +186,26 @@ Revenue Tracker (daily PULL → consolidated report)
 
 ---
 
+---
+
+## Runtimes
+
+The specs are executable through two runtimes that share one generated registry:
+
+| Runtime | Entry point | What it enforces |
+|---------|-------------|------------------|
+| Host | `python3 tools/studio.py` + `.opencode/agents/*` | transport, SYNC gates, memory, publish gate, one subagent per agent spec |
+| Studio | `studio/src/RobloxAIStudio/` → `ReplicatedStorage.RobloxAIStudio` | envelope routing, event bus, gates, memory, publish gate, gamepass pipeline |
+
+```sh
+python3 tools/build_registry.py   # specs → registry JSON + Luau + subagents
+bash tools/smoke_test.sh          # 13 protocol checks
+```
+
+Operating rules: [`AGENTS.md`](AGENTS.md). Studio runtime details:
+[`studio/README.md`](studio/README.md). Pipeline graphs:
+[`shared/schemas/pipelines.json`](shared/schemas/pipelines.json).
+
 ## Getting Started
 
 ### Add a New Agent
@@ -219,11 +243,13 @@ Append to the agent's log file using this format:
 
 ## CI Status
 
-The `agent-lint.yml` workflow validates on every push to `agents/`, `protocols/`, or `shared/schemas/`. It checks:
+The `agent-lint.yml` workflow validates on every push to `agents/`, `protocols/`, `shared/`, `studio/`, `tools/`, or `.opencode/`. It checks:
 - All agent files have required sections (`## Role`, `## Rules`, `## Memory`)
 - All agent files have required frontmatter fields
 - All memory directories exist
 - `events.json` is valid JSON with all required fields
+- The generated registry, Luau config, and subagents match the specs (no drift)
+- The protocol CLI passes its smoke tests
 
 ---
 
