@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roblox AI Studio — Portfolio</title>
+  <meta name="description" content="Portfolio site for Roblox AI Studio: a multi-agent system for building, monetizing, and operating Roblox experiences." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <div class="brand">Roblox <span>AI Studio</span></div>
+      <nav>
+        <a href="#products">Products</a>
+        <a href="#pipelines">Pipelines</a>
+        <a href="#accomplishments">Accomplishments</a>
+        <a href="#mcp">MCP</a>
+        <a href="https://github.com/tpugh/roblox-ai-studio" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">Multi-agent studio system for Roblox</p>
+          <h1>Build, monetize, and operate Roblox products with coordinated AI agents</h1>
+          <p class="lead">Roblox AI Studio defines 38+ specialized agents, event-driven pipelines, compliance gates, and memory-backed workflows across gamepasses, UGC, plugins, freelance, DevEx, and core production.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="https://github.com/tpugh/roblox-ai-studio" target="_blank" rel="noopener">View Repository</a>
+            <a class="btn secondary" href="#accomplishments">See Accomplishments</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h3>At a glance</h3>
+          <ul class="stats">
+            <li><strong>38+</strong><span>Agent specs across 10 categories</span></li>
+            <li><strong>4</strong><span>Protocols: PUSH, PULL, EVENT, SYNC</span></li>
+            <li><strong>1</strong><span>Hard TOS publish gate</span></li>
+            <li><strong>1</strong><span>Analytics event bus for cross-pipeline signals</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="products" class="section">
+      <div class="container">
+        <h2>Products &amp; Revenue Streams</h2>
+        <p class="section-lead">Agent coverage designed to support the full lifecycle of Roblox studio offerings—from ideation and production to publishing, monetization, and operations.</p>
+        <div class="grid cards">
+          <article class="card"><h3>Gamepasses &amp; Dev Products</h3><p>Concepting, balancing, pricing, copy, economy design, triggers, bundles, and implementation handoffs for in-experience purchases.</p></article>
+          <article class="card"><h3>Subscriptions &amp; Private Servers</h3><p>Recurring value design, retention/churn analysis, server configuration, and pricing optimization workflows.</p></article>
+          <article class="card"><h3>UGC &amp; Clothing</h3><p>Trend spotting, concepting, naming, drop strategy, asset production, volume publishing, and accessory scripting pipelines.</p></article>
+          <article class="card"><h3>Plugins</h3><p>Ideation, Luau development, documentation, and support loops for Roblox Studio tools.</p></article>
+          <article class="card"><h3>Freelance &amp; Services</h3><p>Lead qualification, scoping, proposals, client comms, and portfolio building for commissioned work.</p></article>
+          <article class="card"><h3>DevEx &amp; Finance</h3><p>Revenue tracking, DevEx optimization signals, and tax/finance assistance for studio operations.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="pipelines" class="section alt">
+      <div class="container">
+        <h2>Pipeline Architecture</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>How work flows</h3>
+            <ul class="bullets">
+              <li><strong>PUSH:</strong> linear handoffs to downstream agents.</li>
+              <li><strong>PULL:</strong> agents fetch required state/data before acting.</li>
+              <li><strong>EVENT:</strong> async broadcasts routed through the Analytics event bus.</li>
+              <li><strong>SYNC:</strong> blocking gates for high-stakes decisions and approvals.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Governance &amp; safety</h3>
+            <ul class="bullets">
+              <li><strong>TOS Compliance:</strong> mandatory SYNC publish gate—nothing ships without approval.</li>
+              <li><strong>Analytics hub:</strong> centralized cross-pipeline signals, memory visibility, and P0/P1 alerting.</li>
+              <li><strong>Append-only memory:</strong> per-agent logs for traceability and continuous improvement.</li>
+              <li><strong>Schema-driven events:</strong> registered events/subscribers in <code>shared/schemas/events.json</code>.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pipeline-list">
+          <div class="pill">Gamepass: Analytics → Design → Balance (SYNC) → Copy → Pricing → Implement → TOS (SYNC) → Publish</div>
+          <div class="pill">UGC: Trends → Concept → Naming → Drop Schedule → Build (SYNC) → TOS (SYNC) → Community → Publish</div>
+          <div class="pill">Plugin: Ideation → Build (SYNC) → Docs → Support Loop → TOS (SYNC) → Publish</div>
+          <div class="pill">Freelance: Qualify → Scope → Proposal → Delivery/Execution → Portfolio</div>
+          <div class="pill">DevEx: Revenue Tracking → Threshold/Timing → Finance &amp; Ledger</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="accomplishments" class="section">
+      <div class="container">
+        <h2>Accomplishments</h2>
+        <div class="grid cards">
+          <article class="card">
+            <h3>End-to-end build coverage added</h3>
+            <p>Expanded the system with missing implementation and production agents, including Lua scripting/engineering, gameplay systems, UI/UX, world building, QA/playtest, release management, asset production (UGC/clothing/creative/AVFX), publishing integration, data ingestion, moderation monitoring, production management, orchestration/runtime, and code/security review.</p>
+          </article>
+          <article class="card">
+            <h3>Standards-aligned specs &amp; memory</h3>
+            <p>New and updated agents follow repository standards (frontmatter, role/input/workflow/output/rules/memory), with append-only memory logs and extended event registrations to support build, publish, and operations flows.</p>
+          </article>
+          <article class="card">
+            <h3>Pipeline quality fixes</h3>
+            <p>Resolved CI lint failures by adding required <code>## Rules</code> sections to existing agent specs so validation checks for required sections, frontmatter, memory, and event schema can pass.</p>
+          </article>
+          <article class="card">
+            <h3>Roblox Studio &amp; MCP enablement</h3>
+            <p>Documented Windows setup and how to connect to the built-in Roblox Studio MCP server, plus guidance for leveraging this repo’s agents as an execution/integration layer through MCP-capable orchestration.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="mcp" class="section alt">
+      <div class="container">
+        <h2>Roblox Studio MCP Integration</h2>
+        <p class="section-lead">Connect trusted MCP clients to Roblox Studio to turn agent specs into real in-Studio actions—editing scripts, exploring the data model, running playtests, and saving work—while keeping compliance and event-bus rules intact.</p>
+        <div class="grid two">
+          <div class="card">
+            <h3>Quick setup (Windows)</h3>
+            <ol class="bullets ordered">
+              <li>Install/update Roblox Studio and open a place.</li>
+              <li>Enable <strong>Assistant → Manage MCP Servers → Enable Studio as MCP server</strong>.</li>
+              <li>Connect a client (quick connect or <code>%LOCALAPPDATA%\Roblox\mcp.bat</code> via stdio config) and verify the connection indicator.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <h3>What it enables</h3>
+            <ul class="bullets">
+              <li>Script and data model operations, Luau execution, playtest and console/screen capture.</li>
+              <li>Asset search/insert/generation workflows and place saving.</li>
+              <li>Orchestrated, gated execution mapped to this repo’s agents and protocols.</li>
+            </ul>
+            <p><a href="https://create.roblox.com/docs/studio/mcp" target="_blank" rel="noopener">Official Roblox MCP docs →</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container cta-panel">
+        <h2>Explore the system</h2>
+        <p>Review agent specs, protocols, schemas, and memory structure—or use this as the blueprint for your own Roblox studio orchestration.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="https://github.com/tpugh/roblox-ai-studio" target="_blank" rel="noopener">Repository</a>
+          <a class="btn secondary" href="https://github.com/tpugh/roblox-ai-studio/pull/1" target="_blank" rel="noopener">Latest PR</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Roblox AI Studio — portfolio site for the multi-agent Roblox development system.</p>
+      <p class="muted">Built as a static GitHub Pages site. Roblox and related marks are property of Roblox Corporation.</p>
+    </div>
+  </footer>
+</body>
+</html>
