@@ -1,0 +1,110 @@
+name: Agent Config Lint & Validate
+
+on:
+  push:
+    paths:
+      - 'agents/**'
+      - 'protocols/**'
+      - 'shared/schemas/**'
+      - 'memory/**'
+  pull_request:
+    paths:
+      - 'agents/**'
+      - 'protocols/**'
+      - 'shared/schemas/**'
+
+jobs:
+  lint-agents:
+    runs-on: ubuntu-latest
+    name: Validate Agent Files
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check all agent files have required sections
+        run: |
+          echo "Checking agent markdown files for required sections..."
+          FAIL=0
+          for file in agents/**/*.md; do
+            for section in "## Role" "## Rules" "## Memory"; do
+              if ! grep -q "$section" "$file"; then
+                echo "FAIL: Missing '$section' in $file"
+                FAIL=1
+              fi
+            done
+          done
+          if [ $FAIL -eq 1 ]; then
+            echo "One or more agent files are missing required sections."
+            exit 1
+          fi
+          echo "✓ All agent files have required sections."
+
+      - name: Check all agent files have frontmatter
+        run: |
+          echo "Checking agent frontmatter..."
+          FAIL=0
+          for file in agents/**/*.md; do
+            for field in "agent:" "version:" "category:" "protocol:"; do
+              if ! grep -q "$field" "$file"; then
+                echo "FAIL: Missing frontmatter field '$field' in $file"
+                FAIL=1
+              fi
+            done
+          done
+          if [ $FAIL -eq 1 ]; then
+            exit 1
+          fi
+          echo "✓ All agent files have required frontmatter."
+
+      - name: Check memory directories exist for all agent categories
+        run: |
+          echo "Checking memory directories..."
+          FAIL=0
+          for category in gamepass dev-products subscriptions private-servers ugc clothing plugins freelance devex cross-cutting; do
+            if [ ! -d "memory/$category" ]; then
+              echo "FAIL: Missing memory directory: memory/$category"
+              FAIL=1
+            fi
+          done
+          if [ $FAIL -eq 1 ]; then
+            exit 1
+          fi
+          echo "✓ All memory directories present."
+
+      - name: Validate events.json is valid JSON
+        run: |
+          python3 -c "
+          import json, sys
+          try:
+              with open('shared/schemas/events.json') as f:
+                  data = json.load(f)
+              events = data.get('events', {})
+              print(f'✓ events.json valid — {len(events)} events registered.')
+          except json.JSONDecodeError as e:
+              print(f'FAIL: events.json is invalid JSON: {e}')
+              sys.exit(1)
+          "
+
+      - name: Check all events have required fields
+        run: |
+          python3 -c "
+          import json, sys
+          with open('shared/schemas/events.json') as f:
+              data = json.load(f)
+          FAIL = False
+          for name, event in data.get('events', {}).items():
+              for field in ['description', 'source', 'subscribers', 'priority', 'fields']:
+                  if field not in event:
+                      print(f'FAIL: Event \"{name}\" missing required field \"{field}\"')
+                      FAIL = True
+          if FAIL:
+              sys.exit(1)
+          print('✓ All events have required fields.')
+          "
+
+      - name: Count agents and report
+        run: |
+          total=$(find agents -name "*.md" | wc -l)
+          echo "Total agent files: $total (expected: 38)"
+          find agents -name "*.md" | sort
