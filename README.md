@@ -1,4 +1,4 @@
-# Roblox AI Studio — Agent System
+﻿# Roblox AI Studio — Agent System
 
 A multi-agent AI system for running a profitable Roblox development studio. 38 specialized agents across 10 revenue categories, coordinated through a central analytics hub with strict communication protocols.
 
@@ -227,4 +227,64 @@ The `agent-lint.yml` workflow validates on every push to `agents/`, `protocols/`
 
 ---
 
+---
+
+## Roblox Studio Setup & MCP Integration (Windows)
+
+This repository is a **spec/workflow system** (agent definitions, protocols, events, memory). To execute agent work directly in Roblox Studio, connect an MCP-capable AI client to the built-in [Roblox Studio MCP server](https://create.roblox.com/docs/studio/mcp).
+
+### 1. Windows: set up Roblox Studio
+1. **Install/update Roblox Studio:** Download and install the latest Roblox Studio from [Roblox Create](https://create.roblox.com/) (sign in → **Start Creating**) and allow it to update.
+2. **Open a place:** Launch Studio, sign in, and open or create an experience/place so there is an active session to target.
+3. **Install an MCP client:** Install your preferred MCP-capable client on the same Windows PC (e.g. Claude Desktop, Cursor, VS Code, Codex CLI, Gemini CLI, Claude Code, Antigravity).
+
+### 2. Connect to the Roblox Studio MCP server
+The Studio MCP server is built into Studio, runs locally, and communicates over **stdio**.
+
+**Enable in Studio**
+1. Open your place in Roblox Studio.
+2. Open **Assistant** → **… (More)** → **Manage MCP Servers**.
+3. Turn on **Enable Studio as MCP server**.
+4. Confirm the green indicator shows connected clients after your client connects.
+
+**Connect your client (Windows)**
+- **Quick connect (if supported):** **Assistant Settings → MCP Servers** → expand **Quick connect** and toggle your installed client (restart Studio if it doesn’t appear).
+- **JSON configuration:** add/merge into your client’s MCP config:
+  ```json
+  {
+    "mcpServers": {
+      "Roblox_Studio": {
+        "command": "cmd.exe",
+        "args": ["/c", "%LOCALAPPDATA%\\Roblox\\mcp.bat"]
+      }
+    }
+  }
+  ```
+- **CLI command (if required by client):**
+  ```bat
+  cmd.exe /c %LOCALAPPDATA%\Roblox\mcp.bat
+  ```
+- Restart the MCP client (keep Studio open with MCP enabled) and verify the connection indicator in Studio.
+
+**Notes**
+- Every MCP tool call requires a `studio_id`; use `list_roblox_studios` to select the correct open instance.
+- MCP clients can read/modify open places—connect only trusted clients.
+- If it doesn’t connect: restart Studio/client, confirm `%LOCALAPPDATA%\Roblox\mcp.bat` exists, and validate your MCP config JSON.
+
+### 3. Leverage this repo with Roblox MCP
+Use the MCP connection as the **execution/integration layer** so an MCP-capable orchestrator can perform the actions described by the agents in an open Studio session (while enforcing repo protocols and gates).
+
+| Repo agents / workflows | Example MCP tools/capabilities to leverage |
+|---|---|
+| `lua-script-writer`, `roblox-lua-engineer`, `plugin-lua-developer` | `script_read`, `script_search`, `script_grep`, `multi_edit`, `execute_luau`, `search_game_tree`, `inspect_instance` |
+| `ui-ux-builder`, `level-world-builder`, `animation-vfx-audio-agent`, asset/creative flows | Data model exploration + asset tools (e.g. `insert_asset`, `search_asset`, `generate_*`, `upload_image`) |
+| `qa-playtest-agent` | `get_studio_state`, `start_stop_play`, `get_console_output`, `screen_capture`, navigation/input simulation, `execute_luau` |
+| `build-release-agent`, `roblox-api-publishing-agent` | `save_place` and Studio-side release steps; pair with publishing/compliance flows (and Open Cloud via MCP where applicable) |
+| `orchestrator-runtime-agent`, `project-production-manager` | Enforce PUSH/PULL/EVENT/SYNC and TOS gates, pass `correlation_id`s, append `memory/` logs, target correct `studio_id` |
+
+**Operational checklist:** keep Studio open with MCP enabled → run an orchestrator that reads `agents/*.md`, routes per `shared/schemas/events.json` and `protocols/PROTOCOL_RULES.md` → allow MCP tool calls for real edits/tests/saves → preserve **TOS Compliance** (SYNC publish gate) and **Analytics** event-bus rules.
+
+*References: [Connect to the Roblox Studio MCP server](https://create.roblox.com/docs/studio/mcp), [Use Open Cloud with the Studio MCP server](https://create.roblox.com/docs/studio/mcp-open-cloud).*
+
 *Internal studio use only. Not for distribution.*
+
