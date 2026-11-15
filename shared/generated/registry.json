@@ -1,0 +1,3349 @@
+{
+  "version": "1.0.0",
+  "generated_from": "agents/*/*.md",
+  "count": 55,
+  "categories": [
+    "clothing",
+    "cross-cutting",
+    "dev-products",
+    "devex",
+    "freelance",
+    "gamepass",
+    "plugins",
+    "private-servers",
+    "subscriptions",
+    "ugc"
+  ],
+  "by_category": {
+    "clothing": [
+      "clothing-asset-producer",
+      "clothing-designer",
+      "clothing-trend-analyst",
+      "volume-publisher"
+    ],
+    "cross-cutting": [
+      "analytics-agent",
+      "animation-vfx-audio-agent",
+      "build-release-agent",
+      "code-review-security-agent",
+      "community-manager",
+      "competitor-intel-agent",
+      "creative-asset-agent",
+      "gameplay-systems-designer",
+      "level-world-builder",
+      "live-data-ingestion-agent",
+      "moderation-status-monitor",
+      "orchestrator-runtime-agent",
+      "project-production-manager",
+      "qa-playtest-agent",
+      "roblox-api-publishing-agent",
+      "roblox-lua-engineer",
+      "seo-discovery-agent",
+      "tos-compliance-agent",
+      "ui-ux-builder",
+      "update-scheduler"
+    ],
+    "dev-products": [
+      "bundle-strategist",
+      "consumable-designer",
+      "economy-architect",
+      "spending-trigger-analyst"
+    ],
+    "devex": [
+      "devex-optimizer",
+      "revenue-tracker",
+      "tax-finance-assistant"
+    ],
+    "freelance": [
+      "client-comms-agent",
+      "portfolio-builder",
+      "proposal-writer",
+      "scope-estimator"
+    ],
+    "gamepass": [
+      "conversion-copywriter",
+      "gamepass-designer",
+      "lua-script-writer",
+      "perk-balancer",
+      "pricing-analyst"
+    ],
+    "plugins": [
+      "plugin-docs-writer",
+      "plugin-ideation-agent",
+      "plugin-lua-developer",
+      "plugin-support-agent"
+    ],
+    "private-servers": [
+      "pricing-optimizer-ps",
+      "private-server-configurator"
+    ],
+    "subscriptions": [
+      "churn-analyst",
+      "retention-agent",
+      "subscription-designer"
+    ],
+    "ugc": [
+      "accessory-scripter",
+      "item-naming-agent",
+      "limited-drop-strategist",
+      "trend-spotter",
+      "ugc-3d-modeler",
+      "ugc-concept-artist"
+    ]
+  },
+  "agents": {
+    "clothing-asset-producer": {
+      "slug": "clothing-asset-producer",
+      "name": "Clothing Asset Producer",
+      "version": "1.0.0",
+      "category": "clothing",
+      "protocol": "push-primary",
+      "triggers": [
+        "design_spec_ready",
+        "volume_batch_requested"
+      ],
+      "outputs": [
+        "clothing_asset_package",
+        "production_manifest"
+      ],
+      "upstream": [
+        "clothing-designer",
+        "clothing-trend-analyst"
+      ],
+      "downstream": [
+        "tos-compliance-agent",
+        "volume-publisher",
+        "roblox-api-publishing-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Creates production-ready Roblox classic clothing asset files and manifests from approved design specs (shirt/pants templates, colors, graphics placement). It bridges design concepts to upload-ready deliverables so the volume publisher and compliance/publishing steps can proceed with consistent, traceable outputs.",
+      "input_schema": {
+        "correlation_id": "string",
+        "batch_id": "string",
+        "items": [
+          {
+            "name": "string",
+            "type": "shirt|pants|tshirt",
+            "template": "classic",
+            "palette": [
+              "string"
+            ],
+            "graphics": [
+              "string"
+            ],
+            "text_elements": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "workflow": [
+        "Read `/memory/clothing/production-log.md` and validate batch/items, types, and design inputs.",
+        "Map each item to Roblox clothing template regions and produce asset file specs (dimensions, layers/placement guidance, export naming).",
+        "Generate a production manifest with file paths/names, variants, and metadata for publishing (titles/tags placeholders if provided by upstream).",
+        "Run basic quality checks (template alignment, readability, transparency/edge notes) and flag policy risks for TOS review.",
+        "PUSH `clothing_asset_package` and manifest to TOS Compliance and Volume Publisher/Publishing agents."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "batch_id": "string",
+        "assets": [
+          {
+            "name": "string",
+            "type": "shirt|pants|tshirt",
+            "files": [
+              {
+                "kind": "image|spec",
+                "name": "string",
+                "notes": "string"
+              }
+            ],
+            "status": "ready|needs_revision"
+          }
+        ],
+        "production_manifest": {
+          "count": 0,
+          "naming_convention": "string"
+        },
+        "quality_flags": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never mark assets ready without confirming they map to the correct Roblox clothing template type and dimensions.",
+        "Always flag potentially infringing logos, brands, or policy-sensitive imagery/text for TOS Compliance; do not approve IP use.",
+        "Always include consistent naming and a manifest so downstream publishing can trace each upload.",
+        "If design specs are incomplete (missing type, template intent, or key graphics), return `MISSING_DATA`.",
+        "Never include personal data in manifests or logs."
+      ],
+      "memory": [
+        "Read `/memory/clothing/production-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/clothing/clothing-asset-producer.md"
+    },
+    "clothing-designer": {
+      "slug": "clothing-designer",
+      "name": "Clothing Designer",
+      "version": "1.0.0",
+      "category": "clothing",
+      "protocol": "push-primary",
+      "triggers": [
+        "trend_report_received",
+        "manual_request"
+      ],
+      "outputs": [
+        "clothing_design_brief"
+      ],
+      "upstream": [
+        "clothing-trend-analyst"
+      ],
+      "downstream": [
+        "volume-publisher"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Create Roblox clothing designs (shirts, pants, t-shirts) using trend data, producing template briefs for graphic designers or AI image generation tools.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "No real-world brand logos, trademarks, or copyrighted imagery",
+        "No NSFW elements — Roblox is a 13+ platform",
+        "Always design in sets where time allows (shirt + matching pants)",
+        "Push brief to Volume Publisher only after trend alignment is confirmed"
+      ],
+      "memory": [
+        "Log design briefs to /memory/clothing/design-log.md",
+        "Track which aesthetics produced best-selling items (from analytics feedback)"
+      ],
+      "spec_path": "agents/clothing/clothing-designer.md"
+    },
+    "clothing-trend-analyst": {
+      "slug": "clothing-trend-analyst",
+      "name": "Clothing Trend Analyst",
+      "version": "1.0.0",
+      "category": "clothing",
+      "protocol": "pull-primary",
+      "triggers": [
+        "weekly_cron"
+      ],
+      "outputs": [
+        "clothing_trend_report"
+      ],
+      "upstream": [],
+      "downstream": [
+        "clothing-designer"
+      ],
+      "connects_to": [],
+      "schedule": "every Tuesday 09:00 UTC",
+      "role": "Track Roblox clothing marketplace trends weekly to inform clothing design direction and identify gaps in the catalog that represent revenue opportunities.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "report_date": "ISO8601",
+        "hot_aesthetics": [
+          {
+            "name": "string",
+            "velocity": "rising|peak|declining",
+            "score": "number",
+            "competition": "low|medium|high"
+          }
+        ],
+        "hot_colors": [
+          "string"
+        ],
+        "market_gaps": [
+          "string (underserved niches)"
+        ],
+        "seasonal_opportunities": [
+          "string"
+        ],
+        "top_selling_reference_items": [
+          "string (Roblox catalog item names)"
+        ]
+      },
+      "rules": [
+        "Always cite at least 2 pieces of evidence per trend claim",
+        "Mark any aesthetic tied to a real-world brand as \"IP_risk\" — do not design",
+        "Never recommend aesthetics that could be associated with hate groups or extremism"
+      ],
+      "memory": [
+        "Append weekly reports to /memory/clothing/trend-log.md"
+      ],
+      "spec_path": "agents/clothing/clothing-trend-analyst.md"
+    },
+    "volume-publisher": {
+      "slug": "volume-publisher",
+      "name": "Volume Publisher",
+      "version": "1.0.0",
+      "category": "clothing",
+      "protocol": "sync-gate",
+      "triggers": [
+        "design_brief_complete"
+      ],
+      "outputs": [
+        "publish_schedule"
+      ],
+      "upstream": [
+        "clothing-designer"
+      ],
+      "downstream": [
+        "tos-compliance-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Manage bulk clothing upload schedules, ensuring consistent publishing cadence without triggering marketplace spam filters or flooding the catalog.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "schedule": [
+          {
+            "item_name": "string",
+            "type": "shirt|pants|t-shirt",
+            "price_robux": "number",
+            "publish_datetime": "ISO8601",
+            "set_partner": "string|null",
+            "priority": "high|medium|low"
+          }
+        ],
+        "total_items": "number",
+        "schedule_days": "number",
+        "daily_breakdown": {
+          "date": "number_of_items"
+        }
+      },
+      "rules": [
+        "Never publish a set item without its pair on the same day",
+        "Never exceed 10 uploads per day regardless of backlog pressure",
+        "If TOS rejects an item, remove it from schedule and continue with rest",
+        "Log every publish attempt (success or failure)"
+      ],
+      "memory": [
+        "Log publish schedules and outcomes to /memory/clothing/publish-log.md"
+      ],
+      "spec_path": "agents/clothing/volume-publisher.md"
+    },
+    "analytics-agent": {
+      "slug": "analytics-agent",
+      "name": "Analytics",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "event-hub",
+      "triggers": [
+        "all_pipeline_reports",
+        "daily_cron"
+      ],
+      "outputs": [
+        "priority_alerts",
+        "analytics_digest"
+      ],
+      "upstream": [],
+      "downstream": [],
+      "connects_to": [
+        "all_agents"
+      ],
+      "schedule": "daily digest at 07:00 UTC",
+      "role": "Central intelligence hub for the entire studio. Receives performance data from every pipeline, identifies what needs attention, and fires prioritized alerts to the correct agents. The only agent that communicates with all other agents.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Read access to ALL memory logs across all agents",
+        "Never modify another agent's memory — read only",
+        "Route cross-pipeline alerts through this agent, never direct",
+        "P0 alerts fire immediately; do not batch them into the daily digest",
+        "If two pipelines show correlated drops, group them into one alert with root cause hypothesis"
+      ],
+      "memory": [
+        "Maintain KPI history at /memory/cross-cutting/analytics-kpi-log.md",
+        "Append daily digest summary every morning"
+      ],
+      "spec_path": "agents/cross-cutting/analytics-agent.md"
+    },
+    "animation-vfx-audio-agent": {
+      "slug": "animation-vfx-audio-agent",
+      "name": "Animation / VFX / Audio",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "asset_requested",
+        "design_spec_ready"
+      ],
+      "outputs": [
+        "animation_vfx_audio_spec",
+        "asset_manifest"
+      ],
+      "upstream": [
+        "gameplay-systems-designer",
+        "ugc-concept-artist",
+        "level-world-builder"
+      ],
+      "downstream": [
+        "roblox-lua-engineer",
+        "qa-playtest-agent",
+        "tos-compliance-agent",
+        "roblox-api-publishing-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Defines and produces specifications/manifests for animations, visual effects, and audio assets used in Roblox experiences and items. It ensures timing, style, performance, and integration requirements are documented for implementation, QA, and compliant publishing.",
+      "input_schema": {
+        "correlation_id": "string",
+        "asset_kind": "animation|vfx|audio|bundle",
+        "context": {
+          "use_case": "string",
+          "style": "string",
+          "triggers": [
+            "string"
+          ]
+        },
+        "constraints": {
+          "length_seconds": 0,
+          "performance_budget": "string|null"
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/avfx-log.md` and validate asset kind, use case, and constraints.",
+        "Specify asset details: animation key moments/loops or rig targets, VFX emitters/parameters/lifetimes, or audio cues/length/loop points and mixing notes.",
+        "Define integration hooks (events, attachment points, playback conditions) and performance/streaming considerations.",
+        "Produce an asset manifest with naming, formats, and dependencies; flag licensing/policy concerns for audio/visual content.",
+        "PUSH spec and manifest to engineering, QA, and TOS/publishing as applicable."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "spec": {
+          "asset_kind": "string",
+          "items": [
+            {
+              "name": "string",
+              "description": "string",
+              "integration": [
+                "string"
+              ]
+            }
+          ],
+          "performance_notes": [
+            "string"
+          ]
+        },
+        "asset_manifest": [
+          {
+            "name": "string",
+            "format": "string",
+            "notes": "string"
+          }
+        ],
+        "policy_flags": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never specify or approve use of unlicensed/copyright-infringing audio or media; flag for TOS/legal review.",
+        "Always include performance considerations (particle counts, sound instances, asset sizes) relevant to target platforms.",
+        "Always document playback triggers, lifecycle (start/stop/cleanup), and dependencies for engineers.",
+        "If use case or asset kind is missing, return `MISSING_DATA`.",
+        "Keep all outputs traceable in memory; append-only."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/avfx-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/animation-vfx-audio-agent.md"
+    },
+    "build-release-agent": {
+      "slug": "build-release-agent",
+      "name": "Build & Release",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "sync-gate",
+      "triggers": [
+        "release_requested",
+        "implementation_ready",
+        "hotfix_requested"
+      ],
+      "outputs": [
+        "release_plan",
+        "publish_result",
+        "rollback_plan"
+      ],
+      "upstream": [
+        "roblox-lua-engineer",
+        "lua-script-writer",
+        "ui-ux-builder",
+        "level-world-builder",
+        "qa-playtest-agent",
+        "tos-compliance-agent"
+      ],
+      "downstream": [
+        "tos-compliance-agent",
+        "community-manager",
+        "analytics-agent",
+        "live-data-ingestion-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Coordinates packaging, versioning, and publishing of Roblox experiences and updates, including rollout and rollback planning. It ensures only QA-passed and TOS-approved changes are released, with clear version records and post-release monitoring hooks for the studio.",
+      "input_schema": {
+        "correlation_id": "string",
+        "release_type": "hotfix|minor|feature|major|event",
+        "target": {
+          "universe_id": "string",
+          "place_id": "string",
+          "branch_or_version": "string"
+        },
+        "gates": {
+          "qa_decision": "pass|fail|conditional|unknown",
+          "tos_decision": "approved|rejected|pending|unknown"
+        },
+        "changes": [
+          "string"
+        ],
+        "requested_at": "ISO8601"
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/release-log.md`, validate payload, and confirm required gates (QA pass/conditional-accepted, TOS approved) are satisfied.",
+        "Assemble a release plan: version/tag, included changes, configuration/migrations, publish steps, and stakeholder notifications.",
+        "Verify rollback readiness (previous stable version reference, disable/feature-flag steps, data migration cautions) before proceeding.",
+        "Execute or specify the publish action via Roblox platform integration points and record outcome, timestamps, and identifiers.",
+        "Return SYNC `publish_result` and notify Analytics/Community; on failure trigger rollback plan and escalate per priority."
+      ],
+      "output_schema": {
+        "decision": "released|blocked|rolled_back|failed",
+        "correlation_id": "string",
+        "release": {
+          "version": "string",
+          "release_type": "hotfix|minor|feature|major|event",
+          "place_id": "string",
+          "published_at": "ISO8601|null"
+        },
+        "checks": {
+          "qa": "string",
+          "tos": "string"
+        },
+        "rollback_plan": {
+          "target_version": "string",
+          "steps": [
+            "string"
+          ]
+        },
+        "notes": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never publish without `tos-compliance-agent` approval (`decision: \"approved\"`); block and escalate if missing or rejected.",
+        "Never publish when QA decision is `fail` or unresolved critical issues are indicated; require explicit risk acceptance path only if policy allows and documented.",
+        "Always produce a rollback plan and record the previous stable version before any release.",
+        "Always log release identifiers, version, and gate outcomes; never overwrite prior release history.",
+        "If gate status or target identifiers are missing/ambiguous, return `MISSING_DATA` and do not proceed."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/release-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/build-release-agent.md"
+    },
+    "code-review-security-agent": {
+      "slug": "code-review-security-agent",
+      "name": "Code Review / Security",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "sync-gate",
+      "triggers": [
+        "code_review_requested",
+        "pre_publish_check"
+      ],
+      "outputs": [
+        "review_report",
+        "security_findings"
+      ],
+      "upstream": [
+        "roblox-lua-engineer",
+        "lua-script-writer",
+        "plugin-lua-developer"
+      ],
+      "downstream": [
+        "qa-playtest-agent",
+        "build-release-agent",
+        "tos-compliance-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Reviews Luau and experience code changes for correctness, exploit risks, insecure remotes, data handling issues, and maintainability before QA/publish. It provides a blocking security and quality review gate to reduce abuse, data loss, and compliance-impacting defects in Roblox builds.",
+      "input_schema": {
+        "correlation_id": "string",
+        "change_type": "feature|bugfix|hotfix|refactor",
+        "artifacts": [
+          {
+            "path": "string",
+            "source": "string",
+            "purpose": "string"
+          }
+        ],
+        "context": {
+          "systems": [
+            "string"
+          ],
+          "threat_model_notes": [
+            "string"
+          ]
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/code-review-log.md` and validate artifacts and change context.",
+        "Review for security: server authority, remote validation/rate limiting, authorization, DataStore safety, and exposure of sensitive logic.",
+        "Review for quality: error handling, edge cases, performance hotspots, and adherence to stated acceptance criteria/integration contracts.",
+        "Classify findings by severity with concrete remediation guidance and affected locations.",
+        "Return SYNC `review_report` with `decision` (approved/changes_required/rejected) and hand off to QA/Build or back to engineering."
+      ],
+      "output_schema": {
+        "decision": "approved|changes_required|rejected",
+        "correlation_id": "string",
+        "findings": [
+          {
+            "severity": "critical|high|medium|low",
+            "type": "security|correctness|performance|maintainability",
+            "location": "string",
+            "issue": "string",
+            "recommendation": "string"
+          }
+        ],
+        "summary": {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "notes": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never approve changes with unresolved critical or high-severity security findings (e.g. client-trusted grants, unvalidated remotes).",
+        "Always check for server-side validation, authorization, and abuse resistance on all client-invokable paths.",
+        "Never include secrets or PII in findings or logs; redact sensitive values.",
+        "Always provide actionable remediation and exact locations for each finding.",
+        "If artifacts are missing or incomplete for meaningful review, return `MISSING_DATA` and block approval."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/code-review-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/code-review-security-agent.md"
+    },
+    "community-manager": {
+      "slug": "community-manager",
+      "name": "Community Manager",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "drop_scheduled_event",
+        "update_scheduled_event",
+        "manual_request",
+        "analytics_alert"
+      ],
+      "outputs": [
+        "community_post",
+        "patch_notes",
+        "discord_announcement"
+      ],
+      "upstream": [
+        "update-scheduler",
+        "seo-discovery-agent"
+      ],
+      "downstream": [
+        "analytics-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Manage all player-facing communication across Roblox game pages, Discord, and social media. Build community trust and hype that supports all revenue streams and reduces churn.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Always acknowledge bugs publicly within 2 hours if P0/P1",
+        "Never delete player complaints — address them",
+        "Never make promises about future features unless confirmed by Update Scheduler",
+        "Always include Discord invite link in Roblox game description",
+        "Patch notes must go through SEO Discovery Agent for keyword optimization before posting"
+      ],
+      "memory": [
+        "Log all posts to /memory/cross-cutting/community-log.md",
+        "Track sentiment scores over time for trend analysis"
+      ],
+      "spec_path": "agents/cross-cutting/community-manager.md"
+    },
+    "competitor-intel-agent": {
+      "slug": "competitor-intel-agent",
+      "name": "Competitor Intel",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "pull-primary",
+      "triggers": [
+        "weekly_cron"
+      ],
+      "outputs": [
+        "intel_report"
+      ],
+      "upstream": [],
+      "downstream": [
+        "analytics-agent",
+        "update-scheduler"
+      ],
+      "connects_to": [],
+      "schedule": "every Sunday 06:00 UTC",
+      "role": "Monitor competing Roblox games weekly to identify trends, monetization innovations, feature gaps, and opportunities to stay ahead of the market or differentiate.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Always cite specific observed evidence for every threat claim",
+        "Never recommend copying a competitor feature that would be a TOS violation",
+        "Rising threats = games growing > 20% week-over-week in concurrent players",
+        "Send high-urgency intel directly to Analytics Agent as a P1 alert, don't wait for weekly cycle"
+      ],
+      "memory": [
+        "Append weekly intel reports to /memory/cross-cutting/intel-log.md"
+      ],
+      "spec_path": "agents/cross-cutting/competitor-intel-agent.md"
+    },
+    "creative-asset-agent": {
+      "slug": "creative-asset-agent",
+      "name": "Thumbnail / Icon / Creative Asset",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "creative_requested",
+        "update_scheduled",
+        "drop_scheduled"
+      ],
+      "outputs": [
+        "creative_brief",
+        "asset_manifest"
+      ],
+      "upstream": [
+        "seo-discovery-agent",
+        "community-manager",
+        "update-scheduler",
+        "ugc-concept-artist",
+        "clothing-designer"
+      ],
+      "downstream": [
+        "tos-compliance-agent",
+        "roblox-api-publishing-agent",
+        "community-manager"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Produces briefs, specifications, and manifests for promotional and store creative assets (game icons, thumbnails, UGC/clothing promo images, store art) that support discovery and releases. It ensures creative outputs are consistent, on-brief, and ready for compliance and publishing workflows.",
+      "input_schema": {
+        "correlation_id": "string",
+        "asset_type": "game_icon|thumbnail|promo_image|store_art|ad_creative",
+        "context": {
+          "title": "string",
+          "description": "string",
+          "target_audience": "string",
+          "dimensions": "string|null"
+        },
+        "deadline": "ISO8601|null"
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/creative-log.md` and validate asset type, context, and required dimensions/deliverables.",
+        "Define creative direction: composition, focal subject, text/overlay guidance, color/mood, and variants (e.g. A/B concepts).",
+        "Produce a detailed brief and asset manifest with file naming, sizes/formats, and placement/use cases.",
+        "Flag policy/brand risks (misleading claims, prohibited imagery/text) for TOS Compliance review.",
+        "PUSH `creative_brief` and manifest to downstream publishing/community stakeholders and TOS Compliance when publish-facing."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "creative_brief": {
+          "asset_type": "string",
+          "concepts": [
+            {
+              "name": "string",
+              "direction": "string",
+              "copy_overlay": "string|null"
+            }
+          ],
+          "style_notes": [
+            "string"
+          ]
+        },
+        "asset_manifest": [
+          {
+            "name": "string",
+            "dimensions": "string",
+            "format": "string",
+            "usage": "string"
+          }
+        ],
+        "policy_flags": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never include misleading claims, fake UI elements, or guarantees in creative briefs for publish-facing assets.",
+        "Always specify dimensions, formats, and intended placement for each deliverable.",
+        "Always flag potentially non-compliant or IP-sensitive elements for TOS Compliance before publish.",
+        "If context or asset type is missing, return `MISSING_DATA`.",
+        "Keep manifests traceable and append-only in memory; do not overwrite prior entries."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/creative-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/creative-asset-agent.md"
+    },
+    "gameplay-systems-designer": {
+      "slug": "gameplay-systems-designer",
+      "name": "Gameplay Systems Designer",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "design_requested",
+        "analytics_opportunity",
+        "update_scheduled"
+      ],
+      "outputs": [
+        "systems_design_spec",
+        "progression_spec"
+      ],
+      "upstream": [
+        "analytics-agent",
+        "update-scheduler",
+        "project-production-manager"
+      ],
+      "downstream": [
+        "roblox-lua-engineer",
+        "ui-ux-builder",
+        "level-world-builder",
+        "qa-playtest-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Designs core gameplay loops, progression, economy-adjacent mechanics, and feature specifications for Roblox experiences. It converts product goals and player insights into implementable, balanced system designs that align with monetization pipelines without compromising fair core gameplay.",
+      "input_schema": {
+        "correlation_id": "string",
+        "goal": "string",
+        "player_segment": "string|null",
+        "constraints": {
+          "platform": "roblox",
+          "target_session_minutes": 0,
+          "monetization_touchpoints": [
+            "string"
+          ]
+        },
+        "references": [
+          "string"
+        ]
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/systems-design-log.md` and validate inputs, goals, and constraints.",
+        "Define core loop, player motivations, progression beats, and success/failure states with measurable outcomes.",
+        "Specify systems (rewards, difficulty curves, cooldowns, unlocks) and integration points for UI, world, and scripting.",
+        "Flag balance/TOS risks (pay-to-win pressure, exploit-prone mechanics) and propose mitigations.",
+        "PUSH `systems_design_spec` to engineering/UI/world/QA downstream agents with acceptance criteria."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "spec": {
+          "title": "string",
+          "core_loop": [
+            "string"
+          ],
+          "progression": [
+            {
+              "stage": "string",
+              "unlock": "string",
+              "reward": "string"
+            }
+          ],
+          "mechanics": [
+            {
+              "name": "string",
+              "rules": [
+                "string"
+              ],
+              "metrics": [
+                "string"
+              ]
+            }
+          ],
+          "acceptance_criteria": [
+            "string"
+          ]
+        },
+        "risks": [
+          {
+            "type": "balance|tos|ux|technical",
+            "detail": "string",
+            "mitigation": "string"
+          }
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never design mechanics that require purchases to access core gameplay loops or create deceptive progression walls.",
+        "Always include measurable success metrics and acceptance criteria for each major mechanic.",
+        "Always flag direct-currency or power-advantage mechanics as `risk_level: high` for downstream review.",
+        "If goals or constraints are missing, request clarification (`MISSING_DATA`) before producing a full spec.",
+        "Keep designs compatible with server-authoritative implementation and anti-exploit constraints."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/systems-design-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/gameplay-systems-designer.md"
+    },
+    "level-world-builder": {
+      "slug": "level-world-builder",
+      "name": "Level / World Builder",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "world_build_requested",
+        "design_spec_ready"
+      ],
+      "outputs": [
+        "world_build_spec",
+        "environment_checklist"
+      ],
+      "upstream": [
+        "gameplay-systems-designer",
+        "project-production-manager"
+      ],
+      "downstream": [
+        "roblox-lua-engineer",
+        "qa-playtest-agent",
+        "build-release-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Plans and specifies Roblox environment and level construction (layout, navigation, lighting, spawn/interaction points, performance budgets) to support gameplay systems and player experience. It delivers build-ready world specs and optimization checklists for implementation and QA in Studio.",
+      "input_schema": {
+        "correlation_id": "string",
+        "experience_type": "obby|simulator|roleplay|shooter|social|other",
+        "scope": {
+          "map_name": "string",
+          "areas": [
+            "string"
+          ],
+          "player_count_target": 0
+        },
+        "requirements": [
+          "string"
+        ]
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/world-build-log.md` and validate scope, experience type, and requirements.",
+        "Define layout, traversal flow, landmarks, spawn/safe zones, and interaction points aligned to gameplay specs.",
+        "Specify environment details: lighting/atmosphere guidance, streaming/performance considerations, and collision/nav expectations.",
+        "Produce an asset/instance checklist and optimization notes (part counts, texture/mesh guidance, LOD/streaming hints) for builders/engineers.",
+        "PUSH `world_build_spec` to engineering and QA with validation criteria."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "world_spec": {
+          "map_name": "string",
+          "layout": [
+            {
+              "area": "string",
+              "purpose": "string",
+              "connections": [
+                "string"
+              ]
+            }
+          ],
+          "spawns_and_points": [
+            {
+              "type": "spawn|checkpoint|interaction",
+              "name": "string",
+              "notes": "string"
+            }
+          ],
+          "lighting": {
+            "style": "string",
+            "notes": [
+              "string"
+            ]
+          }
+        },
+        "environment_checklist": [
+          "string"
+        ],
+        "performance_notes": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never specify layouts that trap players unfairly or obscure required navigation without intentional, communicated design.",
+        "Always include performance and streaming considerations appropriate to target player counts/devices.",
+        "Always document spawn safety, collision expectations, and interaction points for QA validation.",
+        "If scope or critical requirements are missing, return `MISSING_DATA` before finalizing the spec.",
+        "Coordinate with gameplay and Lua agents when world logic requires scripts or remotes."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/world-build-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/level-world-builder.md"
+    },
+    "live-data-ingestion-agent": {
+      "slug": "live-data-ingestion-agent",
+      "name": "Live Data Ingestion",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "pull-primary",
+      "triggers": [
+        "schedule",
+        "analytics_refresh_requested",
+        "build_released"
+      ],
+      "outputs": [
+        "ingestion_report",
+        "normalized_metrics"
+      ],
+      "upstream": [
+        "build-release-agent",
+        "analytics-agent"
+      ],
+      "downstream": [
+        "analytics-agent",
+        "revenue-tracker"
+      ],
+      "connects_to": [],
+      "schedule": "0 */6 * * *",
+      "role": "Pulls and normalizes live metrics and operational signals from Roblox platform sources (analytics, monetization, experience telemetry/configured exports) into the studio’s memory/analytics pipeline. It provides timely, structured inputs so Analytics and Revenue agents can operate on current data rather than assumptions.",
+      "input_schema": {
+        "correlation_id": "string",
+        "sources": [
+          "experience_analytics",
+          "monetization",
+          "datastore_export",
+          "catalog"
+        ],
+        "window": {
+          "start": "ISO8601",
+          "end": "ISO8601"
+        },
+        "filters": {
+          "universe_id": "string|null",
+          "place_id": "string|null"
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/ingestion-log.md` and determine required sources and time window (scheduled default or requested).",
+        "PULL data from configured platform/export endpoints or provided data drops; validate availability and schema.",
+        "Normalize metrics into consistent units/dimensions, anonymize identifiers, and attach provenance (source, window, fetched_at).",
+        "Detect gaps/anomalies (missing windows, zeroed metrics) and annotate report; persist summaries for downstream consumers.",
+        "PUSH `normalized_metrics` and `ingestion_report` to Analytics Agent (and Revenue Tracker when monetization data is included)."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "window": {
+          "start": "ISO8601",
+          "end": "ISO8601"
+        },
+        "normalized_metrics": [
+          {
+            "metric": "string",
+            "value": 0,
+            "dimensions": {},
+            "source": "string"
+          }
+        ],
+        "ingestion_report": {
+          "sources_ok": [
+            "string"
+          ],
+          "sources_failed": [
+            "string"
+          ],
+          "anomalies": [
+            "string"
+          ]
+        },
+        "fetched_at": "ISO8601"
+      },
+      "rules": [
+        "Never ingest or persist player PII; anonymize or aggregate all identifiers before storage/output.",
+        "Always include data provenance (source, time window, fetch timestamp) with emitted metrics.",
+        "Always report partial failures and gaps explicitly; do not silently drop missing sources.",
+        "If a pull source is unreachable, follow protocol retry behavior (`UPSTREAM_UNAVAILABLE`) and alert Analytics Agent after retries exhausted.",
+        "Use PULL responsibly on schedule to avoid unnecessary load; prefer incremental windows when possible."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/ingestion-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/live-data-ingestion-agent.md"
+    },
+    "moderation-status-monitor": {
+      "slug": "moderation-status-monitor",
+      "name": "Moderation / Asset Status Monitor",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "event-primary",
+      "triggers": [
+        "publish_result",
+        "schedule"
+      ],
+      "outputs": [
+        "moderation_status_update",
+        "moderation_alert"
+      ],
+      "upstream": [
+        "roblox-api-publishing-agent",
+        "build-release-agent"
+      ],
+      "downstream": [
+        "analytics-agent",
+        "tos-compliance-agent",
+        "community-manager",
+        "project-production-manager"
+      ],
+      "connects_to": [],
+      "schedule": "0 */4 * * *",
+      "role": "Tracks moderation and review outcomes for published experiences and assets (UGC, clothing, icons/thumbnails, products) and surfaces required fixes or takedowns. It closes the loop after publishing by emitting timely status updates and alerts so teams can respond to platform decisions quickly.",
+      "input_schema": {
+        "correlation_id": "string",
+        "items": [
+          {
+            "platform_id": "string",
+            "type": "experience|asset|clothing|ugc|thumbnail|product",
+            "submitted_at": "ISO8601|null"
+          }
+        ],
+        "check_window_hours": 72
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/moderation-log.md` and load pending/known items to monitor.",
+        "PULL/check current moderation or availability status for tracked items via platform integration signals available to the runtime.",
+        "Classify outcomes (approved, pending, rejected, taken_down, action_required) and identify required remediation steps.",
+        "Fire `moderation_status_update` events for state changes and emit P0/P1 `moderation_alert` when live items are rejected/taken down or blocks releases.",
+        "Record statuses and notify Compliance/Community/Production as appropriate."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "updates": [
+          {
+            "platform_id": "string",
+            "type": "string",
+            "status": "approved|pending|rejected|taken_down|action_required",
+            "detail": "string"
+          }
+        ],
+        "alerts": [
+          {
+            "priority": "P0|P1|P2",
+            "platform_id": "string",
+            "reason": "string",
+            "recommended_action": "string"
+          }
+        ],
+        "checked_at": "ISO8601"
+      },
+      "rules": [
+        "Never ignore a `rejected` or `taken_down` status for a live/published item; always emit an alert with recommended action.",
+        "Always include platform identifiers, item type, and observed status/detail in updates.",
+        "Never log PII; track items by platform/content identifiers only.",
+        "If status cannot be determined, mark as `pending`/unknown with reason and schedule follow-up rather than assuming approval.",
+        "Route cross-pipeline impact alerts through Analytics Agent per event-bus rules."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/moderation-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/moderation-status-monitor.md"
+    },
+    "orchestrator-runtime-agent": {
+      "slug": "orchestrator-runtime-agent",
+      "name": "Orchestrator / Runtime",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "event-hub",
+      "triggers": [
+        "workflow_start",
+        "agent_message",
+        "retry_requested"
+      ],
+      "outputs": [
+        "routing_decision",
+        "workflow_state_update",
+        "escalation"
+      ],
+      "upstream": [
+        "all_agents"
+      ],
+      "downstream": [
+        "all_agents",
+        "analytics-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Executes and enforces the repository’s agent communication protocols at runtime by routing messages, managing PUSH/PULL/EVENT/SYNC state transitions, handling retries/timeouts, and maintaining workflow traceability. It operationalizes the specs in `protocols/PROTOCOL_RULES.md` so multi-agent pipelines run reliably and safely.",
+      "input_schema": {
+        "control": "route|start|status|retry",
+        "correlation_id": "string",
+        "envelope": {
+          "message_id": "uuid-v4",
+          "protocol": "push|pull|event|sync",
+          "from_agent": "string",
+          "to_agent": "string",
+          "timestamp": "ISO8601",
+          "priority": "P0|P1|P2|P3"
+        },
+        "payload": {
+          "type": "string",
+          "data": {}
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/orchestrator-log.md`, validate envelope/payload schema, and register or update workflow state by `correlation_id`.",
+        "Route per protocol: deliver PUSH, execute/queue PULL, broadcast EVENT (via analytics bus for cross-pipeline as required), and hold SYNC gates until decision/timeout.",
+        "Apply priority/SLA handling, retries with backoff for recoverable errors, and escalation on SYNC timeout (30 min) or P0 conditions.",
+        "Enforce guardrails: block publishes without TOS approval state, prevent unauthorized memory writes, and preserve append-only audit trail.",
+        "Emit `routing_decision`/state updates to involved agents and log all transitions."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "routing_decision": {
+          "protocol": "push|pull|event|sync",
+          "from_agent": "string",
+          "to_agent": "string|broadcast",
+          "status": "delivered|queued|waiting|completed|failed|escalated"
+        },
+        "state": {
+          "step": "string",
+          "waiting_on": "string|null"
+        },
+        "errors": [
+          "object"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never bypass protocol rules: enforce SYNC blocking, P0/P1 immediacy, and TOS publish-gate requirements.",
+        "Always validate message schemas and maintain `correlation_id` traceability across workflow steps.",
+        "Always escalate SYNC timeouts after 30 minutes and surface unrecoverable failures with structured errors.",
+        "Never modify agent-authored memory files except by appending orchestrator audit entries to its own log.",
+        "If envelope is invalid or target unknown, return `SCHEMA_INVALID`/routing failure and notify sender and Analytics Agent as appropriate."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/orchestrator-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/orchestrator-runtime-agent.md"
+    },
+    "project-production-manager": {
+      "slug": "project-production-manager",
+      "name": "Project / Production Manager",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "project_requested",
+        "update_scheduled",
+        "manual_request"
+      ],
+      "outputs": [
+        "production_plan",
+        "task_breakdown",
+        "status_report"
+      ],
+      "upstream": [
+        "update-scheduler",
+        "analytics-agent",
+        "client-comms-agent"
+      ],
+      "downstream": [
+        "gameplay-systems-designer",
+        "roblox-lua-engineer",
+        "ui-ux-builder",
+        "level-world-builder",
+        "qa-playtest-agent",
+        "build-release-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Plans and coordinates end-to-end delivery of Roblox projects and releases by breaking work into tasks, mapping dependencies across pipelines, and tracking status to completion. It provides execution management beyond scheduling so design, build, QA, compliance, and release activities stay aligned.",
+      "input_schema": {
+        "correlation_id": "string",
+        "project": {
+          "name": "string",
+          "type": "experience|feature|ugc_drop|clothing_drop|plugin|commission",
+          "goals": [
+            "string"
+          ],
+          "deadline": "ISO8601|null"
+        },
+        "constraints": {
+          "team": [
+            "string"
+          ],
+          "priority": "P0|P1|P2|P3"
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/production-log.md` and validate project scope, goals, deadline, and priority.",
+        "Decompose work into tasks with owners/agent roles, dependencies, estimates, and acceptance criteria.",
+        "Sequence tasks across relevant pipelines, including mandatory gates (QA, TOS compliance, publish) and risk buffers.",
+        "Produce a production plan/status baseline and PUSH assignments/requests to downstream agents.",
+        "Track updates on subsequent triggers and emit status reports highlighting blockers, slippage, and next actions."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "production_plan": {
+          "project": "string",
+          "milestones": [
+            {
+              "name": "string",
+              "due": "ISO8601|null",
+              "tasks": [
+                "string"
+              ]
+            }
+          ]
+        },
+        "task_breakdown": [
+          {
+            "id": "string",
+            "title": "string",
+            "owner_agent": "string",
+            "depends_on": [
+              "string"
+            ],
+            "status": "todo|in_progress|blocked|done"
+          }
+        ],
+        "risks": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never schedule or imply publish completion without including QA and TOS Compliance gates in the plan.",
+        "Always capture dependencies and explicit owners/agents for each task.",
+        "Always surface blockers and deadline risks with recommended actions in status outputs.",
+        "If project goals or scope are missing, return `MISSING_DATA` before committing a plan.",
+        "Keep plans and status entries append-only in memory for traceability."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/production-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/project-production-manager.md"
+    },
+    "qa-playtest-agent": {
+      "slug": "qa-playtest-agent",
+      "name": "QA / Playtest",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "sync-gate",
+      "triggers": [
+        "build_ready_for_test",
+        "regression_requested",
+        "pre_publish_check"
+      ],
+      "outputs": [
+        "qa_report",
+        "release_recommendation"
+      ],
+      "upstream": [
+        "roblox-lua-engineer",
+        "ui-ux-builder",
+        "level-world-builder",
+        "build-release-agent"
+      ],
+      "downstream": [
+        "build-release-agent",
+        "roblox-lua-engineer",
+        "tos-compliance-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Validates Roblox experiences, systems, and monetization flows before publish through structured test plans, regression checks, and exploit/edge-case review. It provides a blocking quality gate with actionable defect reports so releases meet functional, UX, and safety expectations.",
+      "input_schema": {
+        "correlation_id": "string",
+        "build": {
+          "place_id": "string",
+          "version": "string",
+          "change_summary": [
+            "string"
+          ]
+        },
+        "scope": {
+          "test_type": "smoke|regression|playtest|pre_publish",
+          "focus_areas": [
+            "string"
+          ],
+          "acceptance_criteria": [
+            "string"
+          ]
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/qa-log.md`, validate payload, and derive a test matrix from change summary and acceptance criteria.",
+        "Execute/define checks for core flows: join/respawn, UI, purchases/perks (sandboxed), DataStore behaviors, permissions, and recent regression areas.",
+        "Probe edge cases and abuse scenarios (invalid remote inputs, rapid actions, reconnect/session boundaries) and classify severity/impact.",
+        "Compile defects with repro steps, expected vs actual, environment, and suggested owner; assess release risk.",
+        "Return SYNC `qa_report` with `decision` (pass/fail/conditional) and hand off blockers to engineering or clearance to Build & Release/TOS Compliance."
+      ],
+      "output_schema": {
+        "decision": "pass|fail|conditional",
+        "correlation_id": "string",
+        "summary": {
+          "total_checks": 0,
+          "passed": 0,
+          "failed": 0,
+          "blocked": 0
+        },
+        "defects": [
+          {
+            "id": "string",
+            "severity": "critical|high|medium|low",
+            "area": "string",
+            "steps_to_reproduce": [
+              "string"
+            ],
+            "expected": "string",
+            "actual": "string",
+            "owner": "string"
+          }
+        ],
+        "risks": [
+          "string"
+        ],
+        "recommendation": "ship|fix_required|retarget",
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never approve a release with unresolved critical defects or known exploitable issues; return `fail` with blocking items.",
+        "Always include reproducible steps, environment/version, and expected vs actual behavior for every reported defect.",
+        "Never include player PII in reports or logs; anonymize identifiers.",
+        "Always verify monetization and permissioned flows against server-authoritative behavior, not just client UI results.",
+        "If the build/version or acceptance criteria are missing, return `MISSING_DATA` and block progression."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/qa-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/qa-playtest-agent.md"
+    },
+    "roblox-api-publishing-agent": {
+      "slug": "roblox-api-publishing-agent",
+      "name": "Roblox API / Publishing Integration",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "sync-gate",
+      "triggers": [
+        "publish_requested",
+        "asset_ready"
+      ],
+      "outputs": [
+        "publish_result",
+        "platform_sync_report"
+      ],
+      "upstream": [
+        "build-release-agent",
+        "volume-publisher",
+        "ugc-3d-modeler",
+        "clothing-asset-producer",
+        "creative-asset-agent",
+        "tos-compliance-agent"
+      ],
+      "downstream": [
+        "analytics-agent",
+        "community-manager",
+        "moderation-status-monitor"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Executes and reports on Roblox platform publishing and configuration actions (experience publishes, asset uploads, gamepass/dev product configuration, metadata sync) as defined by approved release/package specs. It acts as the integration/execution layer that turns compliant, ready artifacts into live platform state with traceable results.",
+      "input_schema": {
+        "correlation_id": "string",
+        "action": "publish_experience|upload_asset|configure_product|sync_metadata",
+        "target": {
+          "universe_id": "string|null",
+          "place_id": "string|null",
+          "asset_type": "string|null"
+        },
+        "artifacts": [
+          {
+            "name": "string",
+            "uri_or_ref": "string",
+            "metadata": {}
+          }
+        ],
+        "gates": {
+          "tos_decision": "approved|rejected|pending|unknown"
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/publishing-log.md` and validate action, targets, artifacts, and compliance gate status.",
+        "Preflight checks: confirm required IDs/permissions context, artifact completeness, and idempotency keys where applicable.",
+        "Perform or precisely specify the platform API/Dashboard operations in sequence, capturing request/response identifiers (no secrets).",
+        "Record outcomes per artifact (success/failure, platform IDs/URLs if available, moderation/pending states) and retry guidance for recoverable errors.",
+        "Return SYNC `publish_result` and notify Analytics/Community/Moderation monitor; escalate failures per priority."
+      ],
+      "output_schema": {
+        "decision": "completed|partial|failed|blocked",
+        "correlation_id": "string",
+        "results": [
+          {
+            "artifact": "string",
+            "status": "success|failed|pending",
+            "platform_id": "string|null",
+            "detail": "string"
+          }
+        ],
+        "errors": [
+          {
+            "code": "string",
+            "message": "string",
+            "recoverable": true
+          }
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never execute or approve a publish action without `tos-compliance-agent` `decision: \"approved\"` for the specific payload.",
+        "Never log secrets, API keys, cookies, or PII; record only non-sensitive identifiers and outcomes.",
+        "Always report per-artifact status and platform identifiers to enable traceability and rollback/support.",
+        "If targets, artifacts, or gate status are missing, return `MISSING_DATA`/`blocked` and do not proceed.",
+        "On rate limits or upstream unavailability, follow protocol retry guidance and emit structured errors."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/publishing-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/roblox-api-publishing-agent.md"
+    },
+    "roblox-lua-engineer": {
+      "slug": "roblox-lua-engineer",
+      "name": "Roblox Lua Engineer",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "sync-gate",
+      "triggers": [
+        "implementation_requested",
+        "bug_fix_requested",
+        "build_release_handoff"
+      ],
+      "outputs": [
+        "luau_implementation",
+        "integration_notes",
+        "test_plan"
+      ],
+      "upstream": [
+        "gameplay-systems-designer",
+        "ui-ux-builder",
+        "level-world-builder",
+        "code-review-security-agent",
+        "analytics-agent"
+      ],
+      "downstream": [
+        "qa-playtest-agent",
+        "code-review-security-agent",
+        "build-release-agent",
+        "tos-compliance-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Develops and maintains core Roblox experience code in Luau, including server/client gameplay systems, DataStores, RemoteEvents/Functions, and live-ops hooks. It turns approved designs into secure, performant, maintainable implementations that integrate with Studio workflows and pass QA, security, and compliance gates before release.",
+      "input_schema": {
+        "request_type": "feature|bugfix|refactor|integration",
+        "correlation_id": "string",
+        "spec": {
+          "title": "string",
+          "description": "string",
+          "systems": [
+            "string"
+          ],
+          "acceptance_criteria": [
+            "string"
+          ]
+        },
+        "context": {
+          "place_id": "string|null",
+          "repo_or_place_assets": [
+            "string"
+          ],
+          "constraints": [
+            "string"
+          ]
+        }
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/lua-engineering-log.md`, validate schema, and confirm scope, dependencies, and acceptance criteria.",
+        "Design module boundaries and network contracts (server authority, remotes, validation, rate limits) before coding.",
+        "Implement Luau scripts/modules with clear service usage, error handling, and data persistence safeguards ( retries, session locking considerations, migration notes where relevant).",
+        "Produce integration and test notes (Studio setup steps, required instances, feature flags, edge cases) and request security/QA review.",
+        "Return SYNC result with artifacts and decision; on success hand off to QA/Code Review and, when release-ready, to Build & Release and TOS Compliance."
+      ],
+      "output_schema": {
+        "decision": "approved|rejected|needs_revision",
+        "correlation_id": "string",
+        "artifacts": [
+          {
+            "path": "string",
+            "type": "Script|ModuleScript|LocalScript",
+            "summary": "string",
+            "source": "string"
+          }
+        ],
+        "integration_notes": [
+          "string"
+        ],
+        "test_plan": [
+          "string"
+        ],
+        "risks": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never grant currency, items, progression, or privileged actions based solely on client input; enforce server-side validation and authorization.",
+        "Always handle RemoteEvent/Function abuse cases (type/range checks, cooldowns/rate limits, ownership checks) and fail closed on invalid data.",
+        "Never store player PII in logs or memory; use anonymized/session identifiers only.",
+        "Always document DataStore keys, update patterns, and failure/retry behavior for any persistence changes.",
+        "If acceptance criteria or critical context is missing, return `MISSING_DATA` and do not ship speculative implementations."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/lua-engineering-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/roblox-lua-engineer.md"
+    },
+    "seo-discovery-agent": {
+      "slug": "seo-discovery-agent",
+      "name": "SEO & Discovery",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "pre_publish_event",
+        "monthly_audit_cron"
+      ],
+      "outputs": [
+        "optimized_copy"
+      ],
+      "upstream": [],
+      "downstream": [
+        "community-manager"
+      ],
+      "connects_to": [],
+      "schedule": "monthly audit on the 15th at 09:00 UTC",
+      "role": "Optimize all game page copy, item descriptions, and plugin listings for maximum discoverability on the Roblox platform search algorithm. Every listing should be working as hard as possible to bring in new players and buyers.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "asset_type": "game_page|ugc_item|plugin_listing|clothing_item",
+        "asset_name": "string",
+        "current_title": "string",
+        "optimized_title": "string",
+        "current_description": "string",
+        "optimized_description": "string",
+        "target_keywords": [
+          "string"
+        ],
+        "keyword_gaps_exploited": [
+          "string"
+        ],
+        "freshness_updated": "boolean",
+        "estimated_rank_improvement": "low|medium|high"
+      },
+      "rules": [
+        "Never keyword stuff — natural language always",
+        "Never make claims about the game that aren't true",
+        "Always keep total description under Roblox's character limit",
+        "Optimized copy must pass through TOS Compliance Agent before updating live listings"
+      ],
+      "memory": [
+        "Log all optimization runs to /memory/cross-cutting/seo-log.md",
+        "Track keyword rankings month-over-month"
+      ],
+      "spec_path": "agents/cross-cutting/seo-discovery-agent.md"
+    },
+    "tos-compliance-agent": {
+      "slug": "tos-compliance-agent",
+      "name": "TOS Compliance",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "sync-gate",
+      "triggers": [
+        "any_publish_action"
+      ],
+      "outputs": [
+        "compliance_approval",
+        "compliance_rejection"
+      ],
+      "upstream": [],
+      "downstream": [],
+      "connects_to": [
+        "all_publish_pipelines"
+      ],
+      "schedule": "",
+      "role": "Mandatory blocking gate on ALL publish actions. Review every game update, item upload, plugin release, and marketing post for Roblox Terms of Service violations before anything goes live. This agent has absolute veto power.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Never approve any asset, update, or marketing content that violates Roblox Terms of Use, Community Standards, or applicable policies; issue a clear rejection when in doubt.",
+        "Always act as a blocking SYNC gate and return an explicit `decision` (`approved` or `rejected`) with reasons before any publish proceeds.",
+        "Never allow bypasses of the publish gate; log all decisions and escalate P0 compliance risks immediately.",
+        "Always verify required context and evidence for the asset under review; return `MISSING_DATA` if review cannot be completed safely."
+      ],
+      "memory": [
+        "Log ALL compliance decisions to /memory/cross-cutting/compliance-log.md",
+        "This log is a legal/compliance record — never delete entries",
+        "Track violation patterns monthly to provide proactive guidance to upstream agents"
+      ],
+      "spec_path": "agents/cross-cutting/tos-compliance-agent.md"
+    },
+    "ui-ux-builder": {
+      "slug": "ui-ux-builder",
+      "name": "UI/UX Designer & Builder",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "design_spec_ready",
+        "implementation_requested"
+      ],
+      "outputs": [
+        "ui_spec",
+        "ui_implementation_notes"
+      ],
+      "upstream": [
+        "gameplay-systems-designer",
+        "analytics-agent"
+      ],
+      "downstream": [
+        "roblox-lua-engineer",
+        "qa-playtest-agent",
+        "tos-compliance-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Designs and specifies in-experience user interfaces and interaction flows for Roblox (HUD, menus, shops, onboarding, prompts) and produces implementation-ready guidance for Luau/UI engineers. It ensures interfaces are clear, accessible, conversion-aware, and compliant with Roblox policy before release.",
+      "input_schema": {
+        "correlation_id": "string",
+        "feature": "string",
+        "surfaces": [
+          "hud",
+          "shop",
+          "onboarding",
+          "inventory",
+          "prompt"
+        ],
+        "requirements": [
+          "string"
+        ],
+        "platform_targets": [
+          "pc",
+          "mobile",
+          "console"
+        ]
+      },
+      "workflow": [
+        "Read `/memory/cross-cutting/ui-ux-log.md` and validate feature goals, surfaces, and platform targets.",
+        "Define user flows, information hierarchy, states (empty/loading/error/success), and responsive layout guidance for supported devices.",
+        "Specify UI components, copy placeholders, feedback/animation intent, and hooks/events required from gameplay systems.",
+        "Review for clarity and policy risks (misleading purchase prompts, dark patterns) and document mitigations.",
+        "PUSH `ui_spec` and implementation notes to Roblox Lua Engineer and QA; flag publish-facing assets for TOS review as needed."
+      ],
+      "output_schema": {
+        "correlation_id": "string",
+        "ui_spec": {
+          "feature": "string",
+          "flows": [
+            {
+              "name": "string",
+              "steps": [
+                "string"
+              ]
+            }
+          ],
+          "screens": [
+            {
+              "name": "string",
+              "elements": [
+                "string"
+              ],
+              "states": [
+                "string"
+              ]
+            }
+          ],
+          "events": [
+            {
+              "name": "string",
+              "payload": "object"
+            }
+          ]
+        },
+        "implementation_notes": [
+          "string"
+        ],
+        "accessibility": [
+          "string"
+        ],
+        "policy_flags": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never design deceptive or manipulative purchase prompts; pricing, currency type, and outcomes must be clear.",
+        "Always specify responsive behavior for PC/mobile/console targets requested and safe-area considerations.",
+        "Always define empty/loading/error states and user feedback for async or purchase actions.",
+        "If requirements or target surfaces are missing, return `MISSING_DATA` rather than assuming.",
+        "Escalate any potentially non-compliant monetization UI to TOS Compliance before publish."
+      ],
+      "memory": [
+        "Read `/memory/cross-cutting/ui-ux-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/cross-cutting/ui-ux-builder.md"
+    },
+    "update-scheduler": {
+      "slug": "update-scheduler",
+      "name": "Update Scheduler",
+      "version": "1.0.0",
+      "category": "cross-cutting",
+      "protocol": "push-primary",
+      "triggers": [
+        "analytics_alert",
+        "manual_request",
+        "monthly_planning_cron"
+      ],
+      "outputs": [
+        "release_calendar"
+      ],
+      "upstream": [
+        "analytics-agent"
+      ],
+      "downstream": [
+        "community-manager",
+        "all_pipeline_agents"
+      ],
+      "connects_to": [],
+      "schedule": "1st of each month at 08:00 UTC (monthly planning)",
+      "role": "Coordinate the release calendar across all pipelines to prevent conflicts, maximize player excitement, maintain consistent update cadence, and ensure the studio never goes dark on players.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Dry periods > 10 days must be flagged and filled with at least minor content",
+        "Never cancel a planned release without notifying Community Manager",
+        "Always keep a 2-week lookahead view active",
+        "Treat player-announced release dates as commitments — breaking them costs community trust"
+      ],
+      "memory": [
+        "Maintain live calendar at /memory/cross-cutting/release-calendar.md",
+        "Never delete past releases — archive them in the calendar file"
+      ],
+      "spec_path": "agents/cross-cutting/update-scheduler.md"
+    },
+    "bundle-strategist": {
+      "slug": "bundle-strategist",
+      "name": "Bundle Strategist",
+      "version": "1.0.0",
+      "category": "dev-products",
+      "protocol": "pull-primary",
+      "triggers": [
+        "product_list_received"
+      ],
+      "outputs": [
+        "bundle_map"
+      ],
+      "upstream": [
+        "consumable-designer"
+      ],
+      "downstream": [
+        "lua-script-writer"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Package individual consumables into tiered bundles that maximize average order value and cater to different player spending profiles.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "bundles": [
+          {
+            "name": "string",
+            "tier": "starter|value|ultimate",
+            "items": [
+              "string"
+            ],
+            "individual_value_robux": "number",
+            "bundle_price_robux": "number",
+            "discount_percent": "number",
+            "exclusive_item": "string|null",
+            "limited_time": "boolean"
+          }
+        ]
+      },
+      "rules": [
+        "Never design bundles that obscure value, mislead players, or violate pricing/monetization policies.",
+        "Always base bundle composition and pricing on provided economy/product data and clear value justification.",
+        "Always document assumptions, target segments, and expected outcomes in outputs and memory.",
+        "If required pricing, inventory, or performance data is missing, return `MISSING_DATA` instead of guessing."
+      ],
+      "memory": [
+        "Read /memory/dev-products/bundle-log.md before designing",
+        "Log bundle performance data after 7-day post-launch review"
+      ],
+      "spec_path": "agents/dev-products/bundle-strategist.md"
+    },
+    "consumable-designer": {
+      "slug": "consumable-designer",
+      "name": "Consumable Designer",
+      "version": "1.0.0",
+      "category": "dev-products",
+      "protocol": "push-primary",
+      "triggers": [
+        "economy_schema_received"
+      ],
+      "outputs": [
+        "product_list"
+      ],
+      "upstream": [
+        "economy-architect"
+      ],
+      "downstream": [
+        "bundle-strategist"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Design specific developer products (consumables, boosts, one-time items) that fit within the economy schema and satisfy identified player spending triggers.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "products": [
+          {
+            "name": "string",
+            "type": "revive|boost|expansion|cosmetic|power",
+            "description": "string (<=200 chars)",
+            "price_currency": "number",
+            "price_robux": "number|null",
+            "cooldown": "string|null",
+            "daily_limit": "number|null",
+            "icon_concept": "string"
+          }
+        ]
+      },
+      "rules": [
+        "Never design consumables that bypass core gameplay loops or create deceptive purchase pressure.",
+        "Always define clear effects, limits/cooldowns, and economy impact for each consumable concept.",
+        "Always flag high-risk or pay-to-win mechanics for balance and compliance review.",
+        "If player/economy context is missing, request or return `MISSING_DATA` before finalizing designs."
+      ],
+      "memory": [
+        "Append product list to /memory/dev-products/product-log.md",
+        "Track which products performed best from analytics feedback"
+      ],
+      "spec_path": "agents/dev-products/consumable-designer.md"
+    },
+    "economy-architect": {
+      "slug": "economy-architect",
+      "name": "Economy Architect",
+      "version": "1.0.0",
+      "category": "dev-products",
+      "protocol": "push-primary",
+      "triggers": [
+        "trigger_identified_event"
+      ],
+      "outputs": [
+        "economy_schema"
+      ],
+      "upstream": [
+        "spending-trigger-analyst"
+      ],
+      "downstream": [
+        "consumable-designer"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Design the in-game currency economy: sinks (ways players spend currency), sources (ways players earn it), and the balance that creates healthy spending pressure without frustration.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Never design an economy with no free-to-play viable path",
+        "Starter pack must offer 3-5x value vs direct purchase",
+        "Flag any design where top spenders gain >10x advantage over F2P players"
+      ],
+      "memory": [
+        "Read /memory/dev-products/economy-log.md before designing",
+        "Log each schema version with date and game context"
+      ],
+      "spec_path": "agents/dev-products/economy-architect.md"
+    },
+    "spending-trigger-analyst": {
+      "slug": "spending-trigger-analyst",
+      "name": "Spending Trigger Analyst",
+      "version": "1.0.0",
+      "category": "dev-products",
+      "protocol": "event-primary",
+      "triggers": [
+        "session_event_stream"
+      ],
+      "outputs": [
+        "trigger_identified_event"
+      ],
+      "upstream": [],
+      "downstream": [
+        "economy-architect"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Monitor player session events in real time to identify high-emotion moments where purchase intent is highest. Fire monetization opportunity events at the right moment.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Do not fire more than 1 trigger per 3-minute window per player",
+        "Never trigger during tutorial sequences",
+        "Log all triggers regardless of whether they fired an event"
+      ],
+      "memory": [
+        "Append trigger events to /memory/dev-products/trigger-log.md"
+      ],
+      "spec_path": "agents/dev-products/spending-trigger-analyst.md"
+    },
+    "devex-optimizer": {
+      "slug": "devex-optimizer",
+      "name": "DevEx Optimizer",
+      "version": "1.0.0",
+      "category": "devex",
+      "protocol": "event-primary",
+      "triggers": [
+        "revenue_report_received"
+      ],
+      "outputs": [
+        "devex_ready_event"
+      ],
+      "upstream": [
+        "revenue-tracker"
+      ],
+      "downstream": [
+        "tax-finance-assistant"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Monitor Robux balance and determine optimal timing for Developer Exchange conversions to maximize USD returns. Fires events when conversion thresholds are hit.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Always include USD equivalent in every event (balance × current rate)",
+        "Note tax implications in every recommendation (not advice — just flag for professional)",
+        "Never fire an event for a balance below 30,000 R$",
+        "If DevEx rate changes by >10%, fire a P1 alert to Analytics Agent immediately"
+      ],
+      "memory": [
+        "Log all recommendations to /memory/devex/optimization-log.md"
+      ],
+      "spec_path": "agents/devex/devex-optimizer.md"
+    },
+    "revenue-tracker": {
+      "slug": "revenue-tracker",
+      "name": "Revenue Tracker",
+      "version": "1.0.0",
+      "category": "devex",
+      "protocol": "pull-primary",
+      "triggers": [
+        "daily_cron"
+      ],
+      "outputs": [
+        "revenue_report"
+      ],
+      "upstream": [],
+      "downstream": [
+        "devex-optimizer"
+      ],
+      "connects_to": [],
+      "schedule": "daily at 00:00 UTC",
+      "role": "Pull and consolidate daily Robux earnings from all revenue streams into a unified report for the DevEx Optimizer. The single source of truth for studio financial performance.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Run at midnight UTC every day without fail",
+        "If API is unavailable, retry every 15 minutes for 2 hours then alert Analytics Agent",
+        "Never estimate or interpolate data — only report confirmed figures",
+        "Always include cumulative balance for DevEx threshold monitoring"
+      ],
+      "memory": [
+        "Append daily totals to /memory/devex/revenue-log.md",
+        "Never overwrite historical entries — financial records are permanent"
+      ],
+      "spec_path": "agents/devex/revenue-tracker.md"
+    },
+    "tax-finance-assistant": {
+      "slug": "tax-finance-assistant",
+      "name": "Tax & Finance Assistant",
+      "version": "1.0.0",
+      "category": "devex",
+      "protocol": "push-primary",
+      "triggers": [
+        "devex_ready_event",
+        "monthly_cron"
+      ],
+      "outputs": [
+        "financial_summary",
+        "quarterly_report"
+      ],
+      "upstream": [
+        "devex-optimizer"
+      ],
+      "downstream": [],
+      "connects_to": [],
+      "schedule": "1st of each month at 08:00 UTC (monthly report)",
+      "role": "Organize Roblox development income records, track USD conversions, and prepare financial summaries for accounting purposes. This agent organizes data only — it does NOT provide tax advice.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "period": "YYYY-MM",
+        "gross_robux_earned": "number",
+        "robux_converted": "number",
+        "usd_received": "number",
+        "expenses_usd": "number",
+        "net_income_usd": "number",
+        "ytd_income_usd": "number",
+        "tax_flag": "review_recommended|low_complexity|above_1099_threshold",
+        "notes": [
+          "string"
+        ]
+      },
+      "rules": [
+        "Never state specific tax amounts owed — always flag for professional review",
+        "Never store payment card or bank account numbers",
+        "All financial records are append-only — never delete historical entries",
+        "Mark records as \"preliminary\" until confirmed against bank statements"
+      ],
+      "memory": [
+        "Maintain financial ledger at /memory/devex/finance-ledger.md",
+        "Append monthly summaries — never overwrite"
+      ],
+      "spec_path": "agents/devex/tax-finance-assistant.md"
+    },
+    "client-comms-agent": {
+      "slug": "client-comms-agent",
+      "name": "Client Comms",
+      "version": "1.0.0",
+      "category": "freelance",
+      "protocol": "event-primary",
+      "triggers": [
+        "inbound_inquiry"
+      ],
+      "outputs": [
+        "qualified_lead_event",
+        "client_update_message"
+      ],
+      "upstream": [],
+      "downstream": [
+        "scope-estimator"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "First point of contact for all freelance commission inquiries. Qualify leads, extract project requirements, and manage all client-facing communication.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Never share confidential client information or log PII; use anonymized client identifiers in records.",
+        "Always communicate scope, timelines, and decisions clearly and document key client interactions in memory.",
+        "Always qualify leads and escalate unclear requirements or disputes per protocol before committing.",
+        "If required project details or client inputs are missing, request clarification rather than assuming."
+      ],
+      "memory": [
+        "Log all client interactions to /memory/freelance/client-log.md"
+      ],
+      "spec_path": "agents/freelance/client-comms-agent.md"
+    },
+    "portfolio-builder": {
+      "slug": "portfolio-builder",
+      "name": "Portfolio Builder",
+      "version": "1.0.0",
+      "category": "freelance",
+      "protocol": "pull-primary",
+      "triggers": [
+        "project_completion_event"
+      ],
+      "outputs": [
+        "portfolio_update"
+      ],
+      "upstream": [],
+      "downstream": [],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Automatically maintain and update the studio's freelance portfolio after each completed project, keeping it current for new client acquisition.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "new_entry": {
+          "project_id": "string",
+          "type": "scripting|building|ui|full_game",
+          "features": [
+            "string"
+          ],
+          "tech_tags": [
+            "string"
+          ],
+          "completion_date": "ISO8601",
+          "anonymous_client": "string",
+          "public": "boolean"
+        },
+        "portfolio_updated": "boolean",
+        "total_projects": "number"
+      },
+      "rules": [
+        "Never include confidential client data, private assets, or PII without explicit permission; anonymize by default.",
+        "Always represent completed work accurately and only include deliverables/outcomes that are verified.",
+        "Always record sources, dates, and project references in portfolio updates and memory.",
+        "If completion evidence or permissions are missing, return `MISSING_DATA` or exclude the item."
+      ],
+      "memory": [
+        "Maintain running portfolio at /memory/freelance/portfolio.md",
+        "Append one entry per completed project, never overwrite"
+      ],
+      "spec_path": "agents/freelance/portfolio-builder.md"
+    },
+    "proposal-writer": {
+      "slug": "proposal-writer",
+      "name": "Proposal Writer",
+      "version": "1.0.0",
+      "category": "freelance",
+      "protocol": "push-primary",
+      "triggers": [
+        "scope_document_received"
+      ],
+      "outputs": [
+        "proposal_document"
+      ],
+      "upstream": [
+        "scope-estimator"
+      ],
+      "downstream": [
+        "client-comms-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Write polished client-facing proposals that clearly communicate value, deliverables, pricing, and terms to convert qualified leads into paying clients.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "proposal_title": "string",
+        "proposal_body": "string (markdown)",
+        "total_price_usd": "number",
+        "deposit_required_usd": "number",
+        "timeline_days": "number",
+        "expiry_date": "ISO8601 (proposal valid for 14 days)"
+      },
+      "rules": [
+        "Every proposal must have a clear expiry date (14 days from send)",
+        "Never send a proposal without a scope document backing it",
+        "Always include a revision policy (2 rounds of revisions included)",
+        "Push final proposal back to Client Comms Agent for delivery"
+      ],
+      "memory": [
+        "Log proposals to /memory/freelance/proposal-log.md",
+        "Track won/lost status after client decision"
+      ],
+      "spec_path": "agents/freelance/proposal-writer.md"
+    },
+    "scope-estimator": {
+      "slug": "scope-estimator",
+      "name": "Scope Estimator",
+      "version": "1.0.0",
+      "category": "freelance",
+      "protocol": "push-primary",
+      "triggers": [
+        "qualified_lead_received"
+      ],
+      "outputs": [
+        "scope_document"
+      ],
+      "upstream": [
+        "client-comms-agent"
+      ],
+      "downstream": [
+        "proposal-writer"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Break freelance commissions into detailed task lists with time estimates and pricing, forming the basis for client proposals.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "project_name": "string",
+        "tasks": [
+          {
+            "name": "string",
+            "type": "scripting|building|ui|design",
+            "hours_estimate": "number",
+            "rate": "number",
+            "subtotal": "number",
+            "risk": "low|medium|high"
+          }
+        ],
+        "subtotal_hours": "number",
+        "buffer_hours": "number",
+        "total_hours": "number",
+        "total_price_usd": "number",
+        "timeline_days": "number",
+        "unknowns": [
+          "string"
+        ]
+      },
+      "rules": [
+        "Never provide estimates without stating assumptions, inclusions/exclusions, and risk factors.",
+        "Always break work into clear tasks with effort/cost ranges based on available requirements.",
+        "Always flag ambiguous requirements and dependencies that can affect scope or timeline.",
+        "If requirements are insufficient to estimate reliably, return `MISSING_DATA` and list needed inputs."
+      ],
+      "memory": [
+        "Log scope documents to /memory/freelance/scope-log.md"
+      ],
+      "spec_path": "agents/freelance/scope-estimator.md"
+    },
+    "conversion-copywriter": {
+      "slug": "conversion-copywriter",
+      "name": "Conversion Copywriter",
+      "version": "1.0.0",
+      "category": "gamepass",
+      "protocol": "push-primary",
+      "triggers": [
+        "approved_spec_received"
+      ],
+      "outputs": [
+        "gamepass_copy"
+      ],
+      "upstream": [
+        "perk-balancer"
+      ],
+      "downstream": [
+        "pricing-analyst"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Write high-converting gamepass titles, descriptions, and UI copy that drives purchase decisions on the Roblox game page.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "title": "string (<=50 chars)",
+        "short_description": "string (<=100 chars, for thumbnail)",
+        "full_description": "string (<=1000 chars)",
+        "ui_button_text": "string (<=20 chars)",
+        "a_b_variant": {
+          "title": "string",
+          "short_description": "string"
+        }
+      },
+      "rules": [
+        "Never use ALL CAPS",
+        "Never make claims that are false or exaggerated",
+        "Always produce one A/B variant title for testing",
+        "Push final copy + A/B variant to Pricing Analyst"
+      ],
+      "memory": [
+        "Append each gamepass copy + game name to /memory/gamepass/copy-log.md"
+      ],
+      "spec_path": "agents/gamepass/conversion-copywriter.md"
+    },
+    "gamepass-designer": {
+      "slug": "gamepass-designer",
+      "name": "Gamepass Designer",
+      "version": "1.0.0",
+      "category": "gamepass",
+      "protocol": "push-primary",
+      "triggers": [
+        "analytics_opportunity",
+        "manual_request"
+      ],
+      "outputs": [
+        "perk_spec_doc"
+      ],
+      "upstream": [],
+      "downstream": [
+        "perk-balancer"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Design compelling Roblox gamepass concepts based on player segment data and engagement signals. Produce a structured perk specification document for every gamepass idea.",
+      "input_schema": {
+        "segment": "string",
+        "avg_session_minutes": "number",
+        "top_activity": "string",
+        "drop_off_point": "string",
+        "player_count": "number"
+      },
+      "workflow": [
+        "Parse incoming segment data",
+        "Identify the player's core desire at their drop-off point",
+        "Generate exactly 3 gamepass concepts",
+        "For each concept produce: name, tagline, 3 perks, target player type, risk level (low/med/high)",
+        "PUSH full spec doc to Perk Balancer"
+      ],
+      "output_schema": {
+        "concepts": [
+          {
+            "name": "string",
+            "tagline": "string",
+            "perks": [
+              "string",
+              "string",
+              "string"
+            ],
+            "target_player": "string",
+            "risk_level": "low|med|high"
+          }
+        ],
+        "source_segment": "string",
+        "created_at": "ISO8601"
+      },
+      "rules": [
+        "Never design a perk that bypasses core gameplay loops entirely",
+        "Always include one \"quality of life\" perk per concept",
+        "Flag any perk that grants direct currency as risk_level: high",
+        "If segment data is missing, request it from Analytics Agent before proceeding",
+        "Maximum 3 concepts per request — quality over quantity"
+      ],
+      "memory": [
+        "Read /memory/gamepass/designer-log.md before each run",
+        "Append outcome summary after each completed spec"
+      ],
+      "spec_path": "agents/gamepass/gamepass-designer.md"
+    },
+    "lua-script-writer": {
+      "slug": "lua-script-writer",
+      "name": "Lua Script Writer",
+      "version": "1.0.0",
+      "category": "gamepass",
+      "protocol": "sync-gate",
+      "triggers": [
+        "gamepass_ready"
+      ],
+      "outputs": [
+        "implementation_spec",
+        "luau_source_bundle"
+      ],
+      "upstream": [
+        "pricing-analyst"
+      ],
+      "downstream": [
+        "tos-compliance-agent",
+        "build-release-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Implements approved monetization and gameplay-adjacent perk specifications as production-ready Luau for Roblox experiences. It translates `gamepass_ready` packages into secure, testable server/client scripts and integration instructions so gamepasses can be shipped without bypassing core gameplay loops or introducing exploit vectors.",
+      "input_schema": {
+        "perk_spec": {
+          "concept_name": "string",
+          "perks": [
+            "string"
+          ],
+          "target_player": "string",
+          "risk_level": "low|med|high"
+        },
+        "copy": {
+          "title": "string",
+          "description": "string"
+        },
+        "pricing": {
+          "price_robux": 0,
+          "product_id": "string|null"
+        },
+        "correlation_id": "string",
+        "experience_context": {
+          "place_id": "string",
+          "existing_systems": [
+            "string"
+          ]
+        }
+      },
+      "workflow": [
+        "Read `/memory/gamepass/implementation-log.md` and validate the incoming envelope and `gamepass_ready` payload against required fields.",
+        "Break the perk spec into server-authoritative behaviors, client feedback/UI hooks, and configuration/data requirements.",
+        "Produce Luau implementation artifacts: module/script layout, RemoteEvent/Function contracts, DataStore or in-memory state usage, and MarketplaceService purchase handling as applicable.",
+        "Add exploit mitigations (server validation, rate/ownership checks, no trusted client currency/perk grants) and note integration points for existing systems.",
+        "Return a blocking SYNC decision payload with `decision`, implementation bundle, and test notes; on approval-ready output PUSH/SYNC handoff to TOS Compliance Agent and notify Build & Release Agent."
+      ],
+      "output_schema": {
+        "decision": "approved|rejected|needs_revision",
+        "correlation_id": "string",
+        "implementation": {
+          "scripts": [
+            {
+              "path": "ServerScriptService/Gamepasses/PurchaseHandler.server.lua",
+              "purpose": "string",
+              "source": "string"
+            }
+          ],
+          "remotes": [
+            {
+              "name": "string",
+              "type": "RemoteEvent|RemoteFunction",
+              "direction": "server->client|client->server"
+            }
+          ],
+          "config": {
+            "product_ids": {},
+            "feature_flags": {}
+          }
+        },
+        "test_notes": [
+          "string"
+        ],
+        "security_notes": [
+          "string"
+        ],
+        "blocking_issues": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never trust the client for currency, inventory, or perk ownership; all purchase grants and perk effects must be validated server-side.",
+        "Never implement perks that bypass core gameplay loops entirely; if requested, reject with `BALANCE_FAIL`/revision notes and escalate per protocol.",
+        "Always include purchase/ownership verification (e.g. MarketplaceService/UserOwnsGamePassAsync or receipt handling as appropriate) and idempotent grant logic.",
+        "Always document integration steps, required instances/remotes, and rollback notes in the output.",
+        "If required context is missing (place IDs, existing systems, product IDs), return `MISSING_DATA` with the exact fields needed instead of guessing."
+      ],
+      "memory": [
+        "Read `/memory/gamepass/implementation-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/gamepass/lua-script-writer.md"
+    },
+    "perk-balancer": {
+      "slug": "perk-balancer",
+      "name": "Perk Balancer",
+      "version": "1.0.0",
+      "category": "gamepass",
+      "protocol": "pull-primary",
+      "triggers": [
+        "perk_spec_received"
+      ],
+      "outputs": [
+        "approved_spec",
+        "flagged_issues"
+      ],
+      "upstream": [
+        "gamepass-designer"
+      ],
+      "downstream": [
+        "conversion-copywriter"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Review gamepass perk concepts for economy balance risk. Approve, modify, or reject perks before they reach production.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "approved_perks": [],
+        "flagged_perks": [
+          {
+            "perk": "string",
+            "reason": "string",
+            "score": {}
+          }
+        ],
+        "rejected_perks": [
+          {
+            "perk": "string",
+            "reason": "string"
+          }
+        ],
+        "recommendation": "string"
+      },
+      "rules": [
+        "Never approve perks that bypass core gameplay loops or create unmitigated pay-to-win advantages.",
+        "Always evaluate each perk for economy impact, fairness, and exploit risk and return an explicit balance decision.",
+        "Always provide concrete adjustment recommendations for any flagged issues.",
+        "If perk specs or required context are missing, return `MISSING_DATA` and block progression."
+      ],
+      "memory": [
+        "Read /memory/gamepass/balance-log.md before each run",
+        "Write balance decision + reasoning after each evaluation"
+      ],
+      "spec_path": "agents/gamepass/perk-balancer.md"
+    },
+    "pricing-analyst": {
+      "slug": "pricing-analyst",
+      "name": "Pricing Analyst",
+      "version": "1.0.0",
+      "category": "gamepass",
+      "protocol": "event-primary",
+      "triggers": [
+        "copy_received"
+      ],
+      "outputs": [
+        "price_recommendation",
+        "gamepass_ready_event"
+      ],
+      "upstream": [
+        "conversion-copywriter"
+      ],
+      "downstream": [
+        "lua-script-writer",
+        "build-queue"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Determine optimal Roblox gamepass pricing through competitive analysis and player psychology principles.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "recommended_price": "number",
+        "price_tier": "entry|mid|premium|flagship",
+        "competitor_range": {
+          "min": 0,
+          "max": 0,
+          "avg": 0
+        },
+        "confidence": "low|medium|high",
+        "rationale": "string"
+      },
+      "rules": [
+        "Never recommend pricing without considering provided segment/value context and documented rationale.",
+        "Always emit structured pricing outputs consistent with downstream schema and include `correlation_id` when available.",
+        "Always flag pricing risks (misleading value, policy concerns, or outlier assumptions) for review.",
+        "If required inputs (perk spec, copy, segment data) are missing, return `MISSING_DATA` instead of guessing."
+      ],
+      "memory": [
+        "Log each price recommendation to /memory/gamepass/pricing-log.md"
+      ],
+      "spec_path": "agents/gamepass/pricing-analyst.md"
+    },
+    "plugin-docs-writer": {
+      "slug": "plugin-docs-writer",
+      "name": "Plugin Docs Writer",
+      "version": "1.0.0",
+      "category": "plugins",
+      "protocol": "push-primary",
+      "triggers": [
+        "build_confirmed"
+      ],
+      "outputs": [
+        "documentation_package"
+      ],
+      "upstream": [
+        "plugin-lua-developer"
+      ],
+      "downstream": [
+        "plugin-support-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Write comprehensive documentation for Roblox Studio plugins including README, usage guide, changelog, and DevForum release post.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "readme_content": "string (markdown)",
+        "usage_guide_content": "string (markdown)",
+        "changelog_content": "string (markdown)",
+        "devforum_post_content": "string (devforum format)",
+        "docs_complete": "boolean"
+      },
+      "rules": [
+        "Never document features or behaviors that do not exist or are unverified in the provided build/spec.",
+        "Always produce clear, accurate setup/usage instructions and include limitations or prerequisites.",
+        "Always align documentation with compliance and support requirements before publish.",
+        "If build details or feature specs are missing, return `MISSING_DATA` and request clarification."
+      ],
+      "memory": [
+        "Log doc versions to /memory/plugins/docs-log.md"
+      ],
+      "spec_path": "agents/plugins/plugin-docs-writer.md"
+    },
+    "plugin-ideation-agent": {
+      "slug": "plugin-ideation-agent",
+      "name": "Plugin Ideation",
+      "version": "1.0.0",
+      "category": "plugins",
+      "protocol": "pull-primary",
+      "triggers": [
+        "weekly_cron",
+        "manual_request"
+      ],
+      "outputs": [
+        "plugin_ideas"
+      ],
+      "upstream": [],
+      "downstream": [
+        "plugin-lua-developer"
+      ],
+      "connects_to": [],
+      "schedule": "every Wednesday 09:00 UTC",
+      "role": "Identify high-demand Roblox Studio plugin opportunities by analyzing developer pain points, forum requests, and gaps in existing tooling.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "top_ideas": [
+          {
+            "name": "string",
+            "description": "string (≤200 chars)",
+            "pain_point_solved": "string",
+            "demand_score": "number",
+            "complexity_score": "number",
+            "competition_score": "number",
+            "priority_score": "number",
+            "evidence": [
+              "string"
+            ],
+            "monetization_model": "free|paid|freemium"
+          }
+        ],
+        "total_ideas_evaluated": "number"
+      },
+      "rules": [
+        "Always surface top 3 ideas ranked by priority score",
+        "Include at least 1 \"quick win\" (complexity ≤ 3) in every report",
+        "Never recommend building a plugin Roblox has announced as a native feature"
+      ],
+      "memory": [
+        "Append idea reports to /memory/plugins/ideation-log.md"
+      ],
+      "spec_path": "agents/plugins/plugin-ideation-agent.md"
+    },
+    "plugin-lua-developer": {
+      "slug": "plugin-lua-developer",
+      "name": "Plugin Lua Developer",
+      "version": "1.0.0",
+      "category": "plugins",
+      "protocol": "sync-gate",
+      "triggers": [
+        "idea_approved"
+      ],
+      "outputs": [
+        "plugin_build"
+      ],
+      "upstream": [
+        "plugin-ideation-agent"
+      ],
+      "downstream": [
+        "plugin-docs-writer"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Build Roblox Studio plugins using Luau. Produce clean, well-structured plugin code with a toolbar button, settings UI, and core functionality.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Never ship plugin code without addressing security, permissions, and stability considerations relevant to Roblox Studio.",
+        "Always implement against the provided spec, include integration/test notes, and respect SYNC gate decisions.",
+        "Always handle errors safely and avoid destructive actions without explicit, documented intent.",
+        "If requirements or environment details are missing, return `MISSING_DATA` rather than making unsafe assumptions."
+      ],
+      "memory": [
+        "Log builds to /memory/plugins/build-log.md",
+        "Track bug reports received from Support Agent"
+      ],
+      "spec_path": "agents/plugins/plugin-lua-developer.md"
+    },
+    "plugin-support-agent": {
+      "slug": "plugin-support-agent",
+      "name": "Plugin Support",
+      "version": "1.0.0",
+      "category": "plugins",
+      "protocol": "event-primary",
+      "triggers": [
+        "always_on_monitor"
+      ],
+      "outputs": [
+        "bug_reported_event",
+        "feature_requested_event",
+        "support_response"
+      ],
+      "upstream": [],
+      "downstream": [
+        "plugin-lua-developer",
+        "plugin-ideation-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Monitor DevForum threads and plugin comments for bug reports, feature requests, and user questions. Respond to users and route issues upstream.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Never expose user PII or sensitive data in logs, reports, or forwarded events.",
+        "Always classify and route reports with accurate severity/priority and required reproduction details.",
+        "Always acknowledge and track issues to resolution, escalating P0/P1 cases per protocol.",
+        "If critical report details are missing, request them and mark the issue as incomplete rather than guessing."
+      ],
+      "memory": [
+        "Append all triage entries to /memory/plugins/support-log.md"
+      ],
+      "spec_path": "agents/plugins/plugin-support-agent.md"
+    },
+    "pricing-optimizer-ps": {
+      "slug": "pricing-optimizer-ps",
+      "name": "Private Server Pricing Optimizer",
+      "version": "1.0.0",
+      "category": "private-servers",
+      "protocol": "pull-primary",
+      "triggers": [
+        "config_spec_received"
+      ],
+      "outputs": [
+        "price_recommendation"
+      ],
+      "upstream": [
+        "private-server-configurator"
+      ],
+      "downstream": [],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Determine the optimal monthly Robux price for private servers, balancing revenue generation with accessibility.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "recommended_price": "number",
+        "strategy": "free|budget|standard|premium",
+        "monthly_revenue_estimate": "number",
+        "conversion_rate_estimate": "string",
+        "rationale": "string"
+      },
+      "rules": [
+        "Never recommend prices without considering demand, value, and policy/compliance constraints.",
+        "Always provide data-informed rationale, expected impact, and any risks in pricing outputs.",
+        "Always align recommendations with configured server features and target audience.",
+        "If usage/revenue/configuration data is missing, return `MISSING_DATA` instead of guessing."
+      ],
+      "memory": [
+        "Log price recommendations to /memory/private-servers/pricing-log.md"
+      ],
+      "spec_path": "agents/private-servers/pricing-optimizer-ps.md"
+    },
+    "private-server-configurator": {
+      "slug": "private-server-configurator",
+      "name": "Private Server Configurator",
+      "version": "1.0.0",
+      "category": "private-servers",
+      "protocol": "push-primary",
+      "triggers": [
+        "manual_request",
+        "game_launch_event"
+      ],
+      "outputs": [
+        "server_config_spec"
+      ],
+      "upstream": [],
+      "downstream": [
+        "pricing-optimizer-ps"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Design and configure private server options for Roblox games, including settings, permissions, customization options, and player limits.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "max_players": "number",
+        "default_access": "invite|link|public",
+        "owner_tools": [
+          "kick",
+          "ban",
+          "whitelist",
+          "custom_rules"
+        ],
+        "customization_options": [
+          {
+            "setting": "string",
+            "type": "string",
+            "default": "string"
+          }
+        ],
+        "persistence": "boolean",
+        "recommended_price_range": {
+          "min": "number",
+          "max": "number"
+        }
+      },
+      "rules": [
+        "Never configure private server options that violate Roblox policies or grant unintended unfair advantages.",
+        "Always document configuration choices, permissions, and operational implications clearly.",
+        "Always ensure configurations are consistent with pricing and feature promises.",
+        "If requirements or constraints are missing, return `MISSING_DATA` before finalizing configuration."
+      ],
+      "memory": [
+        "Log server configurations per game to /memory/private-servers/config-log.md"
+      ],
+      "spec_path": "agents/private-servers/private-server-configurator.md"
+    },
+    "churn-analyst": {
+      "slug": "churn-analyst",
+      "name": "Churn Analyst",
+      "version": "1.0.0",
+      "category": "subscriptions",
+      "protocol": "event-primary",
+      "triggers": [
+        "always_on_monitor"
+      ],
+      "outputs": [
+        "churn_spike_event",
+        "monthly_churn_report"
+      ],
+      "upstream": [],
+      "downstream": [
+        "subscription-designer",
+        "analytics-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Monitor subscription cancellation rates in real time and fire alerts when churn exceeds acceptable thresholds. Provide actionable diagnosis with every alert.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Never report churn conclusions without citing the metrics, windows, and segments analyzed.",
+        "Always detect and communicate severity/priority accurately and emit alerts per protocol thresholds.",
+        "Always recommend actionable, evidence-based remediation steps for observed churn drivers.",
+        "If required data is missing or insufficient, return `MISSING_DATA` and state limitations."
+      ],
+      "memory": [
+        "Append churn events to /memory/subscriptions/churn-log.md",
+        "Never overwrite historical data"
+      ],
+      "spec_path": "agents/subscriptions/churn-analyst.md"
+    },
+    "retention-agent": {
+      "slug": "retention-agent",
+      "name": "Retention",
+      "version": "1.0.0",
+      "category": "subscriptions",
+      "protocol": "pull-primary",
+      "triggers": [
+        "tier_spec_received"
+      ],
+      "outputs": [
+        "retention_schedule"
+      ],
+      "upstream": [
+        "subscription-designer"
+      ],
+      "downstream": [
+        "lua-script-writer"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Design a monthly reward cadence that maximizes subscriber retention by creating habitual engagement patterns and anticipation for upcoming rewards.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "schedule": [
+          {
+            "day": "number",
+            "reward": "string",
+            "tier": "bronze|gold|diamond|all",
+            "anti_churn_placement": "boolean"
+          }
+        ],
+        "streak_bonuses": [
+          {
+            "streak_days": "number",
+            "bonus": "string"
+          }
+        ],
+        "predicted_retention_lift": "string"
+      },
+      "rules": [
+        "Never propose retention tactics that are deceptive, coercive, or non-compliant with policies.",
+        "Always tie retention actions to identified churn drivers/segments and measurable outcomes.",
+        "Always coordinate recommendations through defined downstream/event flows and document them.",
+        "If churn/segment data is missing, request or return `MISSING_DATA` before acting."
+      ],
+      "memory": [
+        "Read /memory/subscriptions/retention-log.md before designing",
+        "Log schedule version + predicted retention after each design"
+      ],
+      "spec_path": "agents/subscriptions/retention-agent.md"
+    },
+    "subscription-designer": {
+      "slug": "subscription-designer",
+      "name": "Subscription Designer",
+      "version": "1.0.0",
+      "category": "subscriptions",
+      "protocol": "push-primary",
+      "triggers": [
+        "manual_request",
+        "churn_spike_event"
+      ],
+      "outputs": [
+        "subscription_tier_spec"
+      ],
+      "upstream": [],
+      "downstream": [
+        "retention-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Design Roblox subscription tiers that create ongoing recurring value, habit formation, and high perceived worth relative to Robux cost.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "tiers": [
+          {
+            "name": "string",
+            "price_robux": "number",
+            "monthly_benefits": [
+              "string"
+            ],
+            "daily_bonus": "string|null",
+            "weekly_bonus": "string|null",
+            "monthly_exclusive": "string",
+            "carries_lower_tier": "boolean"
+          }
+        ]
+      },
+      "rules": [
+        "Diamond tier price must be <= 2000 Robux/month",
+        "Never promise perks that aren't technically implemented",
+        "If triggered by churn_spike: redesign weakest tier first"
+      ],
+      "memory": [
+        "Log each tier redesign with date and trigger reason in /memory/subscriptions/design-log.md"
+      ],
+      "spec_path": "agents/subscriptions/subscription-designer.md"
+    },
+    "accessory-scripter": {
+      "slug": "accessory-scripter",
+      "name": "Accessory Scripter",
+      "version": "1.0.0",
+      "category": "ugc",
+      "protocol": "sync-gate",
+      "triggers": [
+        "drop_schedule_received"
+      ],
+      "outputs": [
+        "accessory_build_confirmation"
+      ],
+      "upstream": [
+        "limited-drop-strategist"
+      ],
+      "downstream": [
+        "tos-compliance-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Provide technical specifications for UGC accessory builds and validate that all items meet Roblox's UGC technical requirements before submission.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Never confirm a build ready for publish without required technical/compliance checks being satisfied.",
+        "Always provide accurate build/integration status and note any scripts, constraints, or dependencies.",
+        "Always flag policy or technical risks to downstream compliance/publishing gates.",
+        "If asset specs or required build inputs are missing, return `MISSING_DATA` and block confirmation."
+      ],
+      "memory": [
+        "Log build confirmations to /memory/ugc/build-log.md"
+      ],
+      "spec_path": "agents/ugc/accessory-scripter.md"
+    },
+    "item-naming-agent": {
+      "slug": "item-naming-agent",
+      "name": "Item Naming",
+      "version": "1.0.0",
+      "category": "ugc",
+      "protocol": "push-primary",
+      "triggers": [
+        "concepts_received"
+      ],
+      "outputs": [
+        "named_concepts"
+      ],
+      "upstream": [
+        "ugc-concept-artist"
+      ],
+      "downstream": [
+        "limited-drop-strategist"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Generate compelling, searchable, and trend-aligned names for UGC avatar items that maximize discoverability on the Roblox marketplace.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "named_items": [
+          {
+            "original_working_title": "string",
+            "primary_name": "string",
+            "alt_names": [
+              "string",
+              "string"
+            ],
+            "search_tags": [
+              "string",
+              "string",
+              "string"
+            ],
+            "name_rationale": "string"
+          }
+        ]
+      },
+      "rules": [
+        "Never generate names that are misleading, infringing, or violate Roblox naming/policy guidelines.",
+        "Always produce searchable, clear names aligned with the item concept and target audience.",
+        "Always provide rationale/keywords when useful and avoid duplicates or ambiguous terms where possible.",
+        "If concept details are missing, return `MISSING_DATA` instead of inventing context."
+      ],
+      "memory": [
+        "Log named items to /memory/ugc/naming-log.md"
+      ],
+      "spec_path": "agents/ugc/item-naming-agent.md"
+    },
+    "limited-drop-strategist": {
+      "slug": "limited-drop-strategist",
+      "name": "Limited Drop Strategist",
+      "version": "1.0.0",
+      "category": "ugc",
+      "protocol": "pull-primary",
+      "triggers": [
+        "named_concepts_received"
+      ],
+      "outputs": [
+        "drop_schedule",
+        "drop_scheduled_event"
+      ],
+      "upstream": [
+        "item-naming-agent"
+      ],
+      "downstream": [
+        "accessory-scripter",
+        "marketing-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Plan UGC limited item drops — supply caps, timing windows, teaser schedules, and pricing — to maximize hype, demand, and sell-through.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "drops": [
+          {
+            "item_name": "string",
+            "strategy": "standard|hype|event",
+            "supply_cap": "number",
+            "price_robux": "number",
+            "teaser_start": "ISO8601",
+            "drop_datetime": "ISO8601",
+            "drop_window_hours": "number",
+            "resale_enabled": "boolean",
+            "teaser_content_plan": [
+              "string"
+            ]
+          }
+        ]
+      },
+      "rules": [
+        "Never schedule drops without considering supply, timing, audience, and policy/fairness constraints.",
+        "Always emit structured drop schedules consistent with downstream event schemas and include rationale.",
+        "Always flag risks (oversupply/undersupply, timing conflicts, compliance concerns) for review.",
+        "If required item or demand data is missing, return `MISSING_DATA` rather than guessing."
+      ],
+      "memory": [
+        "Append each drop plan to /memory/ugc/drop-log.md"
+      ],
+      "spec_path": "agents/ugc/limited-drop-strategist.md"
+    },
+    "trend-spotter": {
+      "slug": "trend-spotter",
+      "name": "Trend Spotter",
+      "version": "1.0.0",
+      "category": "ugc",
+      "protocol": "pull-primary",
+      "triggers": [
+        "weekly_cron"
+      ],
+      "outputs": [
+        "trend_report"
+      ],
+      "upstream": [],
+      "downstream": [
+        "ugc-concept-artist"
+      ],
+      "connects_to": [],
+      "schedule": "every Monday 09:00 UTC",
+      "role": "Scan the Roblox avatar marketplace and social media weekly to identify rising aesthetic trends, peak categories, and declining styles.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": null,
+      "rules": [
+        "Always cite specific evidence for trend claims",
+        "Mark any aesthetic tied to a real-world brand as \"IP risk\" — do not concept",
+        "Decline to trend-spot for content that could violate Roblox TOS"
+      ],
+      "memory": [
+        "Append weekly report summary to /memory/ugc/trend-log.md"
+      ],
+      "spec_path": "agents/ugc/trend-spotter.md"
+    },
+    "ugc-3d-modeler": {
+      "slug": "ugc-3d-modeler",
+      "name": "UGC 3D Modeler",
+      "version": "1.0.0",
+      "category": "ugc",
+      "protocol": "sync-gate",
+      "triggers": [
+        "concept_approved",
+        "drop_scheduled"
+      ],
+      "outputs": [
+        "ugc_asset_package",
+        "build_report"
+      ],
+      "upstream": [
+        "ugc-concept-artist",
+        "limited-drop-strategist",
+        "accessory-scripter"
+      ],
+      "downstream": [
+        "accessory-scripter",
+        "tos-compliance-agent",
+        "roblox-api-publishing-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Produces production-ready UGC accessory asset specifications and build outputs (mesh/texture/rig guidance and packaging details) from approved concepts. It ensures assets meet Roblox UGC technical constraints and are prepared for scripting integration, compliance review, and publishing.",
+      "input_schema": {
+        "correlation_id": "string",
+        "item": {
+          "name": "string",
+          "type": "hat|hair|back|front|shoulder|waist|face|other",
+          "concept_art_refs": [
+            "string"
+          ],
+          "style_notes": [
+            "string"
+          ]
+        },
+        "constraints": {
+          "budget_tris": 0,
+          "texture_resolution": "string",
+          "attachment": "string"
+        }
+      },
+      "workflow": [
+        "Read `/memory/ugc/model-log.md` and validate concept, item type, and technical constraints.",
+        "Define geometry, UV, texture, and material plan aligned to Roblox UGC requirements and attachment points.",
+        "Produce asset package details (mesh/texture files or specs, naming, LOD/bounds notes, cage/rig considerations as applicable).",
+        "Run a technical checklist (scale, orientation, naming, poly/texture budgets) and flag risks for scripting/compliance.",
+        "Return SYNC `build_report` and hand off package to Accessory Scripter and TOS Compliance/Publishing agents."
+      ],
+      "output_schema": {
+        "decision": "ready|needs_revision|blocked",
+        "correlation_id": "string",
+        "asset_package": {
+          "item_name": "string",
+          "files": [
+            {
+              "kind": "mesh|texture|material|spec",
+              "name": "string",
+              "notes": "string"
+            }
+          ],
+          "attachment": "string",
+          "dimensions_notes": "string"
+        },
+        "tech_checks": [
+          {
+            "check": "string",
+            "status": "pass|fail",
+            "detail": "string"
+          }
+        ],
+        "issues": [
+          "string"
+        ],
+        "timestamp": "ISO8601"
+      },
+      "rules": [
+        "Never mark an asset `ready` if it fails required technical checks for Roblox UGC constraints provided in scope.",
+        "Always document attachment, scale/orientation, and naming conventions in the package.",
+        "Always flag IP/policy-risky visual elements noted in concepts for TOS Compliance review (do not self-approve).",
+        "If concept refs or required constraints are missing, return `MISSING_DATA`.",
+        "Preserve iteration history; never overwrite prior build records in memory."
+      ],
+      "memory": [
+        "Read `/memory/ugc/model-log.md` at the start of every run",
+        "Append a summary entry at the end of every run using this format:"
+      ],
+      "spec_path": "agents/ugc/ugc-3d-modeler.md"
+    },
+    "ugc-concept-artist": {
+      "slug": "ugc-concept-artist",
+      "name": "UGC Concept Artist",
+      "version": "1.0.0",
+      "category": "ugc",
+      "protocol": "push-primary",
+      "triggers": [
+        "trend_report_received"
+      ],
+      "outputs": [
+        "item_concepts"
+      ],
+      "upstream": [
+        "trend-spotter"
+      ],
+      "downstream": [
+        "item-naming-agent"
+      ],
+      "connects_to": [],
+      "schedule": "",
+      "role": "Generate UGC avatar item concepts based on trending aesthetic data. Produce detailed creative briefs that 3D artists can execute.",
+      "input_schema": null,
+      "workflow": [],
+      "output_schema": {
+        "concepts": [
+          {
+            "working_title": "string",
+            "category": "string",
+            "aesthetic": "string",
+            "colors": [
+              "string",
+              "string",
+              "string"
+            ],
+            "hero_element": "string",
+            "target_demographic": "string",
+            "rarity": "common|rare|legendary|limited",
+            "polygon_guidance": "low|medium|high",
+            "trend_alignment_score": "number (1-10)"
+          }
+        ],
+        "trend_cycle_stage": "emerging|peak|declining"
+      },
+      "rules": [
+        "Never produce concepts that intentionally infringe IP or violate Roblox content policies; flag risks explicitly.",
+        "Always align concepts with provided trends/briefs and include clear visual/style notes for production.",
+        "Always consider feasibility for downstream modeling/scripting/publishing constraints.",
+        "If trend/brief inputs are missing, return `MISSING_DATA` before finalizing concepts."
+      ],
+      "memory": [
+        "Read /memory/ugc/concept-log.md before each run",
+        "Append new concepts after generation"
+      ],
+      "spec_path": "agents/ugc/ugc-concept-artist.md"
+    }
+  }
+}

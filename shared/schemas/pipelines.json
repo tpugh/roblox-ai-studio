@@ -1,0 +1,265 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Roblox AI Studio — Pipeline Definitions",
+  "version": "1.0.0",
+  "description": "Machine-readable pipeline graphs derived from README.md. Each stage names the agent that runs it, the protocol used to hand work in and out, and whether the stage is a blocking gate.",
+  "protocols": ["push", "pull", "event", "sync"],
+  "pipelines": {
+    "gamepass": {
+      "name": "Gamepass Pipeline",
+      "category": "gamepass",
+      "entry_event": "analytics_opportunity",
+      "publish_gate": "tos-compliance-agent",
+      "stages": [
+        {
+          "id": "design",
+          "agent": "gamepass-designer",
+          "in_protocol": "event",
+          "out_protocol": "push",
+          "produces": "perk_spec_doc",
+          "gate": false
+        },
+        {
+          "id": "balance",
+          "agent": "perk-balancer",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "approved_spec",
+          "gate": true,
+          "gate_error": "BALANCE_FAIL"
+        },
+        {
+          "id": "copy",
+          "agent": "conversion-copywriter",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "gamepass_copy",
+          "gate": false
+        },
+        {
+          "id": "price",
+          "agent": "pricing-analyst",
+          "in_protocol": "push",
+          "out_protocol": "event",
+          "produces": "price_recommendation",
+          "emits": "gamepass_ready",
+          "gate": false
+        },
+        {
+          "id": "implement",
+          "agent": "lua-script-writer",
+          "in_protocol": "event",
+          "out_protocol": "sync",
+          "produces": "implementation_spec",
+          "gate": true
+        },
+        {
+          "id": "publish_gate",
+          "agent": "tos-compliance-agent",
+          "in_protocol": "sync",
+          "out_protocol": "sync",
+          "produces": "compliance_approval",
+          "gate": true,
+          "publish_gate": true
+        }
+      ]
+    },
+    "ugc": {
+      "name": "UGC Item Pipeline",
+      "category": "ugc",
+      "entry_event": null,
+      "publish_gate": "tos-compliance-agent",
+      "stages": [
+        {
+          "id": "trends",
+          "agent": "trend-spotter",
+          "in_protocol": "pull",
+          "out_protocol": "push",
+          "produces": "trend_report",
+          "gate": false
+        },
+        {
+          "id": "concept",
+          "agent": "ugc-concept-artist",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "item_concepts",
+          "gate": false
+        },
+        {
+          "id": "naming",
+          "agent": "item-naming-agent",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "item_names",
+          "gate": false
+        },
+        {
+          "id": "drop",
+          "agent": "limited-drop-strategist",
+          "in_protocol": "push",
+          "out_protocol": "event",
+          "produces": "drop_schedule",
+          "emits": "drop_scheduled",
+          "gate": false
+        },
+        {
+          "id": "build",
+          "agent": "accessory-scripter",
+          "in_protocol": "event",
+          "out_protocol": "push",
+          "produces": "build_confirmation",
+          "gate": true
+        },
+        {
+          "id": "publish_gate",
+          "agent": "tos-compliance-agent",
+          "in_protocol": "push",
+          "out_protocol": "sync",
+          "produces": "compliance_approval",
+          "gate": true,
+          "publish_gate": true
+        },
+        {
+          "id": "announce",
+          "agent": "community-manager",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "announcement_post",
+          "gate": false
+        }
+      ]
+    },
+    "plugin": {
+      "name": "Plugin Pipeline",
+      "category": "plugins",
+      "entry_event": null,
+      "publish_gate": "tos-compliance-agent",
+      "stages": [
+        {
+          "id": "ideation",
+          "agent": "plugin-ideation-agent",
+          "in_protocol": "pull",
+          "out_protocol": "push",
+          "produces": "ranked_ideas",
+          "gate": false
+        },
+        {
+          "id": "build",
+          "agent": "plugin-lua-developer",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "plugin_build",
+          "gate": true
+        },
+        {
+          "id": "docs",
+          "agent": "plugin-docs-writer",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "plugin_docs",
+          "gate": false
+        },
+        {
+          "id": "support",
+          "agent": "plugin-support-agent",
+          "in_protocol": "event",
+          "out_protocol": "push",
+          "produces": "support_triage",
+          "gate": false
+        },
+        {
+          "id": "publish_gate",
+          "agent": "tos-compliance-agent",
+          "in_protocol": "push",
+          "out_protocol": "sync",
+          "produces": "compliance_approval",
+          "gate": true,
+          "publish_gate": true
+        }
+      ]
+    },
+    "freelance": {
+      "name": "Freelance Pipeline",
+      "category": "freelance",
+      "entry_event": "qualified_lead",
+      "publish_gate": null,
+      "stages": [
+        {
+          "id": "intake",
+          "agent": "client-comms-agent",
+          "in_protocol": "event",
+          "out_protocol": "event",
+          "produces": "qualified_lead",
+          "emits": "qualified_lead",
+          "gate": false
+        },
+        {
+          "id": "scope",
+          "agent": "scope-estimator",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "scope_estimate",
+          "gate": false
+        },
+        {
+          "id": "proposal",
+          "agent": "proposal-writer",
+          "in_protocol": "push",
+          "out_protocol": "push",
+          "produces": "proposal",
+          "gate": false
+        },
+        {
+          "id": "delivery",
+          "agent": "client-comms-agent",
+          "in_protocol": "push",
+          "out_protocol": "event",
+          "produces": "delivery_confirmation",
+          "gate": false
+        },
+        {
+          "id": "portfolio",
+          "agent": "portfolio-builder",
+          "in_protocol": "event",
+          "out_protocol": "push",
+          "produces": "portfolio_update",
+          "gate": false
+        }
+      ]
+    },
+    "devex": {
+      "name": "DevEx Pipeline",
+      "category": "devex",
+      "entry_event": null,
+      "publish_gate": null,
+      "stages": [
+        {
+          "id": "revenue",
+          "agent": "revenue-tracker",
+          "in_protocol": "pull",
+          "out_protocol": "push",
+          "produces": "consolidated_revenue_report",
+          "gate": false
+        },
+        {
+          "id": "optimize",
+          "agent": "devex-optimizer",
+          "in_protocol": "push",
+          "out_protocol": "event",
+          "produces": "conversion_recommendation",
+          "emits": "devex_ready",
+          "gate": false
+        },
+        {
+          "id": "finance",
+          "agent": "tax-finance-assistant",
+          "in_protocol": "event",
+          "out_protocol": "push",
+          "produces": "ledger_update",
+          "gate": false
+        }
+      ]
+    }
+  }
+}

@@ -5,13 +5,19 @@ on:
     paths:
       - 'agents/**'
       - 'protocols/**'
-      - 'shared/schemas/**'
+      - 'shared/**'
       - 'memory/**'
+      - 'studio/**'
+      - 'tools/**'
+      - '.opencode/**'
   pull_request:
     paths:
       - 'agents/**'
       - 'protocols/**'
-      - 'shared/schemas/**'
+      - 'shared/**'
+      - 'studio/**'
+      - 'tools/**'
+      - '.opencode/**'
 
 jobs:
   lint-agents:
@@ -106,5 +112,34 @@ jobs:
       - name: Count agents and report
         run: |
           total=$(find agents -name "*.md" | wc -l)
-          echo "Total agent files: $total (expected: 38)"
+          echo "Total agent files: $total (expected: 38 original + additions)"
           find agents -name "*.md" | sort
+
+  runtime-checks:
+    runs-on: ubuntu-latest
+    name: Registry, Protocol CLI & Generated Artifacts
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Build registry from specs
+        run: python3 tools/build_registry.py
+
+      - name: Generated artifacts are current
+        run: |
+          git diff --exit-code -- \
+            shared/generated \
+            studio/src/RobloxAIStudio/Config/Generated \
+            .opencode/agents
+
+      - name: Protocol CLI smoke test
+        run: bash tools/smoke_test.sh

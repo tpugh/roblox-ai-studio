@@ -182,6 +182,27 @@ Revenue Tracker (daily PULL → consolidated report)
 
 ---
 
+---
+
+## Runtimes
+
+The specs are executable through two runtimes that share one generated registry:
+
+| Runtime | Entry point | What it enforces |
+|---------|-------------|------------------|
+| Host | `python3 tools/studio.py` + `.opencode/agents/*` | transport, SYNC gates, memory, publish gate, one subagent per agent spec |
+| Studio | `studio/src/RobloxAIStudio/` → `ReplicatedStorage.RobloxAIStudio` | envelope routing, event bus, gates, memory, publish gate, gamepass pipeline |
+
+```sh
+python3 tools/build_registry.py   # specs → registry JSON + Luau + subagents
+bash tools/smoke_test.sh          # 13 protocol checks
+```
+
+Operating rules: [`AGENTS.md`](AGENTS.md). Studio runtime details:
+[`studio/README.md`](studio/README.md). The generated registry currently holds
+55 agents — the table above lists the original 38; the additional agents are
+listed in `ADDED_AGENTS.md`.
+
 ## Getting Started
 
 ### Add a New Agent
