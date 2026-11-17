@@ -23,6 +23,8 @@ local DribbleRemote = remotes:WaitForChild("Dribble")
 local ResetRemote = remotes:WaitForChild("ResetBalls")
 local DefendRemote = remotes:WaitForChild("Defend")
 local Feedback = remotes:WaitForChild("Feedback")
+local DunkRemote = remotes:WaitForChild("Dunk", 10)
+local DunkFeedback = remotes:WaitForChild("DunkFeedback", 10)
 
 local CHARGE_SECONDS = 1.1
 
@@ -44,7 +46,7 @@ hint.Font = Enum.Font.GothamMedium
 hint.TextSize = 15
 hint.TextColor3 = Color3.fromRGB(235, 235, 240)
 hint.TextStrokeTransparency = 0.6
-hint.Text = "E  pick up   ·   walk to dribble   ·   Q  dribble/catch   ·   hold F  shoot   ·   C  block/steal   ·   R  reset"
+hint.Text = "E  pick up   ·   F  shoot   ·   V  dunk   ·   Q  dribble   ·   C  block/steal   ·   R  reset"
 hint.Parent = gui
 
 local score = Instance.new("TextLabel")
@@ -106,11 +108,11 @@ local function refreshHolding()
 	holding = player:GetAttribute("HoldingBall") == true
 	local dribbling = player:GetAttribute("Dribbling") == true
 	if dribbling then
-		hint.Text = "hold F  shoot   ·   walk to keep dribbling   ·   Q  catch   ·   C  block/steal   ·   R  reset"
+		hint.Text = "F  shoot   ·   V  dunk   ·   Q  catch   ·   C  block/steal   ·   R  reset"
 	elseif holding then
-		hint.Text = "walk to dribble   ·   hold F  shoot   ·   Q  dribble   ·   C  block/steal   ·   R  reset"
+		hint.Text = "walk to dribble   ·   F  shoot   ·   V  dunk   ·   Q  catch   ·   C  block/steal   ·   R  reset"
 	else
-		hint.Text = "E  pick up   ·   walk to dribble   ·   Q  dribble/catch   ·   hold F  shoot   ·   C  block/steal   ·   R  reset"
+		hint.Text = "E  pick up   ·   F  shoot   ·   V  dunk   ·   Q  dribble   ·   C  block/steal   ·   R  reset"
 	end
 end
 
@@ -145,6 +147,13 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 	if input.KeyCode == Enum.KeyCode.C then
 		DefendRemote:FireServer()
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.V then
+		-- Dunk works from a held ball or a live dribble; the server validates.
+		if DunkRemote then
+			DunkRemote:FireServer()
+		end
 		return
 	end
 	if not holding then
@@ -210,3 +219,9 @@ Feedback.OnClientEvent:Connect(function(scorer, points)
 	local label = string.format("%s%d", points == 3 and "3PT! +" or "SWISH +", points)
 	showFlash(mine and label or (who .. "  +" .. points), mine and Color3.fromRGB(255, 196, 64) or Color3.fromRGB(180, 200, 220))
 end)
+
+if DunkFeedback then
+	DunkFeedback.OnClientEvent:Connect(function(message)
+		showFlash(message, Color3.fromRGB(255, 196, 64))
+	end)
+end

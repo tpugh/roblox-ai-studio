@@ -118,6 +118,9 @@ local Feedback = remote("Feedback", "RemoteEvent")
 -- Server-to-server: the NBA Street layer invokes this to run a Gamebreaker
 -- dunk. It is a BindableFunction so the caller learns whether the dunk started.
 local DunkCommand = remote("DunkCommand", "BindableFunction")
+-- Player-facing dunk request (V key) and a small text-feedback channel.
+local DunkRemote = remote("Dunk", "RemoteEvent")
+local DunkFeedback = remote("DunkFeedback", "RemoteEvent")
 -- Defense hooks: StreetDefense and the player's C input ask this script to
 -- move the ball around instead of touching the state tables themselves.
 local DefendRemote = remote("Defend", "RemoteEvent")
@@ -585,14 +588,17 @@ end
 
 local function rimAnchors()
 	local list = {}
-	local model = Workspace:FindFirstChild(COURT_MODEL)
-	local anchors = model and model:FindFirstChild("Anchors")
-	if not anchors then
-		return list
-	end
-	for _, part in ipairs(anchors:GetChildren()) do
-		if string.sub(part.Name, 1, 8) == "RimScore" then
-			table.insert(list, part)
+	-- Both the street court and the Santa court host score volumes; a dunk
+	-- should target whichever hoop the player is actually standing near.
+	for _, modelName in ipairs({ COURT_MODEL, "SantaCourt" }) do
+		local model = Workspace:FindFirstChild(modelName)
+		local anchors = model and model:FindFirstChild("Anchors")
+		if anchors then
+			for _, part in ipairs(anchors:GetChildren()) do
+				if string.sub(part.Name, 1, 8) == "RimScore" then
+					table.insert(list, part)
+				end
+			end
 		end
 	end
 	return list
@@ -614,9 +620,9 @@ local function rimCenter(scoreVolume)
 	return scoreVolume.Position + Vector3.new(0, 0.45, 0)
 end
 
-local function dunkBurst(position)
+local function dunkBurst(position, gamebreaker)
 	local holder = Instance.new("Part")
-	holder.Name = "GamebreakerDunkFX"
+	holder.Name = gamebreaker and "GamebreakerDunkFX" or "DunkFX"
 	holder.Size = Vector3.new(0.2, 0.2, 0.2)
 	holder.Transparency = 1
 	holder.CanCollide = false
@@ -625,11 +631,12 @@ local function dunkBurst(position)
 	holder.CFrame = CFrame.new(position)
 	holder.Parent = Workspace
 
+	local tint = gamebreaker and Color3.fromRGB(255, 214, 92) or Color3.fromRGB(232, 244, 255)
 	local sparkle = Instance.new("ParticleEmitter")
 	sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparkle.Color = ColorSequence.new(Color3.fromRGB(255, 214, 92))
+	sparkle.Color = ColorSequence.new(tint)
 	sparkle.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1.8),
+		NumberSequenceKeypoint.new(0, gamebreaker and 1.8 or 1.0),
 		NumberSequenceKeypoint.new(1, 0),
 	})
 	sparkle.Transparency = NumberSequence.new({
@@ -638,24 +645,73 @@ local function dunkBurst(position)
 		NumberSequenceKeypoint.new(1, 1),
 	})
 	sparkle.Lifetime = NumberRange.new(0.4, 0.9)
-	sparkle.Speed = NumberRange.new(10, 26)
+	sparkle.Speed = NumberRange.new(10, gamebreaker and 26 or 16)
 	sparkle.SpreadAngle = Vector2.new(180, 180)
 	sparkle.Rate = 0
 	sparkle.LightEmission = 1
 	sparkle.Parent = holder
 
 	local flash = Instance.new("PointLight")
-	flash.Brightness = 9
-	flash.Range = 26
-	flash.Color = Color3.fromRGB(255, 224, 140)
+	flash.Brightness = gamebreaker and 9 or 3
+	flash.Range = gamebreaker and 26 or 14
+	flash.Color = tint
 	flash.Parent = holder
 
-	sparkle:Emit(70)
+	sparkle:Emit(gamebreaker and 70 or 24)
 	task.delay(1.4, function()
 		if holder.Parent then
 			holder:Destroy()
 		end
 	end)
+end
+
+-- A dunk rattles the ring. Rim and net parts are found by name around the
+-- hoop, so this works for the metal street rims and the generated ones too.
+local shakingRims = setmetatable({}, { __mode = "k" })
+
+local function rimVisualsNear(position)
+	local found = {}
+	local hits = Workspace:GetPartBoundsInBox(CFrame.new(position), Vector3.new(5, 2.5, 5))
+	for _, part in ipairs(hits) do
+		if part:IsA("BasePart") and string.sub(part.Name, 1, 8) ~= "RimScore" then
+			local name = string.lower(part.Name)
+			if string.find(name, "rim", 1, true)
+				or string.find(name, "segment", 1, true)
+				or string.find(name, "net", 1, true) then
+				table.insert(found, part)
+			end
+		end
+	end
+	return found
+end
+
+local function shakeRim(position, strength)
+	for _, part in ipairs(rimVisualsNear(position)) do
+		if not shakingRims[part] then
+			shakingRims[part] = true
+			local isNet = string.find(string.lower(part.Name), "net", 1, true) ~= nil
+			local amplitude = (isNet and 0.09 or 0.16) * strength
+			local base = part.CFrame
+			task.spawn(function()
+				local steps = strength > 1 and 9 or 6
+				for step = 1, steps do
+					if not part.Parent then
+						break
+					end
+					local decay = 1 - (step - 1) / steps
+					local a = amplitude * decay
+					part.CFrame = base
+						* CFrame.new((math.random() * 2 - 1) * a, (math.random() * 2 - 1) * a, (math.random() * 2 - 1) * a)
+						* CFrame.Angles((math.random() * 2 - 1) * a * 0.6, 0, (math.random() * 2 - 1) * a * 0.6)
+					task.wait(0.04)
+				end
+				if part.Parent then
+					part.CFrame = base
+				end
+				shakingRims[part] = nil
+			end)
+		end
+	end
 end
 
 local function tweenPart(part, goal, seconds, style, direction)
@@ -665,7 +721,8 @@ local function tweenPart(part, goal, seconds, style, direction)
 	tween.Completed:Wait()
 end
 
-local function dunkBall(player, scoreVolume)
+local function dunkBall(player, scoreVolume, gamebreaker)
+	gamebreaker = gamebreaker == true
 	if not (player and player.Parent) then
 		return false
 	end
@@ -707,20 +764,53 @@ local function dunkBall(player, scoreVolume)
 		inward = inward.Unit
 	end
 
+	-- The player leaps up to the ring with the ball, so a dunk really does
+	-- touch the rim instead of only flying the ball through the hoop.
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local apexPos = rim + inward * 2.2 + Vector3.new(0, -0.7, 0)
+	local apexRoot = CFrame.lookAt(apexPos, rim)
+
 	-- Cocked above the front of the rim, then straight down through the ring.
 	local gather = CFrame.new(rim + inward * 2.6 + Vector3.new(0, 3.6, 0)) * CFrame.Angles(math.rad(90), 0, 0)
 	local through = CFrame.new(rim + Vector3.new(0, -0.2, 0)) * CFrame.Angles(math.rad(180), 0, 0)
 	local drop = CFrame.new(rim + Vector3.new(0, -3.2, 0)) * CFrame.Angles(math.rad(180), 0, 0)
 
 	task.spawn(function()
+		-- Lift the character in parallel with the ball's gather, hold at the
+		-- rim through the slam, then ease back down to the floor.
+		local baseRoot = root.CFrame
+		local wasAnchored = root.Anchored
+		if humanoid then
+			humanoid.PlatformStand = true
+		end
+		root.Anchored = true
+		task.spawn(function()
+			tweenPart(root, apexRoot, DUNK_GATHER_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			task.wait(DUNK_SLAM_TIME + DUNK_DROP_TIME + 0.12)
+			if root.Parent then
+				tweenPart(root, baseRoot, 0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+				root.Anchored = wasAnchored
+				if humanoid then
+					humanoid.PlatformStand = false
+				end
+			end
+		end)
+
 		ball.CFrame = startCFrame
 		tweenPart(ball, gather, DUNK_GATHER_TIME, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 		if not ball.Parent then
 			return
 		end
 		tweenPart(ball, through, DUNK_SLAM_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-		dunkBurst(rim)
+		dunkBurst(rim, gamebreaker)
+		shakeRim(rim, gamebreaker and 1.9 or 0.6)
 		playSound(ball, "rim", 0.86)
+		if not gamebreaker and player.Parent then
+			-- Gamebreaker pays its own points in the NBA Street layer; a normal
+			-- dunk scores here like any other made basket.
+			player:SetAttribute("Score", (player:GetAttribute("Score") or 0) + 2)
+			Feedback:FireAllClients(player, 2)
+		end
 		if not ball.Parent then
 			return
 		end
@@ -1116,7 +1206,7 @@ ResetRemote.OnServerEvent:Connect(resetBalls)
 
 -- The NBA Street layer calls this for a Gamebreaker. A missing ball returns
 -- false instead of throwing, so the caller can prompt the player.
-DunkCommand.OnInvoke = function(player, scoreVolume)
+DunkCommand.OnInvoke = function(player, scoreVolume, gamebreaker)
 	if not (player and player:IsA("Player")) then
 		return false
 	end
@@ -1128,8 +1218,37 @@ DunkCommand.OnInvoke = function(player, scoreVolume)
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		scoreVolume = root and nearestRim(root.Position) or nil
 	end
-	return dunkBall(player, scoreVolume)
+	return dunkBall(player, scoreVolume, gamebreaker == true)
 end
+
+-- Regular dunk: the V key asks for the same scripted slam, scored as a normal
+-- two-point basket. The caller supplies no hoop, so the nearest one is used.
+DunkRemote.OnServerEvent:Connect(function(player)
+	if not (player and player.Parent) then
+		return
+	end
+	if player:GetAttribute("HoldingBall") ~= true and player:GetAttribute("Dribbling") ~= true then
+		DunkFeedback:FireClient(player, "Grab the ball first!")
+		return
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return
+	end
+	local scoreVolume = nearestRim(root.Position)
+	if not scoreVolume then
+		DunkFeedback:FireClient(player, "No hoop in range")
+		return
+	end
+	if (scoreVolume.Position - root.Position).Magnitude > 55 then
+		DunkFeedback:FireClient(player, "Get closer to the hoop to dunk!")
+		return
+	end
+	if not dunkBall(player, scoreVolume, false) then
+		DunkFeedback:FireClient(player, "Can't dunk right now")
+	end
+end)
 
 -- Keep prompts and rim hooks alive across rebuilds, and tidy dead balls.
 task.spawn(function()

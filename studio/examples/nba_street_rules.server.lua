@@ -208,7 +208,7 @@ GamebreakerRemote.OnServerEvent:Connect(function(player)
 	-- A Gamebreaker is a dunk, so it needs the ball. BallService flies the ball
 	-- through the rim and returns false when the player has nothing to dunk.
 	local invoked, started = pcall(function()
-		return DunkCommand:Invoke(player)
+		return DunkCommand:Invoke(player, nil, true)
 	end)
 	if not invoked or started ~= true then
 		StreetEvent:FireClient(player, "needball")
