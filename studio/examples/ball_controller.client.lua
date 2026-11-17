@@ -3,10 +3,12 @@
 --
 -- The client sends intent only; BallService (ServerScriptService) validates and
 -- owns every ball. Keys:
---   E        pick up (ProximityPrompt on the ball)
+--   E        pick up (ProximityPrompt on the ball, or walk over it)
 --   F        hold to charge, release to shoot
+--   V        dunk
 --   Q        dribble toggle (walking dribbles automatically; Q catches)
 --   R        reset both balls to their build spot
+--   C        block / steal
 --
 -- Install as a LocalScript under StarterPlayer/StarterPlayerScripts.
 
@@ -23,8 +25,11 @@ local DribbleRemote = remotes:WaitForChild("Dribble")
 local ResetRemote = remotes:WaitForChild("ResetBalls")
 local DefendRemote = remotes:WaitForChild("Defend")
 local Feedback = remotes:WaitForChild("Feedback")
+local cocoaRemotes = ReplicatedStorage:WaitForChild("CocoaRemotes", 10)
+local WatchGame = cocoaRemotes and cocoaRemotes:FindFirstChild("WatchGame")
 local DunkRemote = remotes:WaitForChild("Dunk", 10)
 local DunkFeedback = remotes:WaitForChild("DunkFeedback", 10)
+local Candy = require(ReplicatedStorage:WaitForChild("CandyUI", 10))
 
 local CHARGE_SECONDS = 1.1
 
@@ -36,67 +41,47 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = player:WaitForChild("PlayerGui")
 
-local hint = Instance.new("TextLabel")
-hint.Name = "Hints"
-hint.AnchorPoint = Vector2.new(0.5, 1)
-hint.Position = UDim2.new(0.5, 0, 1, -18)
-hint.Size = UDim2.new(0, 720, 0, 24)
-hint.BackgroundTransparency = 1
-hint.Font = Enum.Font.GothamMedium
-hint.TextSize = 15
-hint.TextColor3 = Color3.fromRGB(235, 235, 240)
-hint.TextStrokeTransparency = 0.6
-hint.Text = "E  pick up   ·   F  shoot   ·   V  dunk   ·   Q  dribble   ·   C  block/steal   ·   R  reset"
-hint.Parent = gui
+local walletPanel = Candy.bubble(gui, "WalletBubble", UDim2.fromOffset(360, 60),
+	UDim2.new(1, -16, 0, 14), Vector2.new(1, 0), Candy.RED)
+local wallet = Candy.text(walletPanel, "Wallet", "COCOA BUCKS  0", UDim2.fromScale(0.92, 0.78), 28, Candy.DARK)
 
-local score = Instance.new("TextLabel")
-score.Name = "Score"
-score.AnchorPoint = Vector2.new(0.5, 0)
-score.Position = UDim2.new(0.5, 0, 0, 14)
-score.Size = UDim2.new(0, 220, 0, 30)
-score.BackgroundTransparency = 1
-score.Font = Enum.Font.GothamBold
-score.TextSize = 22
-score.TextColor3 = Color3.fromRGB(255, 255, 255)
-score.TextStrokeTransparency = 0.5
-score.Text = "0 pts"
-score.Parent = gui
+local scorePanel = Candy.bubble(gui, "ScoreBubble", UDim2.fromOffset(320, 76),
+	UDim2.new(0.5, 0, 0, 14), Vector2.new(0.5, 0), Candy.PINK)
+local score = Candy.text(scorePanel, "Score", "0 pts", UDim2.fromScale(0.92, 0.8), 52, Candy.RED)
 
-local flash = Instance.new("TextLabel")
-flash.Name = "Flash"
-flash.AnchorPoint = Vector2.new(0.5, 0.5)
-flash.Position = UDim2.new(0.5, 0, 0.35, 0)
-flash.Size = UDim2.new(0, 320, 0, 56)
-flash.BackgroundTransparency = 1
-flash.Font = Enum.Font.GothamBlack
-flash.TextSize = 44
-flash.TextColor3 = Color3.fromRGB(255, 196, 64)
-flash.TextStrokeTransparency = 0.4
+local hintPanel = Candy.bubble(gui, "HintBubble", UDim2.fromOffset(1120, 62),
+	UDim2.new(0.5, 0, 1, -16), Vector2.new(0.5, 1), Candy.MINT)
+local hint = Candy.text(hintPanel, "Hints",
+	"E  pick up   ·   F  shoot   ·   V  dunk   ·   Q  dribble   ·   C  block/steal   ·   R  reset",
+	UDim2.fromScale(0.96, 0.78), 26, Candy.DARK)
+
+local flashPanel = Candy.bubble(gui, "FlashBubble", UDim2.fromOffset(840, 112),
+	UDim2.new(0.5, 0, 0.34, 0), Vector2.new(0.5, 0.5), Candy.GOLD)
+local flash = Candy.text(flashPanel, "Flash", "", UDim2.fromScale(0.94, 0.78), 64, Candy.RED)
 flash.TextTransparency = 1
-flash.Text = ""
-flash.Parent = gui
+Candy.show(flashPanel, false)
 
+local chargePanel = Candy.bubble(gui, "ChargeBubble", UDim2.fromOffset(340, 30),
+	UDim2.new(0.5, 0, 1, -86), Vector2.new(0.5, 1), Candy.RED)
 local chargeBack = Instance.new("Frame")
 chargeBack.Name = "ChargeTrack"
-chargeBack.AnchorPoint = Vector2.new(0.5, 1)
-chargeBack.Position = UDim2.new(0.5, 0, 1, -48)
-chargeBack.Size = UDim2.new(0, 200, 0, 7)
-chargeBack.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+chargeBack.AnchorPoint = Vector2.new(0.5, 0.5)
+chargeBack.Position = UDim2.fromScale(0.5, 0.5)
+chargeBack.Size = UDim2.new(1, -8, 1, -8)
+chargeBack.BackgroundColor3 = Color3.fromRGB(70, 30, 42)
 chargeBack.BackgroundTransparency = 0.35
 chargeBack.BorderSizePixel = 0
 chargeBack.Visible = false
-chargeBack.Parent = gui
+chargeBack.Parent = chargePanel
+Candy.corner(chargeBack, 8)
 
 local chargeFill = Instance.new("Frame")
 chargeFill.Name = "Fill"
-chargeFill.Size = UDim2.new(0, 0, 1, 0)
-chargeFill.BackgroundColor3 = Color3.fromRGB(255, 140, 40)
+chargeFill.Size = UDim2.fromScale(0, 1)
+chargeFill.BackgroundColor3 = Candy.RED
 chargeFill.BorderSizePixel = 0
 chargeFill.Parent = chargeBack
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(1, 0)
-corner.Parent = chargeBack
+Candy.corner(chargeFill, 8)
 
 -- ------------------------------------------------------------------ state
 
@@ -126,7 +111,7 @@ player:GetAttributeChangedSignal("HoldingBall"):Connect(function()
 		charging = false
 		charge = 0
 		chargeBack.Visible = false
-		chargeFill.Size = UDim2.new(0, 0, 1, 0)
+		chargeFill.Size = UDim2.fromScale(0, 1)
 		player:SetAttribute("Charging", false)
 	end
 end)
@@ -134,6 +119,12 @@ player:GetAttributeChangedSignal("Score"):Connect(refreshScore)
 player:GetAttributeChangedSignal("Dribbling"):Connect(refreshHolding)
 refreshHolding()
 refreshScore()
+
+local function refreshWallet()
+	wallet.Text = "COCOA BUCKS  " .. tostring(player:GetAttribute("CocoaBucks") or 0)
+end
+refreshWallet()
+player:GetAttributeChangedSignal("CocoaBucks"):Connect(refreshWallet)
 
 -- ------------------------------------------------------------------ input
 
@@ -178,7 +169,7 @@ UserInputService.InputEnded:Connect(function(input)
 		local direction = camera and (camera.CFrame.LookVector + Vector3.new(0, 0.15, 0)) or Vector3.new(0, 0.2, -1)
 		ThrowRemote:FireServer(direction, math.clamp(charge, 0, 1))
 		charge = 0
-		chargeFill.Size = UDim2.new(0, 0, 1, 0)
+		chargeFill.Size = UDim2.fromScale(0, 1)
 	end
 end)
 
@@ -187,7 +178,7 @@ RunService.RenderStepped:Connect(function(dt)
 		return
 	end
 	charge = math.min(1, charge + dt / CHARGE_SECONDS)
-	chargeFill.Size = UDim2.new(charge, 0, 1, 0)
+	chargeFill.Size = UDim2.fromScale(charge, 1)
 end)
 
 -- --------------------------------------------------------------- feedback
@@ -199,17 +190,18 @@ local function showFlash(text, color)
 	flash.Text = text
 	flash.TextColor3 = color
 	flash.TextTransparency = 0
-	flash.Position = UDim2.new(0.5, 0, 0.35, 0)
+	Candy.show(flashPanel, true)
 	task.spawn(function()
 		for step = 1, 30 do
 			if token ~= flashToken then
+				Candy.show(flashPanel, false)
 				return
 			end
 			local alpha = step / 30
 			flash.TextTransparency = alpha
-			flash.Position = UDim2.new(0.5, 0, 0.35 - 0.06 * alpha, 0)
 			task.wait(0.03)
 		end
+		Candy.show(flashPanel, false)
 	end)
 end
 
@@ -217,11 +209,36 @@ Feedback.OnClientEvent:Connect(function(scorer, points)
 	local who = scorer and scorer.Name or "Someone"
 	local mine = scorer == player
 	local label = string.format("%s%d", points == 3 and "3PT! +" or "SWISH +", points)
-	showFlash(mine and label or (who .. "  +" .. points), mine and Color3.fromRGB(255, 196, 64) or Color3.fromRGB(180, 200, 220))
+	showFlash(mine and label or (who .. "  +" .. points), mine and Candy.GOLD or Color3.fromRGB(180, 200, 220))
 end)
 
 if DunkFeedback then
 	DunkFeedback.OnClientEvent:Connect(function(message)
-		showFlash(message, Color3.fromRGB(255, 196, 64))
+		showFlash(message, Candy.GOLD)
 	end)
+end
+
+-- Spectator deck: hold a scriptable view of the street court for a while.
+local watching = false
+if WatchGame then
+WatchGame.OnClientEvent:Connect(function()
+	if watching then
+		return
+	end
+	watching = true
+	local camera = Workspace.CurrentCamera
+	if not camera then
+		watching = false
+		return
+	end
+	local previousType = camera.CameraType
+	local previousCFrame = camera.CFrame
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.CFrame = CFrame.new(92, 34, 62) * CFrame.Angles(math.rad(-24), math.rad(0), 0)
+	task.delay(12, function()
+		camera.CameraType = previousType
+		camera.CFrame = previousCFrame
+		watching = false
+	end)
+end)
 end

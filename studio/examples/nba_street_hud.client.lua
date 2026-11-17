@@ -18,6 +18,7 @@ local remotes = ReplicatedStorage:WaitForChild("BallRemotes")
 local TrickRemote = remotes:WaitForChild("Trick")
 local GamebreakerRemote = remotes:WaitForChild("Gamebreaker")
 local StreetEvent = remotes:WaitForChild("StreetEvent")
+local Candy = require(ReplicatedStorage:WaitForChild("CandyUI", 10))
 
 local BASE_SPEED = 16
 local TURBO_SPEED = 26
@@ -31,82 +32,48 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = player:WaitForChild("PlayerGui")
 
-local board = Instance.new("TextLabel")
-board.Name = "Scoreboard"
-board.AnchorPoint = Vector2.new(0, 0)
-board.Position = UDim2.new(0, 22, 0, 18)
-board.Size = UDim2.new(0, 300, 0, 46)
-board.BackgroundTransparency = 1
-board.Font = Enum.Font.GothamBlack
-board.TextSize = 20
-board.TextXAlignment = Enum.TextXAlignment.Left
-board.TextColor3 = Color3.fromRGB(255, 255, 255)
-board.TextStrokeTransparency = 0.5
-board.Text = "STREET · TO 21\nYOU 0   ·   0 RIVAL"
-board.Parent = gui
+local boardPanel = Candy.bubble(gui, "ScoreboardBubble", UDim2.fromOffset(480, 104),
+	UDim2.new(0, 18, 0, 16), Vector2.new(0, 0), Candy.RED)
+local board = Candy.text(boardPanel, "Scoreboard", "STREET · TO 21\nYOU 0   ·   0 RIVAL",
+	UDim2.fromScale(0.92, 0.82), 32, Candy.DARK, Enum.TextXAlignment.Center)
 
+local meterPanel = Candy.bubble(gui, "BreakerBubble", UDim2.fromOffset(400, 46),
+	UDim2.new(0, 18, 1, -22), Vector2.new(0, 1), Candy.MINT)
 local meterBack = Instance.new("Frame")
 meterBack.Name = "BreakerTrack"
-meterBack.AnchorPoint = Vector2.new(0, 1)
-meterBack.Position = UDim2.new(0, 22, 1, -54)
-meterBack.Size = UDim2.new(0, 240, 0, 12)
-meterBack.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+meterBack.AnchorPoint = Vector2.new(0.5, 0.5)
+meterBack.Position = UDim2.fromScale(0.5, 0.5)
+meterBack.Size = UDim2.new(1, -10, 0, 18)
+meterBack.BackgroundColor3 = Color3.fromRGB(70, 30, 42)
 meterBack.BackgroundTransparency = 0.3
 meterBack.BorderSizePixel = 0
-meterBack.Parent = gui
+meterBack.Parent = meterPanel
+Candy.corner(meterBack, 9)
 
 local meterFill = Instance.new("Frame")
 meterFill.Name = "Fill"
-meterFill.Size = UDim2.new(0, 0, 1, 0)
+meterFill.Size = UDim2.fromScale(0, 1)
 meterFill.BackgroundColor3 = Color3.fromRGB(120, 220, 255)
 meterFill.BorderSizePixel = 0
 meterFill.Parent = meterBack
+Candy.corner(meterFill, 9)
 
-local meterCorner = Instance.new("UICorner")
-meterCorner.CornerRadius = UDim.new(1, 0)
-meterCorner.Parent = meterBack
+local controlPanel = Candy.bubble(gui, "ControlsBubble", UDim2.fromOffset(860, 50),
+	UDim2.new(0, 18, 1, -76), Vector2.new(0, 1), Candy.PINK)
+local meterLabel = Candy.text(controlPanel, "Label", "X  trick   ·   G  Gamebreaker   ·   Shift  turbo   ·   V  dunk",
+	UDim2.fromScale(0.94, 0.8), 22, Candy.DARK)
 
-local meterLabel = Instance.new("TextLabel")
-meterLabel.Name = "Label"
-meterLabel.AnchorPoint = Vector2.new(0, 1)
-meterLabel.Position = UDim2.new(0, 22, 1, -70)
-meterLabel.Size = UDim2.new(0, 320, 0, 18)
-meterLabel.BackgroundTransparency = 1
-meterLabel.Font = Enum.Font.GothamBold
-meterLabel.TextSize = 13
-meterLabel.TextXAlignment = Enum.TextXAlignment.Left
-meterLabel.TextColor3 = Color3.fromRGB(170, 200, 220)
-meterLabel.TextStrokeTransparency = 0.7
-meterLabel.Text = "GAMEBREAKER  ·  X trick   G dunk   Shift turbo"
-meterLabel.Parent = gui
-
-local chainLabel = Instance.new("TextLabel")
-chainLabel.Name = "Chain"
-chainLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-chainLabel.Position = UDim2.new(0.5, 0, 0.6, 0)
-chainLabel.Size = UDim2.new(0, 420, 0, 40)
-chainLabel.BackgroundTransparency = 1
-chainLabel.Font = Enum.Font.GothamBlack
-chainLabel.TextSize = 30
-chainLabel.TextColor3 = Color3.fromRGB(120, 220, 255)
-chainLabel.TextStrokeTransparency = 0.4
+local chainPanel = Candy.bubble(gui, "ChainBubble", UDim2.fromOffset(760, 88),
+	UDim2.new(0.5, 0, 0.62, 0), Vector2.new(0.5, 0.5), Candy.MINT)
+local chainLabel = Candy.text(chainPanel, "Chain", "", UDim2.fromScale(0.94, 0.8), 50, Candy.RED)
 chainLabel.TextTransparency = 1
-chainLabel.Text = ""
-chainLabel.Parent = gui
+Candy.show(chainPanel, false)
 
-local flash = Instance.new("TextLabel")
-flash.Name = "BreakFlash"
-flash.AnchorPoint = Vector2.new(0.5, 0.5)
-flash.Position = UDim2.new(0.5, 0, 0.32, 0)
-flash.Size = UDim2.new(0, 760, 0, 90)
-flash.BackgroundTransparency = 1
-flash.Font = Enum.Font.GothamBlack
-flash.TextSize = 54
-flash.TextColor3 = Color3.fromRGB(255, 220, 90)
-flash.TextStrokeTransparency = 0.35
+local flashPanel = Candy.bubble(gui, "FlashBubble", UDim2.fromOffset(940, 128),
+	UDim2.new(0.5, 0, 0.32, 0), Vector2.new(0.5, 0.5), Candy.GOLD)
+local flash = Candy.text(flashPanel, "BreakFlash", "", UDim2.fromScale(0.94, 0.8), 72, Candy.RED)
 flash.TextTransparency = 1
-flash.Text = ""
-flash.Parent = gui
+Candy.show(flashPanel, false)
 
 -- ------------------------------------------------------------------ state
 
@@ -133,14 +100,17 @@ local function showFlash(text, color, size)
 	flash.TextColor3 = color
 	flash.TextSize = size or 54
 	flash.TextTransparency = 0
+	Candy.show(flashPanel, true)
 	task.spawn(function()
 		for step = 1, 36 do
 			if token ~= flashToken then
+				Candy.show(flashPanel, false)
 				return
 			end
 			flash.TextTransparency = step / 36
 			task.wait(0.03)
 		end
+		Candy.show(flashPanel, false)
 	end)
 end
 
@@ -151,30 +121,33 @@ local function showChain(count)
 	local names = { "CROSSOVER", "SPIN", "BEHIND THE BACK", "ANKLE BREAKER", "STYLE!" }
 	chainLabel.Text = string.format("x%d  %s", count, names[math.min(count, #names)])
 	chainLabel.TextTransparency = 0
-	chainLabel.Position = UDim2.new(0.5, 0, 0.6, 0)
+	Candy.show(chainPanel, true)
+	chainLabel.Position = UDim2.fromScale(0.5, 0.55)
 	task.spawn(function()
 		for step = 1, 40 do
 			if token ~= chainToken then
+				Candy.show(chainPanel, false)
 				return
 			end
 			chainLabel.TextTransparency = step / 40
-			chainLabel.Position = UDim2.new(0.5, 0, 0.6 - 0.05 * (step / 40), 0)
+			chainLabel.Position = UDim2.fromScale(0.5, 0.55 - 0.12 * (step / 40))
 			task.wait(0.03)
 		end
+		Candy.show(chainPanel, false)
 	end)
 end
 
 local function refreshMeter()
 	local value = player:GetAttribute("Gamebreaker") or 0
-	meterFill.Size = UDim2.new(math.clamp(value / 100, 0, 1), 0, 1, 0)
+	meterFill.Size = UDim2.fromScale(math.clamp(value / 100, 0, 1), 1)
 	if value >= 100 then
-		meterFill.BackgroundColor3 = Color3.fromRGB(255, 220, 90)
-		meterLabel.Text = "GAMEBREAKER READY  ·  press G to dunk"
-		meterLabel.TextColor3 = Color3.fromRGB(255, 220, 90)
+		meterFill.BackgroundColor3 = Candy.GOLD
+		meterLabel.Text = "GAMEBREAKER READY!  ·  press G to dunk"
+		meterLabel.TextColor3 = Candy.RED
 	else
-		meterFill.BackgroundColor3 = Color3.fromRGB(120, 220, 255)
-		meterLabel.Text = string.format("GAMEBREAKER  %d%%  ·  X trick", math.floor(value + 0.5))
-		meterLabel.TextColor3 = Color3.fromRGB(170, 200, 220)
+		meterFill.BackgroundColor3 = Candy.MINT
+		meterLabel.Text = string.format("GAMEBREAKER  %d%%  ·  X  trick   G  dunk   Shift  turbo   V  dunk", math.floor(value + 0.5))
+		meterLabel.TextColor3 = Candy.DARK
 	end
 end
 
@@ -200,18 +173,18 @@ StreetEvent.OnClientEvent:Connect(function(kind, a, b, c)
 	elseif kind == "trick" then
 		showChain(a)
 	elseif kind == "gamebreaker" then
-		showFlash(a == player and "GAME BREAKER DUNK!" or (a.Name .. " GAME BREAKER!"), Color3.fromRGB(255, 220, 90), 58)
+		showFlash(a == player and "GAME BREAKER DUNK!" or (a.Name .. " GAME BREAKER!"), Candy.GOLD, 72)
 	elseif kind == "needball" then
-		showFlash("GAME BREAKER NEEDS THE BALL", Color3.fromRGB(255, 150, 90), 30)
+		showFlash("GAME BREAKER NEEDS THE BALL", Candy.PINK, 46)
 	elseif kind == "robbed" then
-		showFlash(string.format("-%d  ROBBED BY %s", b, a.Name), Color3.fromRGB(255, 90, 90), 34)
+		showFlash(string.format("-%d  ROBBED BY %s", b, a.Name), Candy.RED, 54)
 	elseif kind == "award" then
 		local who = a
 		if who == player then
-			showFlash("+" .. b .. " STREET", Color3.fromRGB(120, 255, 170), 44)
+			showFlash("+" .. b .. " STREET", Candy.MINT, 66)
 		end
 	elseif kind == "matchover" then
-		showFlash(a == player and "MATCH WON!" or (a.Name .. " WINS"), Color3.fromRGB(120, 220, 255), 60)
+		showFlash(a == player and "MATCH WON!" or (a.Name .. " WINS"), Candy.MINT, 74)
 	end
 end)
 
