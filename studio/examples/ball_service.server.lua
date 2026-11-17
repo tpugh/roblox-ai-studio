@@ -29,6 +29,8 @@ local SCORE_COOLDOWN = 0.8
 local SCORE_MAX_RISE = 0 -- a descending ball in the ring scores; a rising one clanks
 local THREE_POINT_DISTANCE = 23
 local CLANK_COOLDOWN = 0.22 -- a rim rattle touches several times; sound it once
+local BOUNCE_MIN_SPEED = 8 -- studs/s downward before a floor hit is worth a thud
+local BOUNCE_COOLDOWN = 0.14 -- a settling ball touches repeatedly
 
 -- Dribble: kinematic bounce loop. It starts on its own as soon as you walk with
 -- the ball, and Q toggles it while standing still. Kinematic (anchored) instead
@@ -125,6 +127,8 @@ local mode = {} -- [ball] = "free" | "held" | "dribble"
 local lockout = {} -- [ball] = os.clock() until which grabbing is refused
 local lastScore = {} -- [ball] = os.clock()
 local lastClank = {} -- [ball] = os.clock(), rim hits that did not drop
+local lastBounce = {} -- [ball] = os.clock(), floor hits of a loose ball
+local bounceHook = {} -- [ball] = true, floor-bounce listener installed
 local shotOrigin = {} -- [ball] = Vector3, where the current shot was released
 local dunkBusy = {} -- [ball] = true while the scripted dunk owns it
 local dunkNoScore = {} -- [ball] = os.clock() until which the rim score is muted
@@ -720,6 +724,38 @@ local function dunkBall(player, scoreVolume)
 	return true
 end
 
+-- A loose ball that lands should sound like a ball, not a rock: misses, passes
+-- and rebounds all bounce. Dribbling is skipped because its own loop already
+-- accents the floor contact.
+local function watchBounce(ball)
+	if bounceHook[ball] then
+		return
+	end
+	bounceHook[ball] = true
+	ball.Touched:Connect(function(hit)
+		if not hit:IsA("BasePart") then
+			return
+		end
+		if mode[ball] == "held" or mode[ball] == "dribble" then
+			return
+		end
+		if ball.AssemblyLinearVelocity.Y > -BOUNCE_MIN_SPEED then
+			return -- too slow to be a bounce worth hearing
+		end
+		-- Contact near the ball's own height is a rim, board or player; a floor
+		-- contact sits roughly a ball radius below it.
+		if hit.Position.Y > ball.Position.Y - 0.35 then
+			return
+		end
+		local now = os.clock()
+		if lastBounce[ball] and now - lastBounce[ball] < BOUNCE_COOLDOWN then
+			return
+		end
+		lastBounce[ball] = now
+		playSound(ball, "bounce", 0.9 + math.random() * 0.14)
+	end)
+end
+
 -- ----------------------------------------------------------------- score
 
 local function watchRim(scoreVolume)
@@ -877,6 +913,7 @@ task.spawn(function()
 	while true do
 		for _, ball in ipairs(balls()) do
 			ensurePrompt(ball)
+			watchBounce(ball)
 			if held[ball] then
 				setPromptEnabled(ball, false)
 			end
@@ -902,6 +939,8 @@ task.spawn(function()
 				lockout[ball] = nil
 				lastScore[ball] = nil
 				lastClank[ball] = nil
+				lastBounce[ball] = nil
+				bounceHook[ball] = nil
 				dribbling[ball] = nil
 			end
 		end
