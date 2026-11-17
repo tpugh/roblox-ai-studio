@@ -22,6 +22,7 @@ local Workspace = game:GetService("Workspace")
 local COURT_MODEL = "StreetBasketballCourt"
 local COURT_SURFACE = 1.0
 local GRAB_DISTANCE = 9
+local AUTO_GRAB_RADIUS = 3.2 -- walking over a loose ball picks it up
 local THROW_SPEED_MIN, THROW_SPEED_MAX = 50, 105
 local GRAB_LOCKOUT = 0.35 -- can't instantly re-grab a ball you just let go
 local THROW_COLLIDE_DELAY = 0.3
@@ -462,7 +463,43 @@ local function updateDribbles(dt)
 	end
 end
 
-RunService.Heartbeat:Connect(updateDribbles)
+-- Walk-over pickup: a loose ball resting near a player is collected without
+-- needing E. The same grab() gate is used, so a ball that is held, dribbled,
+-- dunked, NPC-carried or still on lockout can never be taken this way.
+local function autoGrab()
+	local now = os.clock()
+	for _, ball in ipairs(balls()) do
+		if (mode[ball] or "free") ~= "free" or dunkBusy[ball] or (lockout[ball] or 0) > now then
+			continue
+		end
+		if ball.AssemblyLinearVelocity.Magnitude > 14 then
+			continue -- don't snatch a live pass or shot out of the air
+		end
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player:GetAttribute("HoldingBall") == true or dribbledBallOf(player) then
+				continue
+			end
+			local character = player.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if not (root and humanoid) or humanoid.Health <= 0 then
+				continue
+			end
+			local dx = ball.Position.X - root.Position.X
+			local dz = ball.Position.Z - root.Position.Z
+			if dx * dx + dz * dz <= AUTO_GRAB_RADIUS * AUTO_GRAB_RADIUS
+				and ball.Position.Y < root.Position.Y + 0.6 then
+				grab(player, ball)
+				break
+			end
+		end
+	end
+end
+
+RunService.Heartbeat:Connect(function(dt)
+	updateDribbles(dt)
+	autoGrab()
+end)
 
 -- --------------------------------------------------------------- ballistics
 
