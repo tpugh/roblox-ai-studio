@@ -1,12 +1,12 @@
 --!nonstrict
 -- Athletic rig motion for the Hoops Santas. Their generated rigs are held
--- together by BallSocketConstraints, so directly rotating a limb is undone by
--- physics on the next step. What does work is the Animator's tracks plus a
--- small whole-model pose applied through PivotTo every frame.
+-- together by BallSocketConstraints, so trying to pose a limb or nudge the
+-- whole model every frame fights the Humanoid and makes them hop in place.
+-- What works reliably is the Animator's own tracks, cross-faded by real
+-- movement, plus a short visual arc when a defender goes for a steal.
 --
 -- attach(model) returns a small state object; swipe(state, direction) makes
--- that character lunge at the ball. Call attach once per Santa from any server
--- script -- StreetDefense and SantaGame both use it.
+-- that character flash a swipe arc. Both StreetDefense and SantaGame use it.
 
 local RunService = game:GetService("RunService")
 
@@ -52,16 +52,11 @@ function module.attach(model)
 		walk = loadTrack(animator, WALK_ID),
 		idle = loadTrack(animator, IDLE_ID),
 		moving = false,
-		baseHip = humanoid.HipHeight,
 		lastPosition = root.Position,
-		lastOffset = CFrame.identity,
-		swipeUntil = 0,
-		swipeDir = Vector3.new(0, 0, 1),
 	}, module)
 
-	-- Both tracks are started once and cross-faded by weight; repeatedly
-	-- calling Play/Stop on these constraint rigs leaves stale duplicate tracks.
-	-- MoveDirection is unreliable here, so movement uses actual displacement.
+	-- Both tracks are started once and cross-faded by weight. MoveDirection is
+	-- unreliable on these rigs, so movement uses actual displacement.
 	if state.idle then
 		state.idle:Play()
 	end
@@ -76,49 +71,21 @@ function module.attach(model)
 		if now < tick then
 			return
 		end
-		tick = now + 1 / 30
+		tick = now + 0.15
 
 		local position = state.root.Position
-		local speed = (Vector3.new(position.X, 0, position.Z) - Vector3.new(state.lastPosition.X, 0, state.lastPosition.Z)).Magnitude / 0.033
+		local moved = Vector3.new(position.X - state.lastPosition.X, 0, position.Z - state.lastPosition.Z).Magnitude
 		state.lastPosition = position
-		local moving = speed > 2.5
+		local moving = moved > 0.2
 		if moving ~= state.moving then
 			state.moving = moving
 			if state.walk then
-				state.walk:AdjustWeight(moving and 1 or 0, 0.15)
+				state.walk:AdjustWeight(moving and 1 or 0, 0.18)
 			end
 			if state.idle then
-				state.idle:AdjustWeight(moving and 0 or 1, 0.15)
+				state.idle:AdjustWeight(moving and 0 or 1, 0.18)
 			end
 		end
-
-		-- Strip off last frame's pose so the Humanoid's own movement isn't
-		-- overwritten, then apply a fresh crouch / run lean / lunge.
-		local current = state.model:GetPivot()
-		local natural = current * state.lastOffset:Inverse()
-		local crouch = moving and 0.25 or 0.5
-		-- HipHeight actually compresses the leg rig, unlike rotating a limb,
-		-- which the BallSocketConstraints undo on the next physics step.
-		humanoid.HipHeight = state.baseHip - crouch
-		local lean = moving and 13 or 8
-		local bob = math.sin(now * (moving and 11 or 2.4)) * (moving and 0.16 or 0.06)
-		local forward = 0
-		local yaw = 0
-
-		if now < state.swipeUntil then
-			local progress = 1 - (state.swipeUntil - now) / 0.45
-			forward = math.sin(progress * math.pi) * 1.7
-			lean = lean + 16
-			local dir = state.swipeDir
-			if dir.Magnitude > 0.01 then
-				yaw = math.deg(math.atan2(dir.X, -dir.Z))
-			end
-		end
-
-		local offset = CFrame.new(0, bob - crouch, -forward)
-			* CFrame.Angles(math.rad(-lean), math.rad(yaw), 0)
-		state.model:PivotTo(natural * offset)
-		state.lastOffset = offset
 	end)
 
 	return state
@@ -128,13 +95,11 @@ function module.swipe(state, direction)
 	if not state then
 		return
 	end
-	state.swipeUntil = os.clock() + 0.45
 	local dir = direction and Vector3.new(direction.X, 0, direction.Z) or state.root.CFrame.LookVector
 	if dir.Magnitude < 0.01 then
 		dir = state.root.CFrame.LookVector
 	end
 	dir = dir.Unit
-	state.swipeDir = dir
 
 	-- A brief pale arc from the lead hand reads as the swipe even though the
 	-- constraint rig can't hold a manually posed arm.
