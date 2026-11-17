@@ -21,6 +21,7 @@ local remotes = ReplicatedStorage:WaitForChild("BallRemotes")
 local ThrowRemote = remotes:WaitForChild("Throw")
 local DribbleRemote = remotes:WaitForChild("Dribble")
 local ResetRemote = remotes:WaitForChild("ResetBalls")
+local DefendRemote = remotes:WaitForChild("Defend")
 local Feedback = remotes:WaitForChild("Feedback")
 
 local CHARGE_SECONDS = 1.1
@@ -43,7 +44,7 @@ hint.Font = Enum.Font.GothamMedium
 hint.TextSize = 15
 hint.TextColor3 = Color3.fromRGB(235, 235, 240)
 hint.TextStrokeTransparency = 0.6
-hint.Text = "E  pick up   ·   walk to dribble   ·   Q  dribble/catch   ·   hold F  shoot   ·   R  reset"
+hint.Text = "E  pick up   ·   walk to dribble   ·   Q  dribble/catch   ·   hold F  shoot   ·   C  block/steal   ·   R  reset"
 hint.Parent = gui
 
 local score = Instance.new("TextLabel")
@@ -105,11 +106,11 @@ local function refreshHolding()
 	holding = player:GetAttribute("HoldingBall") == true
 	local dribbling = player:GetAttribute("Dribbling") == true
 	if dribbling then
-		hint.Text = "hold F  shoot   ·   walk to keep dribbling   ·   Q  catch   ·   R  reset"
+		hint.Text = "hold F  shoot   ·   walk to keep dribbling   ·   Q  catch   ·   C  block/steal   ·   R  reset"
 	elseif holding then
-		hint.Text = "walk to dribble   ·   hold F  shoot   ·   Q  dribble   ·   R  reset"
+		hint.Text = "walk to dribble   ·   hold F  shoot   ·   Q  dribble   ·   C  block/steal   ·   R  reset"
 	else
-		hint.Text = "E  pick up   ·   walk to dribble   ·   Q  dribble/catch   ·   hold F  shoot   ·   R  reset"
+		hint.Text = "E  pick up   ·   walk to dribble   ·   Q  dribble/catch   ·   hold F  shoot   ·   C  block/steal   ·   R  reset"
 	end
 end
 
@@ -140,6 +141,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 	if input.KeyCode == Enum.KeyCode.R then
 		ResetRemote:FireServer()
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.C then
+		DefendRemote:FireServer()
 		return
 	end
 	if not holding then

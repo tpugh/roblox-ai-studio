@@ -94,6 +94,7 @@ for _, model in ipairs(roster:GetChildren()) do
 				lane = (model:GetAttribute("Number") or 1) % 2 == 1 and -1 or 1,
 				spread = 6.5 + ((model:GetAttribute("Number") or 1) % 2) * 2.5,
 				moving = nil,
+				stealReady = 0,
 			})
 		end
 	end
@@ -231,7 +232,15 @@ local function release(entry)
 	local seconds = 0.42 + distance * 0.016
 	local vertical = (delta.Y + 0.5 * gravity * seconds * seconds) / seconds
 	local speed = distance / seconds
-	local bend = math.rad((math.random() * 2 - 1) * entry.spread)
+	-- A defender in the shooter's face muddies the release.
+	local spread = entry.spread
+	for _, other in ipairs(players) do
+		if other.team ~= entry.team and (flat(other.root.Position) - flat(entry.root.Position)).Magnitude < 5.5 then
+			spread = spread * 1.8
+			break
+		end
+	end
+	local bend = math.rad((math.random() * 2 - 1) * spread)
 	local aim = CFrame.fromAxisAngle(Vector3.yAxis, bend) * horizontal.Unit
 
 	ball.Anchored = false
@@ -372,6 +381,23 @@ task.spawn(function()
 			if not entry or not entry.root.Parent then
 				carrier = nil
 				phase = "loose"
+				continue
+			end
+			-- A defender camping on the handler can strip the ball. The
+			-- cooldown keeps it from turning into a steal train.
+			local stolen = false
+			for _, other in ipairs(players) do
+				if other.team ~= entry.team
+					and (flat(other.root.Position) - flat(entry.root.Position)).Magnitude < 2.8
+					and os.clock() > (other.stealReady or 0)
+					and math.random() < 0.16 then
+					other.stealReady = os.clock() + 6
+					setCarry(other)
+					stolen = true
+					break
+				end
+			end
+			if stolen then
 				continue
 			end
 			local spot = spotFor(entry, spotDistance, spotLane)

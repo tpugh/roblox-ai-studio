@@ -118,6 +118,10 @@ local Feedback = remote("Feedback", "RemoteEvent")
 -- Server-to-server: the NBA Street layer invokes this to run a Gamebreaker
 -- dunk. It is a BindableFunction so the caller learns whether the dunk started.
 local DunkCommand = remote("DunkCommand", "BindableFunction")
+-- Defense hooks: StreetDefense and the player's C input ask this script to
+-- move the ball around instead of touching the state tables themselves.
+local DefendRemote = remote("Defend", "RemoteEvent")
+local DefenseCommand = remote("DefenseCommand", "BindableFunction")
 
 -- ----------------------------------------------------------------- state
 
@@ -526,6 +530,19 @@ local function throwBall(player, direction, charge)
 		velocity = unit * (THROW_SPEED_MIN + (THROW_SPEED_MAX - THROW_SPEED_MIN) * charge)
 	end
 
+	-- A defender in the shooter's air space contests the release: the arc is
+	-- nudged off line and loses a little pace, so a tight contest can force a
+	-- miss even when the player's aim and charge were perfect.
+	local contested = (ball:GetAttribute("ContestedUntil") or 0) > os.clock()
+	if contested then
+		ball:SetAttribute("ContestedUntil", nil)
+		local nudge = Vector3.new(math.random() * 2 - 1, 0, math.random() * 2 - 1)
+		if nudge.Magnitude > 0.01 then
+			nudge = nudge.Unit * (5 + math.random() * 5)
+		end
+		velocity = velocity * 0.92 + nudge
+	end
+
 	release(ball, false) -- no collide for a moment so it clears the thrower
 	ball.CFrame = launch
 	-- Set velocity directly: reading AssemblyMass in the same tick that Massless
@@ -883,6 +900,147 @@ Players.PlayerRemoving:Connect(function(player)
 		if data.player == player then
 			release(ball, true)
 		end
+	end
+end)
+
+-- ---------------------------------------------------------------- defense
+-- Ball state still belongs to this script. StreetDefense (AI opponents) and
+-- the player's Defend input only ask for these operations by name.
+
+local npcHold = {} -- [ball] = name of the NPC currently carrying it
+
+local function carrierInfo()
+	for ball, data in pairs(held) do
+		return ball, data.player, "held"
+	end
+	for ball, data in pairs(dribbling) do
+		return ball, data.player, "dribble"
+	end
+	for ball, name in pairs(npcHold) do
+		return ball, name, "npc"
+	end
+	-- A loose ball still needs to be visible to the defense so the guards can
+	-- chase it; only the holder changes.
+	local model = Workspace:FindFirstChild(COURT_MODEL)
+	local props = model and model:FindFirstChild("Props")
+	local loose = props and props:FindFirstChild("Basketball")
+	return loose, nil, "free"
+end
+
+DefenseCommand.OnInvoke = function(action, ball, extra, speed)
+	if action == "carrier" then
+		return carrierInfo()
+	end
+	if not ball or not ball.Parent or not ball:IsA("BasePart") then
+		return false
+	end
+	if action == "contest" then
+		ball:SetAttribute("ContestedUntil", os.clock() + (tonumber(extra) or 0.5))
+		return true
+	end
+	if action == "knockLoose" then
+		if dunkBusy[ball] then
+			return false
+		end
+		release(ball, false)
+		local dir = typeof(extra) == "Vector3" and extra or Vector3.new(0, 0, 1)
+		if dir.Magnitude < 0.01 then
+			dir = Vector3.new(0, 0, 1)
+		end
+		ball.AssemblyLinearVelocity = dir.Unit * (tonumber(speed) or 16) + Vector3.new(0, 6, 0)
+		ball.AssemblyAngularVelocity = Vector3.new(6, 3, 0)
+		lockout[ball] = os.clock() + 0.35
+		return true
+	end
+	if action == "holdByNPC" then
+		if dunkBusy[ball] then
+			return false
+		end
+		release(ball, false)
+		npcHold[ball] = tostring(extra)
+		mode[ball] = "npc"
+		ball.Anchored = true
+		ball.CanCollide = false
+		ball:SetAttribute("HeldByNPC", tostring(extra))
+		lockout[ball] = os.clock() + 600
+		return true
+	end
+	if action == "releaseNPC" then
+		if not npcHold[ball] then
+			return false
+		end
+		npcHold[ball] = nil
+		ball:SetAttribute("HeldByNPC", nil)
+		ball.Anchored = false
+		ball.CanCollide = true
+		mode[ball] = "free"
+		local dir = typeof(extra) == "Vector3" and extra or Vector3.new(0, 0, 1)
+		if dir.Magnitude < 0.01 then
+			dir = Vector3.new(0, 0, 1)
+		end
+		ball.AssemblyLinearVelocity = dir.Unit * (tonumber(speed) or 14) + Vector3.new(0, 5, 0)
+		lockout[ball] = os.clock() + 0.6
+		return true
+	end
+	if action == "stealToPlayer" then
+		local thief = extra
+		if not (thief and thief:IsA("Player")) then
+			return false
+		end
+		if heldBallOf(thief) or dribbledBallOf(thief) then
+			return false
+		end
+		if npcHold[ball] then
+			npcHold[ball] = nil
+			ball:SetAttribute("HeldByNPC", nil)
+		end
+		release(ball, false)
+		lockout[ball] = 0
+		return grab(thief, ball)
+	end
+	if action == "deflect" then
+		if dunkBusy[ball] or mode[ball] ~= "free" or typeof(extra) ~= "Vector3" then
+			return false
+		end
+		local away = ball.Position - extra
+		away = Vector3.new(away.X, 0, away.Z)
+		if away.Magnitude < 0.01 then
+			away = Vector3.new(0, 0, 1)
+		end
+		ball.AssemblyLinearVelocity = away.Unit * 18 + Vector3.new(0, 10, 0)
+		thrower[ball] = nil
+		ball:SetAttribute("LastThrownBy", nil)
+		return true
+	end
+	return false
+end
+
+DefendRemote.OnServerEvent:Connect(function(player)
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return
+	end
+	-- Steal from a defender that is carrying the ball.
+	for ball in pairs(npcHold) do
+		if (ball.Position - root.Position).Magnitude < 7 then
+			if DefenseCommand:Invoke("stealToPlayer", ball, player) then
+				return
+			end
+		end
+	end
+	-- Block a shot that is in the air close by.
+	for ball, who in pairs(thrower) do
+		if who ~= player and ball.Parent and (ball.Position - root.Position).Magnitude < 10 then
+			if DefenseCommand:Invoke("deflect", ball, root.Position) then
+				return
+			end
+		end
+	end
+	-- Otherwise shake off a tight contest while holding the ball.
+	local ball, holder = carrierInfo()
+	if ball and holder == player then
+		ball:SetAttribute("ContestedUntil", nil)
+		player:SetAttribute("DefendPulse", os.clock())
 	end
 end)
 
