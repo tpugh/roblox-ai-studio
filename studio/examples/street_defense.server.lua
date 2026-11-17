@@ -30,6 +30,8 @@ if #rims == 0 then
 	warn("[StreetDefense] no rim anchors")
 	return
 end
+local rimNorth = anchors:FindFirstChild("RimScore_North")
+local rimSouth = anchors:FindFirstChild("RimScore_South")
 
 local CONTEST_RANGE = 5.5
 local CONTEST_SECONDS = 0.5
@@ -45,13 +47,19 @@ for index, model in ipairs(roster:GetChildren()) do
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	if root and humanoid then
 		humanoid.WalkSpeed = 16
+		-- One-time lower centre of gravity reads as a defensive stance. Doing
+		-- this per frame would fight the Humanoid and make the rig hop.
+		humanoid.HipHeight = humanoid.HipHeight - 0.4
 		table.insert(defenders, {
 			name = model.Name,
 			model = model,
 			root = root,
 			humanoid = humanoid,
 			side = index % 2 == 1 and -1 or 1,
+			attack = index % 2 == 1 and rimNorth or rimSouth,
 			stealReady = os.clock() + 4 + math.random() * 4,
+			shotReady = 0,
+			shotMode = "shoot",
 			chasing = 0,
 			carryUntil = 0,
 			rig = AthleticRig and AthleticRig.attach(model),
@@ -142,14 +150,31 @@ task.spawn(function()
 			if not carrier then
 				continue
 			end
+			local rim = carrier.attack or rimNorth
+			local rimPos = rim and rim.Position or Vector3.new(39, 8.9, -33)
 			if now < carrier.carryUntil then
-				-- Dribble away from the nearest player and keep the ball at hand.
-				local target = nearestPlayer(carrier.root.Position)
-				local away = target and unit(carrier.root.Position - target.Position) or unit(Vector3.new(1, 0, 0))
-				local spot = carrier.root.Position + away * 8
+				-- Drive at the hoop in a low stance, then pull up or dunk.
+				local goal = carrier.shotMode == "dunk" and 4.5 or 12
+				local toward = unit(rimPos - carrier.root.Position)
+				local spot = rimPos - toward * goal
 				moveTo(carrier, Vector3.new(spot.X, GROUND_Y, spot.Z))
-				local look = unit(carrier.root.CFrame.LookVector)
+				local look = unit(rimPos - carrier.root.Position)
 				ball.CFrame = CFrame.new(carrier.root.Position + look * 1.4 + Vector3.new(0, -0.55, 0))
+				local gap = flat(carrier.root.Position - rimPos).Magnitude
+				if now > (carrier.shotReady or 0) and (gap < goal + 2.5 or now > carrier.carryUntil - 0.4) then
+					command:Invoke("releaseNPC", ball) -- clear the carry hold before the shot owns the ball
+					if carrier.shotMode == "dunk" and gap < 8 then
+						command:Invoke("dunkTo", ball, rimPos + Vector3.new(0, 0.35, 0))
+						if AthleticRig then
+							AthleticRig.swipe(carrier.rig, flat(rimPos - carrier.root.Position))
+						end
+					else
+						command:Invoke("shootTo", ball, rimPos + Vector3.new(0, 0.35, 0), 5)
+					end
+					carrier.carryUntil = 0
+					carrier.shotReady = now + 7
+					carrier.chasing = 0
+				end
 			else
 				local target = nearestPlayer(carrier.root.Position)
 				local toward = target and flat(target.Position - carrier.root.Position) or flat(Vector3.new(39, 0, -4) - carrier.root.Position)
@@ -206,6 +231,8 @@ task.spawn(function()
 				if command:Invoke("holdByNPC", ball, chaser.name) then
 					chaser.carryUntil = now + CARRY_SECONDS
 					chaser.chasing = 0
+					chaser.shotMode = math.random() < 0.4 and "dunk" or "shoot"
+					chaser.shotReady = now + 1.2
 				end
 			end
 		else

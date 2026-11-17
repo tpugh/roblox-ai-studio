@@ -986,6 +986,65 @@ DefenseCommand.OnInvoke = function(action, ball, extra, speed)
 		lockout[ball] = os.clock() + 0.6
 		return true
 	end
+	if action == "shootTo" then
+		if dunkBusy[ball] or typeof(extra) ~= "Vector3" then
+			return false
+		end
+		release(ball, false)
+		local from = ball.Position
+		local delta = extra - from
+		local horizontal = Vector3.new(delta.X, 0, delta.Z)
+		local distance = math.max(horizontal.Magnitude, 1)
+		local seconds = 0.5 + distance * 0.018
+		local vertical = (delta.Y + 0.5 * Workspace.Gravity * seconds * seconds) / seconds
+		local spread = tonumber(speed) or 3
+		local bend = math.rad((math.random() * 2 - 1) * spread)
+		local aim = CFrame.fromAxisAngle(Vector3.yAxis, bend) * horizontal.Unit
+		ball.CFrame = CFrame.new(from)
+		ball.CanCollide = false
+		ball.AssemblyLinearVelocity = aim * (distance / seconds) + Vector3.new(0, vertical, 0)
+		ball.AssemblyAngularVelocity = Vector3.new(6, 3, 0)
+		lockout[ball] = os.clock() + 0.3
+		shotOrigin[ball] = from
+		thrower[ball] = nil
+		task.delay(THROW_COLLIDE_DELAY, function()
+			if ball.Parent then
+				ball.CanCollide = true
+			end
+		end)
+		return true
+	end
+	if action == "dunkTo" then
+		if dunkBusy[ball] or typeof(extra) ~= "Vector3" then
+			return false
+		end
+		release(ball, false)
+		dunkBusy[ball] = true
+		mode[ball] = "npc"
+		ball.Anchored = true
+		ball.CanCollide = false
+		task.spawn(function()
+			local gather = CFrame.new(extra + Vector3.new(0, 3.2, 0))
+			local through = CFrame.new(extra - Vector3.new(0, 0.4, 0))
+			tweenPart(ball, gather, 0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			if not ball.Parent then
+				dunkBusy[ball] = nil
+				return
+			end
+			tweenPart(ball, through, 0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+			if not ball.Parent then
+				dunkBusy[ball] = nil
+				return
+			end
+			ball.Anchored = false
+			ball.CanCollide = true
+			mode[ball] = "free"
+			ball.AssemblyLinearVelocity = Vector3.new(0, -16, 0)
+			lockout[ball] = os.clock() + 0.5
+			dunkBusy[ball] = nil
+		end)
+		return true
+	end
 	if action == "stealToPlayer" then
 		local thief = extra
 		if not (thief and thief:IsA("Player")) then
