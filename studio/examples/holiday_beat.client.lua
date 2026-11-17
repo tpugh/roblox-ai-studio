@@ -22,6 +22,7 @@ local SFX = {
 	hat = "rbxassetid://124140408144336",
 	bass = "rbxassetid://377958030",
 	bell = "rbxassetid://81912260477958",
+	piano = "rbxassetid://584691395",
 }
 
 local function makeSound(name, id, volume)
@@ -41,6 +42,9 @@ local voices = {
 	hat = makeSound("Hat", SFX.hat, 0.06),
 	bass = makeSound("Bass", SFX.bass, 0.2),
 	bell = makeSound("Bell", SFX.bell, 0.09),
+	pianoA = makeSound("PianoA", SFX.piano, 0.09),
+	pianoB = makeSound("PianoB", SFX.piano, 0.09),
+	pianoC = makeSound("PianoC", SFX.piano, 0.09),
 }
 
 local function hit(name, speed)
@@ -60,6 +64,16 @@ local MELODY = {
 	{ "E", "G", "C", "D" },
 	{ "E", "E", "E", "D" },
 }
+
+-- Real piano notes: playback speed shifts the sample up or down the scale.
+local PIANO = { C = 1.0, D = 1.12, E = 1.26, F = 1.34, G = 1.5, A = 1.68, B = 1.89 }
+local CHORDS = {
+	{ "C", "E", "G" }, -- C major
+	{ "A", "C", "E" }, -- A minor
+	{ "F", "A", "C" }, -- F major
+	{ "G", "B", "D" }, -- G dominant
+}
+local ARP = { "E", "G", "C", "E", "E", "G", "C", "D" }
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "HolidayBeatUI"
@@ -125,6 +139,19 @@ while true do
 		local note = MELODY[bar][inBar / 4 + 1]
 		if note then
 			hit("bell", NOTES[note] or NOTES.E)
+		end
+	end
+	-- Piano: a warm chord on each downbeat plus a rolling arpeggio.
+	if inBar == 0 then
+		local chord = CHORDS[bar]
+		hit("pianoA", PIANO[chord[1]])
+		hit("pianoB", PIANO[chord[2]])
+		hit("pianoC", PIANO[chord[3]])
+	end
+	if inBar % 2 == 0 then
+		local note = ARP[inBar / 2 + 1]
+		if note then
+			hit("pianoC", PIANO[note])
 		end
 	end
 	-- Extra shimmer at the end of each two-bar phrase.
