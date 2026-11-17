@@ -121,6 +121,9 @@ local DunkCommand = remote("DunkCommand", "BindableFunction")
 -- Player-facing dunk request (V key) and a small text-feedback channel.
 local DunkRemote = remote("Dunk", "RemoteEvent")
 local DunkFeedback = remote("DunkFeedback", "RemoteEvent")
+-- NBAStreetRules invokes this when X lands so the dribbled ball follows the
+-- same move the avatar is performing.
+local TrickBallCommand = remote("TrickBallCommand", "BindableFunction")
 -- Defense hooks: StreetDefense and the player's C input ask this script to
 -- move the ball around instead of touching the state tables themselves.
 local DefendRemote = remote("Defend", "RemoteEvent")
@@ -130,6 +133,7 @@ local DefenseCommand = remote("DefenseCommand", "BindableFunction")
 
 local held = {} -- [ball] = { player = Player, weld = WeldConstraint }
 local dribbling = {} -- [ball] = { player, phase, manual, idle }
+local trickBall = {} -- [ball] = { move = 1..5, start, duration }
 local mode = {} -- [ball] = "free" | "held" | "dribble"
 local lockout = {} -- [ball] = os.clock() until which grabbing is refused
 local lastScore = {} -- [ball] = os.clock()
@@ -393,7 +397,43 @@ local function updateDribble(ball, data, dt)
 
 	-- |cos| keeps the ball hanging at the hand longer and snapping through the
 	-- floor contact, which reads as a real bounce instead of a sine slide.
+	-- During a trick the ball follows the same move the avatar is doing, so a
+	-- crossover really crosses the body and a spin really orbits the player.
+	local trickLift = 0
+	if trickBall[ball] then
+		local trick = trickBall[ball]
+		local elapsed = os.clock() - trick.start
+		if elapsed >= trick.duration then
+			trickBall[ball] = nil
+		else
+			local t = elapsed / trick.duration
+			local swirl = t * math.pi * 2
+			local arc = math.sin(t * math.pi)
+			if trick.move == 1 then
+				center = root.Position + flat * DRIBBLE_FORWARD + right * (math.sin(swirl) * 2.6)
+			elseif trick.move == 2 then
+				center = root.Position + (flat * math.cos(swirl) + right * math.sin(swirl)) * 2.1
+				topY = root.Position.Y + 1.0 + arc * 1.5
+				trickLift = 0.82
+			elseif trick.move == 3 then
+				center = root.Position - flat * 1.8 + right * (math.sin(t * math.pi) * 1.5)
+				topY = root.Position.Y + 0.8 + arc * 0.9
+				trickLift = 0.82
+			elseif trick.move == 4 then
+				center = root.Position + flat * 0.5 + right * (math.sin(swirl) * 2.0)
+				topY = root.Position.Y - 0.6
+			else
+				center = root.Position + right * (math.sin(swirl) * 0.8)
+				topY = root.Position.Y + 1.6 + arc * 1.2
+				trickLift = 0.88
+			end
+		end
+	end
+
 	local bounce = math.abs(math.cos(data.phase * math.pi))
+	if trickLift > 0 then
+		bounce = math.max(bounce, trickLift)
+	end
 	local y = bottomY + (topY - bottomY) * bounce
 	ball.CFrame = CFrame.new(Vector3.new(center.X, y, center.Z)) * CFrame.Angles(data.phase * math.pi * 2, 0, 0)
 end
@@ -1250,6 +1290,24 @@ DunkRemote.OnServerEvent:Connect(function(player)
 	end
 end)
 
+-- Start the matching ball path for an X trick. The avatar animation is driven
+-- on the clients by TrickAnim; this is only the ball's route through the move.
+TrickBallCommand.OnInvoke = function(player, move)
+	if not (player and player:IsA("Player")) then
+		return false
+	end
+	local ball = dribbledBallOf(player)
+	if not ball then
+		return false
+	end
+	trickBall[ball] = {
+		move = math.clamp(tonumber(move) or 1, 1, 5),
+		start = os.clock(),
+		duration = 0.65,
+	}
+	return true
+end
+
 -- Keep prompts and rim hooks alive across rebuilds, and tidy dead balls.
 task.spawn(function()
 	while true do
@@ -1295,6 +1353,11 @@ task.spawn(function()
 		for ball in pairs(dunkBusy) do
 			if not ball.Parent then
 				dunkBusy[ball] = nil
+			end
+		end
+		for ball in pairs(trickBall) do
+			if not ball.Parent then
+				trickBall[ball] = nil
 			end
 		end
 		task.wait(1)

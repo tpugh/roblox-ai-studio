@@ -50,8 +50,11 @@ end
 local TrickRemote = remote("Trick")
 local GamebreakerRemote = remote("Gamebreaker")
 local StreetEvent = remote("StreetEvent")
--- BallService exposes the scripted dunk through this BindableFunction.
+-- Carries the trick move to every client so each avatar performs it.
+local TrickAnim = remote("TrickAnim")
+-- BallService exposes the scripted dunk and trick dribble through bindables.
 local DunkCommand = remotes:WaitForChild("DunkCommand")
+local TrickBallCommand = remotes:WaitForChild("TrickBallCommand", 10)
 
 local streetScore = {}
 local meter = {}
@@ -184,6 +187,15 @@ TrickRemote.OnServerEvent:Connect(function(player)
 	player:SetAttribute("TrickChain", state.count)
 	addMeter(player, METER_PER_TRICK * state.count)
 	StreetEvent:FireClient(player, "trick", state.count)
+
+	-- Play it, don't just announce it: every client poses this character and
+	-- BallService steers the dribbled ball through the same move.
+	TrickAnim:FireAllClients(player, state.count)
+	if TrickBallCommand then
+		pcall(function()
+			TrickBallCommand:Invoke(player, state.count)
+		end)
+	end
 end)
 
 -- ----------------------------------------------------------- gamebreaker
