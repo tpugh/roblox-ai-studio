@@ -116,8 +116,88 @@ close.TextSize = 20
 close.Text = "X"
 close.TextColor3 = Color3.new(1, 1, 1)
 close.Parent = frame
+local robuxFrame -- declared early so the close button can hide it too
 close.MouseButton1Click:Connect(function()
 	frame.Visible = false
+	if robuxFrame then
+		robuxFrame.Visible = false
+	end
+end)
+
+-- Robux bundles ---------------------------------------------------------------
+-- Product IDs and prices come from the shared config; the server opens the
+-- actual MarketplaceService prompt and credits the Cocoa Bucks after payment.
+local BuyBucks = remotes:WaitForChild("BuyBucks", 10)
+robuxFrame = Instance.new("Frame")
+robuxFrame.Name = "RobuxMenu"
+robuxFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+robuxFrame.Position = UDim2.fromScale(0.5, 0.5)
+robuxFrame.Size = UDim2.fromOffset(420, 260)
+robuxFrame.BackgroundColor3 = Color3.fromRGB(40, 28, 32)
+robuxFrame.Visible = false
+robuxFrame.Parent = gui
+
+local robuxTitle = Instance.new("TextLabel")
+robuxTitle.Size = UDim2.new(1, 0, 0, 50)
+robuxTitle.BackgroundTransparency = 1
+robuxTitle.Font = Enum.Font.GothamBlack
+robuxTitle.TextSize = 24
+robuxTitle.Text = "COCOA BUCKS WITH ROBUX"
+robuxTitle.TextColor3 = Color3.fromRGB(255, 226, 160)
+robuxTitle.Parent = robuxFrame
+
+local robuxClose = Instance.new("TextButton")
+robuxClose.Position = UDim2.fromOffset(360, 10)
+robuxClose.Size = UDim2.fromOffset(44, 36)
+robuxClose.BackgroundColor3 = Color3.fromRGB(150, 44, 52)
+robuxClose.BorderSizePixel = 0
+robuxClose.Font = Enum.Font.GothamBold
+robuxClose.TextSize = 18
+robuxClose.Text = "X"
+robuxClose.TextColor3 = Color3.new(1, 1, 1)
+robuxClose.Parent = robuxFrame
+robuxClose.MouseButton1Click:Connect(function()
+	robuxFrame.Visible = false
+end)
+
+local configModule = ReplicatedStorage:FindFirstChild("CocoaMonetizationConfig")
+if BuyBucks and configModule then
+	local ok, config = pcall(function()
+		return require(configModule)
+	end)
+	if ok and config and config.Products then
+		for index, product in ipairs(config.Products) do
+			local button = Instance.new("TextButton")
+			button.Position = UDim2.fromOffset(24, 58 + (index - 1) * 56)
+			button.Size = UDim2.fromOffset(372, 46)
+			button.BackgroundColor3 = Color3.fromRGB(88, 52, 42)
+			button.BorderSizePixel = 0
+			button.Font = Enum.Font.GothamBold
+			button.TextSize = 18
+			button.TextColor3 = Color3.fromRGB(255, 245, 230)
+			button.Text = string.format("%s  ·  %d Robux", product.name, product.robux)
+			button.Parent = robuxFrame
+			button.MouseButton1Click:Connect(function()
+				if BuyBucks then
+					BuyBucks:FireServer(product.id)
+				end
+			end)
+		end
+	end
+end
+
+local robuxButton = Instance.new("TextButton")
+robuxButton.Position = UDim2.fromOffset(24, 414)
+robuxButton.Size = UDim2.fromOffset(512, 46)
+robuxButton.BackgroundColor3 = Color3.fromRGB(38, 96, 66)
+robuxButton.BorderSizePixel = 0
+robuxButton.Font = Enum.Font.GothamBold
+robuxButton.TextSize = 18
+robuxButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+robuxButton.Text = "BUY COCOA BUCKS WITH ROBUX"
+robuxButton.Parent = frame
+robuxButton.MouseButton1Click:Connect(function()
+	robuxFrame.Visible = true
 end)
 
 OpenShop.OnClientEvent:Connect(function(bucks)
