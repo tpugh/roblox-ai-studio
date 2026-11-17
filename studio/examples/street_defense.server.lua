@@ -17,6 +17,8 @@ if not command or not roster or not court then
 	return
 end
 
+local AthleticRig = require(game:GetService("ServerScriptService"):WaitForChild("AthleticRig", 10))
+
 local anchors = court:WaitForChild("Anchors")
 local rims = {}
 for _, part in ipairs(anchors:GetChildren()) do
@@ -43,28 +45,16 @@ for index, model in ipairs(roster:GetChildren()) do
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	if root and humanoid then
 		humanoid.WalkSpeed = 16
-		local animator = humanoid:FindFirstChildOfClass("Animator")
-		local function track(id)
-			if not animator then
-				return nil
-			end
-			local animation = Instance.new("Animation")
-			animation.AnimationId = "rbxassetid://" .. id
-			local t = animator:LoadAnimation(animation)
-			t.Looped = true
-			return t
-		end
 		table.insert(defenders, {
 			name = model.Name,
+			model = model,
 			root = root,
 			humanoid = humanoid,
 			side = index % 2 == 1 and -1 or 1,
 			stealReady = os.clock() + 4 + math.random() * 4,
 			chasing = 0,
 			carryUntil = 0,
-			walk = track("507777826"),
-			idle = track("507766666"),
-			moving = false,
+			rig = AthleticRig and AthleticRig.attach(model),
 			target = nil,
 			movedAt = 0,
 		})
@@ -129,34 +119,6 @@ local function nearestPlayer(position)
 	return best
 end
 
--- Nobody asked for a frozen crowd: keep the guards' walk/idle tracks in sync.
-task.spawn(function()
-	while true do
-		task.wait(0.25)
-		for _, def in ipairs(defenders) do
-			local moving = def.humanoid.MoveDirection.Magnitude > 0.1
-			if moving ~= def.moving then
-				def.moving = moving
-				if moving then
-					if def.walk then
-						def.walk:Play(0.15)
-					end
-					if def.idle then
-						def.idle:Stop(0.25)
-					end
-				else
-					if def.walk then
-						def.walk:Stop(0.25)
-					end
-					if def.idle then
-						def.idle:Play(0.25)
-					end
-				end
-			end
-		end
-	end
-end)
-
 local function byName(name)
 	for _, def in ipairs(defenders) do
 		if def.name == name then
@@ -205,6 +167,9 @@ task.spawn(function()
 			end
 			local rim = nearestRim(root.Position)
 			for _, def in ipairs(defenders) do
+				if now <= (def.lungeUntil or 0) then
+					continue -- mid-swipe: let the lunge play out
+				end
 				moveTo(def, guardSpot(def, root.Position, rim))
 				local gap = flat(def.root.Position - root.Position).Magnitude
 				if gap < CONTEST_RANGE then
@@ -215,6 +180,11 @@ task.spawn(function()
 					local knock = flat(def.root.Position - ball.Position)
 					if knock.Magnitude > 0.01 then
 						command:Invoke("knockLoose", ball, knock, 17)
+						if AthleticRig then
+							AthleticRig.swipe(def.rig, knock)
+						end
+						def.lungeUntil = now + 0.4
+						def.humanoid:MoveTo(ball.Position)
 						def.chasing = now + 3
 					end
 				end

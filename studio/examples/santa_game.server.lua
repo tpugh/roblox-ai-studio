@@ -18,6 +18,8 @@
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 
+local AthleticRig = require(game:GetService("ServerScriptService"):WaitForChild("AthleticRig", 10))
+
 local COURT_NAME = "SantaCourt"
 local ROSTER_NAME = "HoopsMas_Santas"
 
@@ -95,6 +97,7 @@ for _, model in ipairs(roster:GetChildren()) do
 				spread = 6.5 + ((model:GetAttribute("Number") or 1) % 2) * 2.5,
 				moving = nil,
 				stealReady = 0,
+				rig = AthleticRig and AthleticRig.attach(model),
 			})
 		end
 	end
@@ -108,24 +111,10 @@ if #players < 2 then
 end
 
 -- ------------------------------------------------------------- animation
-
-local function loadTrack(entry, id)
-	local animator = entry.humanoid:FindFirstChildOfClass("Animator")
-	if not animator then
-		return nil
-	end
-	local animation = Instance.new("Animation")
-	animation.AnimationId = "rbxassetid://" .. id
-	local track = animator:LoadAnimation(animation)
-	track.Looped = true
-	track.Priority = Enum.AnimationPriority.Movement
-	return track
-end
+-- Motion and pose are owned by AthleticRig; it starts the R15 tracks and adds
+-- a crouch/run lean so the Santas no longer skate around stiffly.
 
 for _, entry in ipairs(players) do
-	entry.walk = loadTrack(entry, "507777826") -- default R15 walk
-	entry.idle = loadTrack(entry, "507766666") -- default R15 idle
-
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NameTag"
 	tag.Size = UDim2.fromOffset(190, 40)
@@ -392,6 +381,11 @@ task.spawn(function()
 					and os.clock() > (other.stealReady or 0)
 					and math.random() < 0.16 then
 					other.stealReady = os.clock() + 6
+					if AthleticRig then
+						AthleticRig.swipe(other.rig, flat(entry.root.Position - other.root.Position))
+					end
+					other.lungeUntil = os.clock() + 0.4
+					other.humanoid:MoveTo(entry.root.Position)
 					setCarry(other)
 					stolen = true
 					break
@@ -434,40 +428,14 @@ task.spawn(function()
 		end
 		for _, entry in ipairs(players) do
 			if entry ~= carrier and entry.root.Parent then
+				if (entry.lungeUntil or 0) > os.clock() then
+					continue -- this defender is in the middle of a swipe
+				end
 				if entry.team == carrier.team then
 					moveTo(entry, spotFor(entry, spotDistance + 3, -spotLane))
 				else
 					local target = flat(carrier.root.Position) + unit(entry.defend.Position - carrier.root.Position) * 4.5
 					moveTo(entry, Vector3.new(target.X, GROUND_Y, target.Z))
-				end
-			end
-		end
-	end
-end)
-
--- Walk/idle animation switching. There is no Animate script on these rigs, so
--- the default R15 tracks are driven from the server.
-task.spawn(function()
-	while true do
-		task.wait(0.2)
-		for _, entry in ipairs(players) do
-			local moving = entry.humanoid.MoveDirection.Magnitude > 0.1
-			if moving ~= entry.moving then
-				entry.moving = moving
-				if moving then
-					if entry.walk then
-						entry.walk:Play(0.15)
-					end
-					if entry.idle then
-						entry.idle:Stop(0.25)
-					end
-				else
-					if entry.walk then
-						entry.walk:Stop(0.25)
-					end
-					if entry.idle then
-						entry.idle:Play(0.25)
-					end
 				end
 			end
 		end
