@@ -501,6 +501,10 @@ local function throwBall(player, direction, charge)
 		return
 	end
 	charge = math.clamp(tonumber(charge) or 0, 0, 1)
+	-- Sharp Shooter cocoa buys a little extra charge and aim assist.
+	if (player:GetAttribute("CocoaShootUntil") or 0) > os.clock() then
+		charge = math.min(1, charge + 0.35)
+	end
 
 	local character = player.Character
 	local hand = handOf(character)
@@ -1020,9 +1024,11 @@ DefendRemote.OnServerEvent:Connect(function(player)
 	if not root then
 		return
 	end
-	-- Steal from a defender that is carrying the ball.
+	-- Steal from a defender that is carrying the ball. Steal cocoa extends the
+	-- reach so the buff is felt on both halves of the floor.
+	local stealRange = (player:GetAttribute("CocoaStealUntil") or 0) > os.clock() and 13 or 7
 	for ball in pairs(npcHold) do
-		if (ball.Position - root.Position).Magnitude < 7 then
+		if (ball.Position - root.Position).Magnitude < stealRange then
 			if DefenseCommand:Invoke("stealToPlayer", ball, player) then
 				return
 			end

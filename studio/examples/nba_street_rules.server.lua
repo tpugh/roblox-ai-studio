@@ -192,7 +192,8 @@ GamebreakerRemote.OnServerEvent:Connect(function(player)
 	if matchOver then
 		return
 	end
-	if (meter[player] or 0) < METER_MAX then
+	-- Slam cocoa grants a ready Gamebreaker without filling the meter.
+	if (meter[player] or 0) < METER_MAX and (player:GetAttribute("CocoaDunkUntil") or 0) <= os.clock() then
 		return
 	end
 	if player:GetAttribute("HoldingBall") ~= true and player:GetAttribute("Dribbling") ~= true then
@@ -215,7 +216,11 @@ GamebreakerRemote.OnServerEvent:Connect(function(player)
 	end
 	lastBreaker[player] = now
 
-	meter[player] = 0
+	if (player:GetAttribute("CocoaDunkUntil") or 0) > os.clock() then
+		player:SetAttribute("CocoaDunkUntil", 0)
+	else
+		meter[player] = 0
+	end
 	player:SetAttribute("Gamebreaker", 0)
 	player:SetAttribute("GamebreakerActive", true)
 
