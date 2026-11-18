@@ -41,7 +41,7 @@ local C = {
 	rim = Color3.fromRGB(226, 108, 38),
 	net = Color3.fromRGB(232, 232, 232),
 	bench = Color3.fromRGB(122, 86, 58),
-	ball = Color3.fromRGB(212, 108, 44),
+	ball = Color3.fromRGB(214, 34, 48),
 	lamp = Color3.fromRGB(250, 238, 200),
 }
 
@@ -528,6 +528,35 @@ local function buildProps(model)
 		box(bench, "LegRight", Vector3.new(0.4, 1.3, 1.8), Vector3.new(b.x + 3.4, 0.65, b.z), C.steel, M.metal)
 	end
 
+	-- Harlem Globetrotters look: a red ball wrapped in three crossed white
+	-- bands. The bands are welded, non-colliding and massless, so they follow
+	-- the ball's physics without changing how it plays.
+	local function addGlobeStripes(ball)
+		local white = Color3.fromRGB(250, 250, 246)
+		local rotations = {
+			CFrame.identity,
+			CFrame.Angles(0, math.rad(90), 0),
+			CFrame.Angles(0, 0, math.rad(90)),
+		}
+		for index, rotation in ipairs(rotations) do
+			local band = Instance.new("Part")
+			band.Name = "GlobeStripe" .. index
+			band.Shape = Enum.PartType.Cylinder
+			band.Size = Vector3.new(0.06, 0.84, 0.84)
+			band.CFrame = ball.CFrame * rotation
+			band.Color = white
+			band.Material = M.plastic
+			band.CanCollide = false
+			band.Massless = true
+			band.CastShadow = false
+			band.Parent = ball
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0 = ball
+			weld.Part1 = band
+			weld.Parent = band
+		end
+	end
+
 	local ballA = makePart(
 		folder,
 		"Basketball",
@@ -541,6 +570,7 @@ local function buildProps(model)
 	ballA.CastShadow = true
 	ballA.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.6, 0.75, 1, 1)
 	ballA:SetAttribute("HomeCFrame", ballA.CFrame)
+	addGlobeStripes(ballA)
 
 	local ballB = makePart(
 		folder,
@@ -555,6 +585,7 @@ local function buildProps(model)
 	ballB.CastShadow = true
 	ballB.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.6, 0.75, 1, 1)
 	ballB:SetAttribute("HomeCFrame", ballB.CFrame)
+	addGlobeStripes(ballB)
 
 	return folder
 end
