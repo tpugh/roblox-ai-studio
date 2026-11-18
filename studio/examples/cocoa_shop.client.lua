@@ -27,7 +27,7 @@ local DRINKS = {
 		effect = "Gamebreaker charged · instant", mug = Color3.fromRGB(206, 60, 64), accent = Color3.fromRGB(238, 142, 44), kind = "ball" },
 	{ id = "steal", name = "Steal Cocoa", price = 15, blurb = "Longer reach on steals",
 		effect = "Long steal reach · 60 seconds", mug = Color3.fromRGB(142, 90, 180), accent = Color3.fromRGB(226, 228, 238), kind = "spark" },
-	{ id = "snow", name = "Snowball Cocoa", price = 25, blurb = "Snowball gun that stuns defenders",
+	{ id = "snow", name = "Snowball Cocoa", price = 25, blurb = "Snowball gun · 30 rounds · knocks them down",
 		effect = "Snowball gun · 90 seconds", mug = Color3.fromRGB(228, 238, 248), accent = Color3.fromRGB(255, 255, 255), kind = "snow" },
 }
 

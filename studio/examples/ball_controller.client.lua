@@ -27,6 +27,7 @@ local DefendRemote = remotes:WaitForChild("Defend")
 local Feedback = remotes:WaitForChild("Feedback")
 local cocoaRemotes = ReplicatedStorage:WaitForChild("CocoaRemotes", 10)
 local WatchGame = cocoaRemotes and cocoaRemotes:FindFirstChild("WatchGame")
+local FireSnowball = cocoaRemotes and cocoaRemotes:FindFirstChild("FireSnowball", 10)
 local DunkRemote = remotes:WaitForChild("Dunk", 10)
 local DunkFeedback = remotes:WaitForChild("DunkFeedback", 10)
 local Candy = require(ReplicatedStorage:WaitForChild("CandyUI", 10))
@@ -82,6 +83,68 @@ chargeFill.BackgroundColor3 = Candy.RED
 chargeFill.BorderSizePixel = 0
 chargeFill.Parent = chargeBack
 Candy.corner(chargeFill, 8)
+
+-- Touch / on-screen fire button. Appears whenever the Snowball Gun is owned,
+-- so players without a mouse can fire with a tap.
+local snowPanel = Candy.bubble(gui, "SnowButtonBubble", UDim2.fromOffset(230, 82),
+	UDim2.new(1, -18, 1, -104), Vector2.new(1, 1), Candy.MINT)
+local snowButton = Instance.new("TextButton")
+snowButton.Name = "SnowballFire"
+snowButton.AnchorPoint = Vector2.new(0.5, 0.5)
+snowButton.Position = UDim2.fromScale(0.5, 0.44)
+snowButton.Size = UDim2.fromScale(0.94, 0.76)
+snowButton.BackgroundTransparency = 1
+snowButton.Font = Candy.FONT
+snowButton.TextSize = 32
+snowButton.Text = "❄ FIRE"
+snowButton.TextColor3 = Candy.RED
+snowButton.TextStrokeTransparency = 0.9
+snowButton.Parent = snowPanel
+Candy.show(snowPanel, false)
+if FireSnowball then
+	snowButton.MouseButton1Click:Connect(function()
+		FireSnowball:FireServer()
+	end)
+end
+
+local function hasSnowGun()
+	local backpack = player:FindFirstChild("Backpack")
+	if backpack and backpack:FindFirstChild("Snowball Gun") then
+		return true
+	end
+	local character = player.Character
+	return character ~= nil and character:FindFirstChild("Snowball Gun") ~= nil
+end
+
+local function refreshSnowButton()
+	Candy.show(snowPanel, hasSnowGun())
+end
+
+local function watchSnowGun()
+	refreshSnowButton()
+	local function watchContainer(container)
+		if not container then
+			return
+		end
+		container.ChildAdded:Connect(function(child)
+			if child:IsA("Tool") and child.Name == "Snowball Gun" then
+				refreshSnowButton()
+			end
+		end)
+		container.ChildRemoved:Connect(function(child)
+			if child:IsA("Tool") and child.Name == "Snowball Gun" then
+				refreshSnowButton()
+			end
+		end)
+	end
+	watchContainer(player:FindFirstChild("Backpack"))
+	watchContainer(player.Character)
+end
+player.CharacterAdded:Connect(function()
+	task.wait(0.2)
+	watchSnowGun()
+end)
+watchSnowGun()
 
 -- ------------------------------------------------------------------ state
 
@@ -144,6 +207,13 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		-- Dunk works from a held ball or a live dribble; the server validates.
 		if DunkRemote then
 			DunkRemote:FireServer()
+		end
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.B then
+		-- Keyboard alternative to left-click for firing the snowball gun.
+		if FireSnowball then
+			FireSnowball:FireServer()
 		end
 		return
 	end
