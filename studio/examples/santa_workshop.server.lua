@@ -55,7 +55,7 @@ local AVATARS = {
 	},
 	mrs = {
 		name = "Mrs Claus", price = 50, coat = RED, pants = DARK_RED,
-		hat = RED, hair = true, boots = BLACK,
+		hat = RED, hair = true, boots = BLACK, apron = true,
 	},
 	elf = {
 		name = "Workshop Elf", price = 40, coat = GREEN, pants = GREEN,
@@ -171,6 +171,10 @@ local function applyOutfit(player, id)
 		if def.beard then
 			accessory("Beard", Enum.PartType.Ball, Vector3.new(1.7, 1.5, 0.9), WHITE, head,
 				CFrame.new(0, -0.9, -1.1))
+			accessory("BeardLower", Enum.PartType.Ball, Vector3.new(1.5, 1.1, 0.7), WHITE, head,
+				CFrame.new(0, -1.35, -0.9))
+			accessory("Moustache", Enum.PartType.Ball, Vector3.new(0.85, 0.3, 0.45), WHITE, head,
+				CFrame.new(0, 2.42, -0.55))
 		end
 		if def.hair then
 			accessory("Hair", Enum.PartType.Ball, Vector3.new(1.8, 1.1, 1.6), WHITE, head,
@@ -186,20 +190,48 @@ local function applyOutfit(player, id)
 			accessory("Nose", Enum.PartType.Ball, Vector3.new(0.6, 0.6, 0.6), RED, head,
 				CFrame.new(0, -0.2, 1.3))
 		end
+		if def.antlers then
+			accessory("Tail", Enum.PartType.Ball, Vector3.new(0.7, 0.6, 0.7), BROWN, torso,
+				CFrame.new(0, -0.4, -0.9))
+		end
 		if def.carrot then
 			accessory("Carrot", Enum.PartType.Cylinder, Vector3.new(0.3, 1.1, 0.3), Color3.fromRGB(240, 140, 40), head,
 				CFrame.new(0, -0.2, 1.5), CFrame.Angles(math.pi / 2, 0, 0))
+		end
+		if def.topHat then
+			accessory("TopHatBand", Enum.PartType.Cylinder, Vector3.new(1.25, 0.25, 1.25), Color3.fromRGB(190, 38, 46), head,
+				CFrame.new(0, 2.78, 0), CFrame.Angles(0, 0, math.pi / 2))
+			for i = 0, 2 do
+				accessory("CoalButton" .. i, Enum.PartType.Ball, Vector3.new(0.28, 0.28, 0.28), BLACK, torso,
+					CFrame.new(0, 1.3 - i * 0.4, 0.6))
+			end
+			accessory("Scarf", Enum.PartType.Block, Vector3.new(2.0, 0.35, 1.7), Color3.fromRGB(190, 38, 46), torso,
+				CFrame.new(0, 0.35, 0.6))
 		end
 		if def.ears then
 			for side = -1, 1, 2 do
 				accessory("Ear", Enum.PartType.Ball, Vector3.new(0.5, 0.9, 0.4), SKIN, head,
 					CFrame.new(side * 1.05, 0, 0))
 			end
+			accessory("JingleBell", Enum.PartType.Ball, Vector3.new(0.45, 0.45, 0.45), GOLD, head,
+				CFrame.new(0, 3.35, 0))
 		end
 	end
 	if def.belt and torso and torso:IsA("BasePart") then
 		accessory("Belt", Enum.PartType.Block, Vector3.new(2.6, 0.45, 1.6), BLACK, torso,
 			CFrame.new(0, -0.6, 0.55))
+	end
+	if def.apron and torso and torso:IsA("BasePart") then
+		accessory("Apron", Enum.PartType.Block, Vector3.new(2.4, 1.9, 0.22), WHITE, torso,
+			CFrame.new(0, 0.2, 0.85))
+		accessory("ApronBow", Enum.PartType.Ball, Vector3.new(0.5, 0.5, 0.4), WHITE, torso,
+			CFrame.new(0, 1.25, 0.9))
+	end
+	if def.wings and torso and torso:IsA("BasePart") then
+		accessory("Cape", Enum.PartType.Block, Vector3.new(2.2, 2.4, 0.18), Color3.fromRGB(120, 80, 30), torso,
+			CFrame.new(0, 0.4, -0.9))
+		accessory("CapeTrim", Enum.PartType.Block, Vector3.new(2.25, 0.18, 0.22), GOLD, torso,
+			CFrame.new(0, 1.6, -0.9))
 	end
 	-- Golden Wing Boots: a pair of flapping wings welded to each foot with a
 	-- Motor6D so the client can animate them without fighting the rig.
