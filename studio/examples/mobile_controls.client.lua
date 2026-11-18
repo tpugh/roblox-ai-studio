@@ -54,6 +54,38 @@ if UserInputService.TouchEnabled then
 	end)
 end
 
+-- Ticket 11: deterministic layering and safe-area awareness. HUD sits behind
+-- the touch controls, which sit behind modal shop menus, regardless of the
+-- order the LocalScripts happened to create their ScreenGuis in. Let Roblox
+-- inset the HUD/controls/menus so nothing hides under a notch or home bar.
+local DISPLAY_ORDER = {
+	CocoaShopUI = 30,
+	SantaWorkshopUI = 30,
+	MobileControls = 20,
+}
+local SAFE_AREA_GUIS = {
+	BallHUD = true, StreetHUD = true, HolidayPianoUI = true,
+	MobileControls = true, CocoaShopUI = true, SantaWorkshopUI = true,
+}
+local function applyGuiSafety()
+	local playerGui = player:FindFirstChild("PlayerGui")
+	if not playerGui then
+		return
+	end
+	for _, screenGui in ipairs(playerGui:GetChildren()) do
+		if screenGui:IsA("ScreenGui") then
+			local order = DISPLAY_ORDER[screenGui.Name]
+			if order and screenGui.DisplayOrder ~= order then
+				screenGui.DisplayOrder = order
+			end
+			if SAFE_AREA_GUIS[screenGui.Name] and screenGui.IgnoreGuiInset then
+				screenGui.IgnoreGuiInset = false
+			end
+		end
+	end
+end
+applyGuiSafety()
+
 local CREAM = Color3.fromRGB(240, 240, 246)
 local INK = Color3.fromRGB(38, 38, 48)
 local GLASS = Color3.fromRGB(66, 58, 50)
@@ -373,6 +405,7 @@ local shopMenus = {
 task.spawn(function()
 	while true do
 		task.wait(0.25)
+		applyGuiSafety()
 		local playerGui = player:FindFirstChild("PlayerGui")
 		if not playerGui then
 			continue

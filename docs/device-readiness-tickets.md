@@ -104,7 +104,7 @@ leaves `charging=true`, so the next tap fires a full-charge shot.
 **Fix:** Enforce ≥44px effective size on touch.
 **Acceptance:** Every shop button ≥44px effective on a 1024×460 viewport.
 
-### TICKET-11 — Safe area and explicit layering — OPEN
+### TICKET-11 — Safe area and explicit layering — DONE
 **Severity:** Low · `IgnoreGuiInset=true` on all GUIs ignores notched-phone safe
 areas; no `DisplayOrder` anywhere.
 **Fix:** Add safe-area padding for `MobileControls`; assign intentional `DisplayOrder`
