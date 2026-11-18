@@ -577,6 +577,9 @@ task.spawn(function()
 	while true do
 		task.wait(0.25)
 		applyGuiSafety()
+		-- Re-check possession as well as listening to attribute signals: a
+		-- missed/reordered signal must never leave the wrong button set up.
+		updateButtonMode()
 		local playerGui = player:FindFirstChild("PlayerGui")
 		if not playerGui then
 			continue
