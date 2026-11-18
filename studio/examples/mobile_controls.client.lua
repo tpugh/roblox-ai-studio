@@ -271,7 +271,7 @@ end)
 circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(68, 68), at(185, 335), false, nil, setTurbo)
 circleButton("MobileGrab", "GRAB", UDim2.fromOffset(68, 68), at(270, 360), false, grabNearest)
 -- Defensive block: jump and throw both hands up to swat a shot away.
-circleButton("MobileSwat", "SWAT", UDim2.fromOffset(90, 90), at(345, 215), false, function()
+circleButton("MobileSwat", "SWAT", UDim2.fromOffset(78, 78), at(430, 240), false, function()
 	playDefenseAnimation(BLOCK_ANIM)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -354,53 +354,11 @@ if camera then
 	camera:GetPropertyChangedSignal("ViewportSize"):Connect(applyScale)
 end
 
--- Offense vs defense: while holding/dribbling the ball the player gets the
--- shooting set; otherwise the defensive set appears with STEAL as the big hub.
-local buttonMode = {}
+-- All actions stay visible in one fixed cluster; possession no longer swaps
+-- the button set. Every action fires the same server-validated remote.
 for _, entry in ipairs(buttons) do
-	local name = entry.holder.Name
-	if name == "MobileShoot" or name == "MobileDunk" or name == "MobileTrick" or name == "MobileBreaker" then
-		buttonMode[name] = "offense"
-	elseif name == "MobileSteal" or name == "MobileGrab" or name == "MobileSwat" then
-		buttonMode[name] = "defense"
-	else
-		buttonMode[name] = "both"
-	end
-	entry.offenseSize, entry.offenseCentre = entry.baseSize, entry.baseCentre
+	entry.holder.Visible = true
 end
-local defenseLayout = {
-	MobileSteal = { 136, 255, 120 },
-	MobileSwat = { 90, 360, 235 },
-	MobileGrab = { 90, 255, 250 },
-	MobileTurbo = { 80, 185, 335 },
-}
-local inOffense = nil
-local function updateButtonMode()
-	local hasBall = player:GetAttribute("HoldingBall") == true or player:GetAttribute("Dribbling") == true
-	if hasBall == inOffense then
-		return
-	end
-	inOffense = hasBall
-	for _, entry in ipairs(buttons) do
-		local mode = buttonMode[entry.holder.Name] or "both"
-		entry.holder.Visible = mode == "both"
-			or (mode == "offense" and hasBall)
-			or (mode == "defense" and not hasBall)
-		if hasBall then
-			entry.baseSize, entry.baseCentre = entry.offenseSize, entry.offenseCentre
-		else
-			local layout = defenseLayout[entry.holder.Name]
-			if layout then
-				entry.baseSize = UDim2.fromOffset(layout[1], layout[1])
-				entry.baseCentre = at(layout[2], layout[3])
-			end
-		end
-	end
-	applyScale()
-end
-player:GetAttributeChangedSignal("HoldingBall"):Connect(updateButtonMode)
-player:GetAttributeChangedSignal("Dribbling"):Connect(updateButtonMode)
-updateButtonMode()
 
 -- Shrink the Score and Cocoa Bucks bubbles on phones and make them see-through
 -- so they stop covering the court. Keep the numbers readable with a dark stroke.
@@ -577,9 +535,6 @@ task.spawn(function()
 	while true do
 		task.wait(0.25)
 		applyGuiSafety()
-		-- Re-check possession as well as listening to attribute signals: a
-		-- missed/reordered signal must never leave the wrong button set up.
-		updateButtonMode()
 		local playerGui = player:FindFirstChild("PlayerGui")
 		if not playerGui then
 			continue
