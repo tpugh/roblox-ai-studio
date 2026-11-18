@@ -245,6 +245,64 @@ end)
 circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(68, 68), at(185, 335), false, nil, setTurbo)
 circleButton("MobileGrab", "GRAB", UDim2.fromOffset(68, 68), at(270, 360), false, grabNearest)
 
+-- When the Gamebreaker meter fills, make the BREAKER button obvious: gold face,
+-- "GO!" label and a pulsing glow ring, so the player knows it is ready.
+local breaker = gui:FindFirstChild("MobileBreaker")
+local breakerRing = breaker and breaker:FindFirstChildOfClass("Frame")
+local breakerFace = breaker and breaker:FindFirstChild("Tap")
+local breakerGlow
+if breaker then
+	breakerGlow = Instance.new("UIStroke")
+	breakerGlow.Name = "ReadyGlow"
+	breakerGlow.Color = Color3.fromRGB(255, 208, 84)
+	breakerGlow.Thickness = 0
+	breakerGlow.Transparency = 1
+	breakerGlow.Parent = breaker
+end
+local GOLD = Color3.fromRGB(255, 208, 84)
+local breakerReady = false
+local breakerPulse = 0
+local function refreshBreakerReady()
+	local ready = (player:GetAttribute("Gamebreaker") or 0) >= 100
+	if ready == breakerReady then
+		return
+	end
+	breakerReady = ready
+	if not breakerRing or not breakerFace then
+		return
+	end
+	if ready then
+		breakerFace.Text = "GO!"
+		breakerFace.TextColor3 = INK
+		breakerFace.BackgroundColor3 = GOLD
+		breakerRing.BackgroundColor3 = GOLD
+	else
+		breakerFace.Text = "BREAKER"
+		breakerFace.TextColor3 = CREAM
+		breakerFace.BackgroundColor3 = GLASS
+		breakerRing.BackgroundColor3 = CREAM
+		breakerRing.Size = UDim2.fromScale(1, 1)
+		if breakerGlow then
+			breakerGlow.Thickness = 0
+			breakerGlow.Transparency = 1
+		end
+	end
+end
+player:GetAttributeChangedSignal("Gamebreaker"):Connect(refreshBreakerReady)
+refreshBreakerReady()
+RunService.RenderStepped:Connect(function(dt)
+	if not breakerReady or not breakerGlow then
+		return
+	end
+	breakerPulse += dt * 4
+	local wave = (math.sin(breakerPulse) + 1) / 2
+	breakerGlow.Thickness = 2 + wave * 5
+	breakerGlow.Transparency = 0.15 + (1 - wave) * 0.5
+	if breakerRing then
+		breakerRing.Size = UDim2.fromScale(1 + wave * 0.08, 1 + wave * 0.08)
+	end
+end)
+
 local function applyScale()
 	local scale = uiScale()
 	for _, entry in ipairs(buttons) do
