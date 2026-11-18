@@ -36,6 +36,9 @@ local AVATARS = {
 		coat = BROWN, pants = BROWN, hat = BROWN, head = BROWN, boots = BROWN, antlers = true, nose = true },
 	{ id = "snowman", name = "Snowman", price = 50, blurb = "White suit, top hat and carrot nose",
 		coat = WHITE, pants = WHITE, hat = BLACK, head = WHITE, boots = BLACK, topHat = true, carrot = true },
+	{ id = "goldwings", name = "Golden Wing Boots", price = 70, blurb = "Gold suit with flapping wings",
+		coat = Color3.fromRGB(120, 80, 30), pants = Color3.fromRGB(90, 60, 20), hat = GOLD,
+		head = SKIN, boots = GOLD, wings = true, hair = false },
 }
 
 -- Builds a miniature mannequin wearing the selected outfit inside a
@@ -89,6 +92,11 @@ local function makeAvatarPreview(avatar, parent, size)
 		put("Arm", Enum.PartType.Block, Vector3.new(0.28, 0.92, 0.3), Vector3.new(side * 0.68, 1.55, 0), avatar.coat)
 		put("Hand", Enum.PartType.Ball, Vector3.new(0.28, 0.28, 0.28), Vector3.new(side * 0.68, 1.04, 0), avatar.head)
 	end
+	if avatar.wings then
+		for _, side in ipairs({ -1, 1 }) do
+			put("Wing" .. (side == -1 and "L" or "R"), Enum.PartType.Block, Vector3.new(1.7, 0.14, 1.05), Vector3.new(side * 0.35, 0.6, -0.25), GOLD)
+		end
+	end
 	put("Torso", Enum.PartType.Block, Vector3.new(1.0, 1.05, 0.56), Vector3.new(0, 1.62, 0), avatar.coat)
 	if avatar.belt then
 		put("Belt", Enum.PartType.Block, Vector3.new(1.04, 0.18, 0.6), Vector3.new(0, 1.16, 0), BLACK)
@@ -112,8 +120,8 @@ local function makeAvatarPreview(avatar, parent, size)
 	end
 
 	if avatar.beard then
-		put("Beard", Enum.PartType.Ball, Vector3.new(0.56, 0.52, 0.3), Vector3.new(0, 2.3, 0.34), WHITE)
-		put("Moustache", Enum.PartType.Ball, Vector3.new(0.34, 0.16, 0.2), Vector3.new(0, 2.44, 0.38), WHITE)
+		put("Beard", Enum.PartType.Ball, Vector3.new(0.56, 0.52, 0.3), Vector3.new(0, 2.3, -0.34), WHITE)
+		put("Moustache", Enum.PartType.Ball, Vector3.new(0.34, 0.16, 0.2), Vector3.new(0, 2.44, -0.38), WHITE)
 	end
 	if avatar.hair then
 		put("Hair", Enum.PartType.Ball, Vector3.new(0.82, 0.5, 0.82), Vector3.new(0, 2.78, 0), WHITE)

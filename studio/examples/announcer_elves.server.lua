@@ -26,6 +26,7 @@ local OUTFITS = {
 	elf = "WORKSHOP ELF",
 	reindeer = "REINDEER",
 	snowman = "SNOWMAN",
+	goldwings = "GOLDEN WING BOOTS",
 }
 local ADS = {
 	Cocoa = {

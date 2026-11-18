@@ -46,6 +46,7 @@ local WHITE = Color3.fromRGB(245, 245, 240)
 local BLACK = Color3.fromRGB(32, 28, 30)
 local BROWN = Color3.fromRGB(129, 84, 52)
 local SKIN = Color3.fromRGB(232, 194, 158)
+local GOLD = Color3.fromRGB(255, 214, 120)
 
 local AVATARS = {
 	santa = {
@@ -67,6 +68,11 @@ local AVATARS = {
 	snowman = {
 		name = "Snowman", price = 50, coat = WHITE, pants = WHITE, headColor = WHITE,
 		hat = BLACK, carrot = true, boots = BLACK,
+	},
+	goldwings = {
+		name = "Golden Wing Boots", price = 70, coat = Color3.fromRGB(120, 80, 30),
+		pants = Color3.fromRGB(90, 60, 20), hat = GOLD, head = SKIN,
+		boots = GOLD, wings = true, hair = false,
 	},
 }
 
@@ -164,7 +170,7 @@ local function applyOutfit(player, id)
 		end
 		if def.beard then
 			accessory("Beard", Enum.PartType.Ball, Vector3.new(1.7, 1.5, 0.9), WHITE, head,
-				CFrame.new(0, -0.9, 1.1))
+				CFrame.new(0, -0.9, -1.1))
 		end
 		if def.hair then
 			accessory("Hair", Enum.PartType.Ball, Vector3.new(1.8, 1.1, 1.6), WHITE, head,
@@ -194,6 +200,35 @@ local function applyOutfit(player, id)
 	if def.belt and torso and torso:IsA("BasePart") then
 		accessory("Belt", Enum.PartType.Block, Vector3.new(2.6, 0.45, 1.6), BLACK, torso,
 			CFrame.new(0, -0.6, 0.55))
+	end
+	-- Golden Wing Boots: a pair of flapping wings welded to each foot with a
+	-- Motor6D so the client can animate them without fighting the rig.
+	if def.wings then
+		for _, side in ipairs({ -1, 1 }) do
+			local foot = character:FindFirstChild(side == -1 and "LeftFoot" or "RightFoot")
+			if foot and foot:IsA("BasePart") then
+				local wing = Instance.new("Part")
+				wing.Name = side == -1 and "SantaAvatar_WingL" or "SantaAvatar_WingR"
+				wing.Shape = Enum.PartType.Block
+				wing.Size = Vector3.new(1.7, 0.14, 1.05)
+				wing.Color = GOLD
+				wing.Material = Enum.Material.SmoothPlastic
+				wing.CanCollide = false
+				wing.CanTouch = false
+				wing.CanQuery = false
+				wing.CFrame = foot.CFrame * CFrame.new(side * 0.35, 0.45, -0.25)
+					* CFrame.Angles(0, side * math.rad(22), 0)
+				wing.Parent = foot.Parent
+
+				local motor = Instance.new("Motor6D")
+				motor.Name = side == -1 and "SantaAvatar_WingMotorL" or "SantaAvatar_WingMotorR"
+				motor.Part0 = foot
+				motor.Part1 = wing
+				motor.C0 = CFrame.new(side * 0.35, 0.45, -0.25) * CFrame.Angles(0, side * math.rad(22), 0)
+				motor.C1 = CFrame.new(0, 0, 0)
+				motor.Parent = wing
+			end
+		end
 	end
 	player:SetAttribute("SantaOutfit", id)
 end
