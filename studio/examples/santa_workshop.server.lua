@@ -217,14 +217,14 @@ local function applyOutfit(player, id)
 				wing.CanTouch = false
 				wing.CanQuery = false
 				wing.CFrame = foot.CFrame * CFrame.new(side * 0.35, 0.45, -0.25)
-					* CFrame.Angles(0, side * math.rad(22), 0)
+					* CFrame.Angles(math.rad(-30), side * math.rad(22), side * math.rad(35))
 				wing.Parent = foot.Parent
 
 				local motor = Instance.new("Motor6D")
 				motor.Name = side == -1 and "SantaAvatar_WingMotorL" or "SantaAvatar_WingMotorR"
 				motor.Part0 = foot
 				motor.Part1 = wing
-				motor.C0 = CFrame.new(side * 0.35, 0.45, -0.25) * CFrame.Angles(0, side * math.rad(22), 0)
+				motor.C0 = CFrame.new(side * 0.35, 0.45, -0.25) * CFrame.Angles(math.rad(-30), side * math.rad(22), side * math.rad(35))
 				motor.C1 = CFrame.new(0, 0, 0)
 				motor.Parent = wing
 			end

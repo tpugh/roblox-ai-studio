@@ -94,7 +94,8 @@ local function makeAvatarPreview(avatar, parent, size)
 	end
 	if avatar.wings then
 		for _, side in ipairs({ -1, 1 }) do
-			put("Wing" .. (side == -1 and "L" or "R"), Enum.PartType.Block, Vector3.new(1.7, 0.14, 1.05), Vector3.new(side * 0.35, 0.6, -0.25), GOLD)
+			local wing = put("Wing" .. (side == -1 and "L" or "R"), Enum.PartType.Block, Vector3.new(1.7, 0.14, 1.05), Vector3.new(side * 0.35, 0.6, -0.25), GOLD)
+			wing.CFrame = CFrame.new(side * 0.35, 0.6, -0.25) * CFrame.Angles(math.rad(-30), side * math.rad(22), side * math.rad(35))
 		end
 	end
 	put("Torso", Enum.PartType.Block, Vector3.new(1.0, 1.05, 0.56), Vector3.new(0, 1.62, 0), avatar.coat)
