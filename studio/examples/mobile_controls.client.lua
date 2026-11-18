@@ -311,6 +311,13 @@ local function slimSigns()
 				panel.Visible = false
 			end
 		end
+		-- Holiday Piano's tag ends in "M mute" — a keyboard hint with no phone
+		-- equivalent. Hide the whole tag; music mute stays on through other UI.
+		local piano = playerGui:FindFirstChild("HolidayPianoUI")
+		local musicTag = piano and piano:FindFirstChild("MusicTag")
+		if musicTag then
+			musicTag.Visible = false
+		end
 	end
 	-- The big in-world HOOPSMAS title board eats phone screen space. The voice
 	-- announcer still delivers every callout, so hide the visual board entirely.
@@ -319,6 +326,15 @@ local function slimSigns()
 	local titleBoard = anchor and anchor:FindFirstChild("Bubble")
 	if titleBoard and titleBoard:IsA("BillboardGui") then
 		titleBoard.Enabled = false
+	end
+	-- The spectator sign's second line is a keyboard hint ("press E to watch").
+	-- Keep the useful label but drop the key instruction on touch devices.
+	local stand = Workspace:FindFirstChild("HotChocolateStand")
+	local watchAnchor = stand and stand:FindFirstChild("WatchSignAnchor")
+	local watchSign = watchAnchor and watchAnchor:FindFirstChild("WatchSign")
+	local watchLabel = watchSign and watchSign:FindFirstChild("TextLabel")
+	if watchLabel then
+		watchLabel.Text = "SPECTATOR DECK"
 	end
 	for _, object in ipairs(Workspace:GetDescendants()) do
 		if object:IsA("BillboardGui") and not object:GetAttribute("MobileScaled") then
