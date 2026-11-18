@@ -791,6 +791,152 @@ local function shakeRim(position, strength)
 	end
 end
 
+-- ------------------------------------------------------- gamebreaker sled
+-- A temporary sled carrying Santa and two reindeer sweeps in, lifts the
+-- dunker, and carries them to the rim. Built from primitives so it needs no
+-- external assets and can be tweaked as one anchored model.
+
+local function buildSled(at)
+	local model = Instance.new("Model")
+	model.Name = "GamebreakerSled"
+	model.Parent = Workspace
+	local root = Instance.new("Part")
+	root.Name = "SledRoot"
+	root.Size = Vector3.new(1, 1, 1)
+	root.Transparency = 1
+	root.Anchored = true
+	root.CanCollide = false
+	root.CanTouch = false
+	root.CanQuery = false
+	root.CFrame = at
+	root.Parent = model
+	model.PrimaryPart = root
+
+	local function part(name, shape, size, pos, colour, rotation)
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Shape = shape or Enum.PartType.Block
+		p.Size = size
+		p.Color = colour
+		p.Material = Enum.Material.SmoothPlastic
+		p.CanCollide = false
+		p.CanTouch = false
+		p.CanQuery = false
+		p.CFrame = at * CFrame.new(pos) * (rotation or CFrame.new())
+		p.Parent = model
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = root
+		weld.Part1 = p
+		weld.Parent = p
+		return p
+	end
+
+	local RED = Color3.fromRGB(200, 40, 52)
+	local WHITE = Color3.fromRGB(255, 250, 240)
+	local SKIN = Color3.fromRGB(232, 194, 158)
+	local BROWN = Color3.fromRGB(120, 76, 48)
+	local INK = Color3.fromRGB(34, 30, 40)
+
+	-- Sled body and runners.
+	part("Deck", Enum.PartType.Block, Vector3.new(2.6, 0.35, 4.2), Vector3.new(0, 0.25, 0), RED)
+	part("BackREST", Enum.PartType.Block, Vector3.new(2.6, 1.2, 0.35), Vector3.new(0, 0.9, 1.9), RED)
+	for _, side in ipairs({ -1, 1 }) do
+		part("Runner" .. side, Enum.PartType.Block, Vector3.new(0.22, 0.28, 5), Vector3.new(side * 1.1, -0.05, -0.3), INK)
+		part("RunnerTip" .. side, Enum.PartType.Block, Vector3.new(0.22, 0.28, 1), Vector3.new(side * 1.1, 0.3, -3), INK)
+	end
+
+	-- Santa sitting on the sled, facing the hoop (-Z in sled-local space).
+	part("SantaBody", Enum.PartType.Ball, Vector3.new(1.5, 1.6, 1.2), Vector3.new(0, 1.35, 0.5), RED)
+	part("SantaHead", Enum.PartType.Ball, Vector3.new(0.95, 0.95, 0.95), Vector3.new(0, 2.4, 0.5), SKIN)
+	part("SantaHat", Enum.PartType.Cylinder, Vector3.new(0.85, 0.9, 0.85), Vector3.new(0, 2.95, 0.5), RED)
+	part("SantaPom", Enum.PartType.Ball, Vector3.new(0.38, 0.38, 0.38), Vector3.new(0, 3.45, 0.4), WHITE)
+	part("SantaBeard", Enum.PartType.Ball, Vector3.new(0.85, 0.7, 0.5), Vector3.new(0, 2.1, 0.15), WHITE)
+	part("SantaBelt", Enum.PartType.Block, Vector3.new(1.55, 0.28, 1.25), Vector3.new(0, 1.0, 0.5), INK)
+
+	-- Two reindeer pulling in front.
+	for index = 1, 2 do
+		local z = -2.6 - (index - 1) * 2.2
+		part("DeerBody" .. index, Enum.PartType.Ball, Vector3.new(1.2, 1.05, 2.0), Vector3.new(0, 1.0, z), BROWN)
+		part("DeerHead" .. index, Enum.PartType.Ball, Vector3.new(0.75, 0.75, 0.9), Vector3.new(0, 1.7, z - 1.15), BROWN)
+		part("DeerNose" .. index, Enum.PartType.Ball, Vector3.new(0.32, 0.32, 0.32), Vector3.new(0, 1.55, z - 1.7), RED)
+		for _, side in ipairs({ -1, 1 }) do
+			part("Antler" .. index .. side, Enum.PartType.Cylinder, Vector3.new(0.12, 0.9, 0.12),
+				Vector3.new(side * 0.32, 2.3, z - 1.1), BROWN, CFrame.Angles(0, 0, side * 0.5))
+		end
+		part("Harness" .. index, Enum.PartType.Block, Vector3.new(1.5, 0.16, 0.2), Vector3.new(0, 1.2, z + 0.8), RED)
+	end
+	return model
+end
+
+-- Blow the hoop apart into sparks and debris, then put every part back.
+local function explodeHoop(position)
+	local visuals = rimVisualsNear(position)
+	local saved = {}
+	for _, part in ipairs(visuals) do
+		saved[part] = { cframe = part.CFrame, transparency = part.Transparency }
+		part.Transparency = 1
+	end
+
+	local holder = Instance.new("Part")
+	holder.Name = "HoopExplosion"
+	holder.Size = Vector3.new(0.2, 0.2, 0.2)
+	holder.Transparency = 1
+	holder.CanCollide = false
+	holder.CanQuery = false
+	holder.Anchored = true
+	holder.CFrame = CFrame.new(position)
+	holder.Parent = Workspace
+	local burst = Instance.new("ParticleEmitter")
+	burst.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	burst.Color = ColorSequence.new(Color3.fromRGB(255, 214, 92))
+	burst.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2.4), NumberSequenceKeypoint.new(1, 0) })
+	burst.Lifetime = NumberRange.new(0.5, 1.0)
+	burst.Speed = NumberRange.new(18, 42)
+	burst.SpreadAngle = Vector2.new(180, 180)
+	burst.Rate = 0
+	burst.LightEmission = 1
+	burst.Parent = holder
+	burst:Emit(140)
+
+	local flash = Instance.new("PointLight")
+	flash.Brightness = 14
+	flash.Range = 40
+	flash.Color = Color3.fromRGB(255, 224, 140)
+	flash.Parent = holder
+
+	for i = 1, 18 do
+		local debris = Instance.new("Part")
+		debris.Name = "HoopDebris"
+		debris.Shape = Enum.PartType.Ball
+		debris.Size = Vector3.new(0.35, 0.35, 0.35)
+		debris.Color = Color3.fromRGB(255, 214, 92)
+		debris.Material = Enum.Material.Neon
+		debris.CanCollide = false
+		debris.CanTouch = false
+		debris.CanQuery = false
+		debris.CFrame = CFrame.new(position)
+		debris.Parent = Workspace
+		debris.AssemblyLinearVelocity = Vector3.new((math.random() - 0.5) * 70, math.random() * 45, (math.random() - 0.5) * 70)
+		task.delay(1.2, function()
+			if debris.Parent then
+				debris:Destroy()
+			end
+		end)
+	end
+
+	task.delay(1.1, function()
+		for part, state in pairs(saved) do
+			if part.Parent then
+				part.CFrame = state.cframe
+				part.Transparency = state.transparency
+			end
+		end
+		if holder.Parent then
+			holder:Destroy()
+		end
+	end)
+end
+
 local function tweenPart(part, goal, seconds, style, direction)
 	local info = TweenInfo.new(seconds, style or Enum.EasingStyle.Quad, direction or Enum.EasingDirection.Out)
 	local tween = TweenService:Create(part, info, { CFrame = goal })
@@ -861,6 +1007,25 @@ local function dunkBall(player, scoreVolume, gamebreaker)
 			humanoid.PlatformStand = true
 		end
 		root.Anchored = true
+
+		-- Gamebreaker: Santa and his reindeer sweep in on a sled and carry the
+		-- dunker to the rim. The sled runs alongside the normal ball/body path.
+		if gamebreaker then
+			local sledStart = rim + inward * 26 + Vector3.new(0, -1, 0)
+			local sled = buildSled(CFrame.lookAt(sledStart, root.Position))
+			task.spawn(function()
+				tweenPart(sled.PrimaryPart, CFrame.lookAt(root.Position - inward * 2, rim), 0.45,
+					Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+				task.wait(0.12)
+				tweenPart(sled.PrimaryPart, CFrame.lookAt(rim + inward * 5 + Vector3.new(0, -0.7, 0), rim), 0.6,
+					Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+				task.wait(0.35)
+				tweenPart(sled.PrimaryPart, CFrame.lookAt(rim + inward * 28 + Vector3.new(0, 6, 0), rim), 0.85,
+					Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+				sled:Destroy()
+			end)
+		end
+
 		task.spawn(function()
 			tweenPart(root, apexRoot, DUNK_GATHER_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 			task.wait(DUNK_SLAM_TIME + DUNK_DROP_TIME + 0.12)
@@ -880,7 +1045,11 @@ local function dunkBall(player, scoreVolume, gamebreaker)
 		end
 		tweenPart(ball, through, DUNK_SLAM_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		dunkBurst(rim, gamebreaker)
-		shakeRim(rim, gamebreaker and 1.9 or 0.6)
+		if gamebreaker then
+			explodeHoop(rim) -- hoop blows apart, then reassembles itself
+		else
+			shakeRim(rim, 0.6)
+		end
 		playSound(ball, "rim", 0.86)
 		if not gamebreaker and player.Parent then
 			-- Gamebreaker pays its own points in the NBA Street layer; a normal
