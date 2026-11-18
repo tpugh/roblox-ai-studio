@@ -143,6 +143,7 @@ local lastBounce = {} -- [ball] = os.clock(), floor hits of a loose ball
 local bounceHook = {} -- [ball] = true, floor-bounce listener installed
 local shotOrigin = {} -- [ball] = Vector3, where the current shot was released
 local dunkBusy = {} -- [ball] = true while the scripted dunk owns it
+local dunkingPlayer = {} -- [player] = token while a dunk owns their character
 local dunkNoScore = {} -- [ball] = os.clock() until which the rim score is muted
 local thrower = setmetatable({}, { __mode = "k" })
 local watchedRims = {}
@@ -950,7 +951,7 @@ local function dunkBall(player, scoreVolume, gamebreaker)
 		return false
 	end
 	local ball = heldBallOf(player) or dribbledBallOf(player)
-	if not ball or dunkBusy[ball] then
+	if not ball or dunkBusy[ball] or dunkingPlayer[player] then
 		return false
 	end
 
@@ -968,6 +969,8 @@ local function dunkBall(player, scoreVolume, gamebreaker)
 	end
 
 	dunkBusy[ball] = true
+	local dunkToken = {}
+	dunkingPlayer[player] = dunkToken
 	dunkNoScore[ball] = os.clock() + DUNK_NO_SCORE_WINDOW
 	mode[ball] = "dunk"
 	ball.Anchored = true
@@ -1003,6 +1006,9 @@ local function dunkBall(player, scoreVolume, gamebreaker)
 		-- rim through the slam, then ease back down to the floor.
 		local baseRoot = root.CFrame
 		local wasAnchored = root.Anchored
+		-- Capture the original state BEFORE changing it; restoring to the value
+		-- read after setting PlatformStand=true was leaving players frozen.
+		local wasPlatformStand = humanoid and humanoid.PlatformStand or false
 		if humanoid then
 			humanoid.PlatformStand = true
 		end
@@ -1026,15 +1032,49 @@ local function dunkBall(player, scoreVolume, gamebreaker)
 			end)
 		end
 
-		task.spawn(function()
-			tweenPart(root, apexRoot, DUNK_GATHER_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-			task.wait(DUNK_SLAM_TIME + DUNK_DROP_TIME + 0.12)
+		-- The old version waited on Tween.Completed. A tween that was cancelled
+		-- (another animation, a respawn, a physics change) could hang that wait
+		-- forever, so the player stayed Anchored + PlatformStand at the rim.
+		-- Timed waits and an unconditional cleanup make that impossible.
+		local function restoreCharacter()
 			if root.Parent then
-				tweenPart(root, baseRoot, 0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 				root.Anchored = wasAnchored
-				if humanoid then
-					humanoid.PlatformStand = false
+			end
+			if humanoid then
+				humanoid.PlatformStand = wasPlatformStand
+			end
+			if dunkingPlayer[player] == dunkToken then
+				dunkingPlayer[player] = nil
+			end
+		end
+
+		-- Last-resort watchdog: if the animation thread is ever interrupted,
+		-- free the character after the longest possible dunk plus a margin.
+		task.delay(DUNK_GATHER_TIME + DUNK_SLAM_TIME + DUNK_DROP_TIME + 3, function()
+			if dunkingPlayer[player] == dunkToken then
+				restoreCharacter()
+			end
+		end)
+
+		task.spawn(function()
+			local ok, err = pcall(function()
+				local up = TweenService:Create(root,
+					TweenInfo.new(DUNK_GATHER_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					{ CFrame = apexRoot })
+				up:Play()
+				task.wait(DUNK_GATHER_TIME)
+				task.wait(DUNK_SLAM_TIME + DUNK_DROP_TIME + 0.12)
+				if root.Parent then
+					local down = TweenService:Create(root,
+						TweenInfo.new(0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+						{ CFrame = baseRoot })
+					down:Play()
+					task.wait(0.42)
 				end
+			end)
+			restoreCharacter() -- always runs, including on error
+			if not ok then
+				warn("Dunk character animation failed: " .. tostring(err))
 			end
 		end)
 

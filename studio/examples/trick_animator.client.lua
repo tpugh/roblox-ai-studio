@@ -116,6 +116,11 @@ local function perform(character, move)
 	if not humanoid or not root then
 		return
 	end
+	-- A dunk/cinematic anchors the root. Caching that Anchored=true here would
+	-- restore it after the trick and strand the player at the rim.
+	if root.Anchored then
+		return
+	end
 
 	local token = {}
 	active[character] = token
