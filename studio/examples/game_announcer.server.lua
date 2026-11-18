@@ -4,7 +4,21 @@
 -- reads attributes and scoreboard text, so it never touches game state.
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+
+-- Play the voice on each client as 2D audio so it is always audible, instead
+-- of relying on a positional Sound attached to a part far across the court.
+local remotes = ReplicatedStorage:WaitForChild("BallRemotes", 10)
+local announceVoice
+if remotes then
+	announceVoice = remotes:FindFirstChild("AnnounceVoice")
+	if not announceVoice then
+		announceVoice = Instance.new("RemoteEvent")
+		announceVoice.Name = "AnnounceVoice"
+		announceVoice.Parent = remotes
+	end
+end
 
 local model = Workspace:WaitForChild("GameAnnouncer", 10)
 if not model then
@@ -37,28 +51,13 @@ local queue = {}
 local running = false
 
 local function speak(key)
-	if not anchor then
-		return
-	end
 	local id = key and VOICE[key]
 	if not id then
 		return
 	end
-	local sound = Instance.new("Sound")
-	sound.Name = "AnnouncerVoice"
-	sound.SoundId = "rbxassetid://" .. tostring(id)
-	sound.Volume = 1
-	sound.PlaybackSpeed = 1
-	sound.RollOffMode = Enum.RollOffMode.InverseTapered
-	sound.RollOffMinDistance = 12
-	sound.RollOffMaxDistance = 0 -- heard anywhere on the court
-	sound.Parent = anchor
-	sound:Play()
-	task.delay(4, function()
-		if sound.Parent then
-			sound:Destroy()
-		end
-	end)
+	if announceVoice then
+		announceVoice:FireAllClients(id)
+	end
 end
 
 local function blare()
