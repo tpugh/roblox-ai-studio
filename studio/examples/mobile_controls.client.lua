@@ -382,6 +382,9 @@ local function slimSigns()
 		for _, pair in ipairs({
 			{ ballHud, "HintBubble" }, { ballHud, "HintBubbleShadow" },
 			{ streetHud, "ControlsBubble" }, { streetHud, "ControlsBubbleShadow" },
+			-- Empty red charge meter: touch charging is handled by our SHOOT
+			-- button, so this box would just sit there covering the court.
+			{ ballHud, "ChargeBubble" }, { ballHud, "ChargeBubbleShadow" },
 		}) do
 			local panel = pair[1] and pair[1]:FindFirstChild(pair[2])
 			if panel then
