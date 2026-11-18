@@ -40,6 +40,15 @@ player:GetAttributeChangedSignal("ForceMobileControls"):Connect(function()
 	gui.Enabled = UserInputService.TouchEnabled or player:GetAttribute("ForceMobileControls") == true
 end)
 
+-- Roblox's default touch JUMP button sits in the same bottom-right corner as
+-- SHOOT. On real touch devices remove it so the two never overlap; our DUNK
+-- button already covers the jump/dunk action.
+if UserInputService.TouchEnabled then
+	pcall(function()
+		game:GetService("ContextActionService"):UnbindAction("jumpAction")
+	end)
+end
+
 local CREAM = Color3.fromRGB(240, 240, 246)
 local INK = Color3.fromRGB(38, 38, 48)
 local GLASS = Color3.fromRGB(66, 58, 50)
@@ -178,28 +187,27 @@ local function at(right, bottom)
 	return UDim2.new(1, -right, 1, -bottom)
 end
 
-circleButton("MobileShoot", "SHOOT", UDim2.fromOffset(152, 152), at(115, 100), true, nil, setCharging)
-circleButton("MobileDunk", "DUNK", UDim2.fromOffset(90, 90), at(160, 215), false, function()
+-- SHOOT is the hub; the four action buttons sit in an arc wrapped around its
+-- top and left (the right/bottom edges are screen boundaries).
+circleButton("MobileShoot", "SHOOT", UDim2.fromOffset(148, 148), at(125, 125), true, nil, setCharging)
+circleButton("MobileDunk", "DUNK", UDim2.fromOffset(84, 84), at(125, 255), false, function()
 	if Dunk then Dunk:FireServer() end
 end)
-circleButton("MobileTrick", "TRICK", UDim2.fromOffset(90, 90), at(70, 240), false, function()
+circleButton("MobileTrick", "TRICK", UDim2.fromOffset(84, 84), at(215, 220), false, function()
 	if Trick then Trick:FireServer() end
 end)
-circleButton("MobileSteal", "STEAL", UDim2.fromOffset(90, 90), at(155, 310), false, function()
+circleButton("MobileSteal", "STEAL", UDim2.fromOffset(84, 84), at(255, 140), false, function()
 	if Defend then Defend:FireServer() end
 end)
-circleButton("MobileBreaker", "BREAKER", UDim2.fromOffset(90, 90), at(70, 335), false, function()
+circleButton("MobileBreaker", "BREAKER", UDim2.fromOffset(84, 84), at(215, 55), false, function()
 	if Gamebreaker then Gamebreaker:FireServer() end
 end)
 
--- Smaller support circles above the main cluster.
-circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(76, 76), at(150, 410), false, nil, setTurbo)
-circleButton("MobileGrab", "GRAB", UDim2.fromOffset(76, 76), at(80, 435), false, grabNearest)
-circleButton("MobileReset", "RESET", UDim2.fromOffset(70, 70), at(140, 495), false, function()
+-- Support circles form a smaller arc above the hub (no MUSIC button on mobile).
+circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(72, 72), at(55, 345), false, nil, setTurbo)
+circleButton("MobileGrab", "GRAB", UDim2.fromOffset(72, 72), at(140, 370), false, grabNearest)
+circleButton("MobileReset", "RESET", UDim2.fromOffset(68, 68), at(225, 345), false, function()
 	if ResetBalls then ResetBalls:FireServer() end
-end)
-circleButton("MobileMute", "MUSIC", UDim2.fromOffset(66, 66), at(75, 505), false, function()
-	if MusicMute then MusicMute:Fire() end
 end)
 
 local function applyScale()
@@ -217,8 +225,60 @@ if camera then
 	camera:GetPropertyChangedSignal("ViewportSize"):Connect(applyScale)
 end
 
+-- Shrink the Score and Cocoa Bucks bubbles on phones and make them see-through
+-- so they stop covering the court. Keep the numbers readable with a dark stroke.
+local hudSlimmed = false
+local function slimHUD()
+	if hudSlimmed then
+		return
+	end
+	local ballHud = player:FindFirstChild("PlayerGui")
+	ballHud = ballHud and ballHud:FindFirstChild("BallHUD")
+	if not ballHud then
+		return
+	end
+	local specs = {
+		{ name = "WalletBubble", w = 360, h = 60, font = 19 },
+		{ name = "ScoreBubble", w = 320, h = 76, font = 30 },
+	}
+	for _, spec in ipairs(specs) do
+		if not ballHud:FindFirstChild(spec.name) then
+			return -- HUD not built yet; try again next tick
+		end
+	end
+	hudSlimmed = true
+	for _, spec in ipairs(specs) do
+		local rim = ballHud:FindFirstChild(spec.name)
+		local shadow = ballHud:FindFirstChild(spec.name .. "Shadow")
+		if rim then
+			rim.Size = UDim2.fromOffset(math.floor(spec.w * 0.6), math.floor(spec.h * 0.6))
+			rim.BackgroundTransparency = 1
+			local inner = rim:FindFirstChild("Inner")
+			if inner then
+				inner.BackgroundTransparency = 1
+				for _, child in ipairs(inner:GetChildren()) do
+					if child:IsA("Frame") then
+						child.Visible = false -- candy stripes
+					end
+				end
+				for _, label in ipairs(inner:GetDescendants()) do
+					if label:IsA("TextLabel") then
+						label.TextSize = spec.font
+						label.TextStrokeColor3 = Color3.new(1, 1, 1)
+						label.TextStrokeTransparency = 0.45
+					end
+				end
+			end
+		end
+		if shadow then
+			shadow.Visible = false
+		end
+	end
+end
+
 -- Phones have less room: hide keyboard hints and shrink the world sign boards.
 local function slimSigns()
+	slimHUD()
 	local playerGui = player:FindFirstChild("PlayerGui")
 	if playerGui then
 		local ballHud = playerGui:FindFirstChild("BallHUD")
