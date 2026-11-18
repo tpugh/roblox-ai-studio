@@ -170,7 +170,7 @@ status.Parent = frame
 
 local close = Instance.new("TextButton")
 close.Position = UDim2.fromOffset(624, 12)
-close.Size = UDim2.fromOffset(80, 38)
+close.Size = UDim2.fromOffset(80, 56)
 close.BackgroundColor3 = Color3.fromRGB(150, 44, 52)
 close.BorderSizePixel = 0
 close.Font = Enum.Font.GothamBold
@@ -229,7 +229,7 @@ detailEffect.Parent = detail
 
 buyButton = Instance.new("TextButton")
 buyButton.Position = UDim2.fromOffset(176, 120)
-buyButton.Size = UDim2.fromOffset(300, 46)
+buyButton.Size = UDim2.fromOffset(300, 56)
 buyButton.BackgroundColor3 = Color3.fromRGB(48, 122, 78)
 buyButton.BorderSizePixel = 0
 buyButton.Font = Enum.Font.GothamBold
@@ -318,7 +318,7 @@ robuxTitle.Parent = robuxFrame
 
 local robuxClose = Instance.new("TextButton")
 robuxClose.Position = UDim2.fromOffset(360, 10)
-robuxClose.Size = UDim2.fromOffset(44, 36)
+robuxClose.Size = UDim2.fromOffset(48, 48)
 robuxClose.BackgroundColor3 = Color3.fromRGB(150, 44, 52)
 robuxClose.BorderSizePixel = 0
 robuxClose.Font = Enum.Font.GothamBold
@@ -338,8 +338,8 @@ if BuyBucks and configModule then
 	if ok and config and config.Products then
 		for index, product in ipairs(config.Products) do
 			local button = Instance.new("TextButton")
-			button.Position = UDim2.fromOffset(24, 58 + (index - 1) * 56)
-			button.Size = UDim2.fromOffset(372, 46)
+			button.Position = UDim2.fromOffset(24, 58 + (index - 1) * 60)
+			button.Size = UDim2.fromOffset(372, 56)
 			button.BackgroundColor3 = Color3.fromRGB(88, 52, 42)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.GothamBold
@@ -358,7 +358,7 @@ end
 
 local robuxButton = Instance.new("TextButton")
 robuxButton.Position = UDim2.fromOffset(18, 486)
-robuxButton.Size = UDim2.fromOffset(684, 46)
+robuxButton.Size = UDim2.fromOffset(684, 56)
 robuxButton.BackgroundColor3 = Color3.fromRGB(38, 96, 66)
 robuxButton.BorderSizePixel = 0
 robuxButton.Font = Enum.Font.GothamBold

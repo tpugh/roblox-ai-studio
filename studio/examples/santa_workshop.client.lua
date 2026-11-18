@@ -231,7 +231,7 @@ player:GetAttributeChangedSignal("SantaOutfit"):Connect(refresh)
 
 local close = Instance.new("TextButton")
 close.Position = UDim2.fromOffset(784, 12)
-close.Size = UDim2.fromOffset(80, 38)
+close.Size = UDim2.fromOffset(80, 56)
 close.BackgroundColor3 = Color3.fromRGB(150, 44, 52)
 close.BorderSizePixel = 0
 close.Font = Enum.Font.GothamBold
@@ -287,7 +287,7 @@ detailHint.Parent = detail
 
 buyButton = Instance.new("TextButton")
 buyButton.Position = UDim2.fromOffset(176, 120)
-buyButton.Size = UDim2.fromOffset(300, 46)
+buyButton.Size = UDim2.fromOffset(300, 56)
 buyButton.BackgroundColor3 = Color3.fromRGB(138, 44, 50)
 buyButton.BorderSizePixel = 0
 buyButton.Font = Enum.Font.GothamBold
@@ -354,7 +354,7 @@ end)
 
 local remove = Instance.new("TextButton")
 remove.Position = UDim2.fromOffset(18, 486)
-remove.Size = UDim2.fromOffset(844, 44)
+remove.Size = UDim2.fromOffset(844, 56)
 remove.BackgroundColor3 = Color3.fromRGB(60, 70, 80)
 remove.BorderSizePixel = 0
 remove.Font = Enum.Font.GothamBold
