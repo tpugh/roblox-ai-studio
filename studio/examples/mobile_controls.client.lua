@@ -332,6 +332,46 @@ local function slimHUD()
 	end
 end
 
+-- Ticket 12: a flat 0.65 scale still let close-up signs dominate a short phone
+-- viewport. Scale each offset-sized BillboardGui from the viewport height so it
+-- never covers more than ~25%, and ease it down further when very close.
+local billboardOriginals = setmetatable({}, { __mode = "k" })
+local function scaleWorldSigns()
+	local camera = Workspace.CurrentCamera
+	local viewport = camera and camera.ViewportSize or Vector2.new(1280, 720)
+	local maxHeight = viewport.Y * 0.25
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local rootPos = root and root.Position
+	for _, object in ipairs(Workspace:GetDescendants()) do
+		if object:IsA("BillboardGui") then
+			local size = object.Size
+			if size.X.Offset > 0 and size.Y.Offset > 0 then
+				local original = billboardOriginals[object]
+				if not original then
+					original = size
+					billboardOriginals[object] = original
+					object.MaxDistance = object.MaxDistance * 0.75
+				end
+				local scale = math.min(1, maxHeight / original.Y.Offset)
+				local part = object.Adornee or object.Parent
+				if rootPos and part and part:IsA("BasePart") then
+					local distance = (part.Position - rootPos).Magnitude
+					if distance < 12 then
+						scale = scale * (0.6 + 0.4 * (distance / 12))
+					end
+				end
+				scale = math.clamp(scale, 0.35, 1)
+				local width = original.X.Offset * scale
+				local height = original.Y.Offset * scale
+				if object.Size.X.Offset ~= width or object.Size.Y.Offset ~= height then
+					object.Size = UDim2.fromOffset(width, height)
+				end
+			end
+		end
+	end
+end
+
 -- Phones have less room: hide keyboard hints and shrink the world sign boards.
 local function slimSigns()
 	slimHUD()
@@ -364,25 +404,15 @@ local function slimSigns()
 	if titleBoard and titleBoard:IsA("BillboardGui") then
 		titleBoard.Enabled = false
 	end
-	-- The spectator sign's second line is a keyboard hint ("press E to watch").
-	-- Keep the useful label but drop the key instruction on touch devices.
-	local stand = Workspace:FindFirstChild("HotChocolateStand")
-	local watchAnchor = stand and stand:FindFirstChild("WatchSignAnchor")
-	local watchSign = watchAnchor and watchAnchor:FindFirstChild("WatchSign")
-	local watchLabel = watchSign and watchSign:FindFirstChild("TextLabel")
-	if watchLabel then
-		watchLabel.Text = "SPECTATOR DECK"
-	end
-	for _, object in ipairs(Workspace:GetDescendants()) do
-		if object:IsA("BillboardGui") and not object:GetAttribute("MobileScaled") then
-			local s = object.Size
-			if s.X.Offset > 0 and s.Y.Offset > 0 then
-				object:SetAttribute("MobileScaled", true)
-				object.Size = UDim2.fromOffset(s.X.Offset * 0.65, s.Y.Offset * 0.65)
-				object.MaxDistance = object.MaxDistance * 0.75
-			end
-		end
-	end
+	-- The spectator sign now reads "Interact to watch" (device-neutral), so no
+	-- touch-specific text rewrite is needed here.
+	scaleWorldSigns()
+end
+-- Re-scale world signs immediately when the viewport changes (rotation, split
+-- view, resizing) instead of waiting for the next periodic pass.
+local scaleCamera = Workspace.CurrentCamera
+if scaleCamera then
+	scaleCamera:GetPropertyChangedSignal("ViewportSize"):Connect(scaleWorldSigns)
 end
 slimSigns()
 -- Keep retrying even if the mobile GUI was disabled when the script first ran

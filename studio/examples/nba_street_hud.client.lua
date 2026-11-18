@@ -210,17 +210,19 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.X then
+	-- Gamepad: R2 trick, D-pad right Gamebreaker, L1 turbo (A stays jump and
+	-- X stays the pick-up ProximityPrompt button).
+	if input.KeyCode == Enum.KeyCode.X or input.KeyCode == Enum.KeyCode.ButtonR2 then
 		TrickRemote:FireServer()
-	elseif input.KeyCode == Enum.KeyCode.G then
+	elseif input.KeyCode == Enum.KeyCode.G or input.KeyCode == Enum.KeyCode.DPadRight then
 		GamebreakerRemote:FireServer()
-	elseif input.KeyCode == Enum.KeyCode.LeftShift then
+	elseif input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonL1 then
 		setTurbo(true)
 	end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.LeftShift then
+	if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonL1 then
 		setTurbo(false)
 	end
 end)

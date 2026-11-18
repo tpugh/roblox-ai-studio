@@ -95,7 +95,11 @@ local function toggleMute()
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or input.KeyCode ~= Enum.KeyCode.M then
+	if processed then
+		return
+	end
+	-- M on keyboard, D-pad up on gamepad.
+	if input.KeyCode ~= Enum.KeyCode.M and input.KeyCode ~= Enum.KeyCode.DPadUp then
 		return
 	end
 	toggleMute()

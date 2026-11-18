@@ -191,27 +191,31 @@ player:GetAttributeChangedSignal("CocoaBucks"):Connect(refreshWallet)
 
 -- ------------------------------------------------------------------ input
 
+-- Gamepad mapping (console is currently disabled, but this keeps every action
+-- playable if it is enabled): Y shoot, B dunk, L2 steal, R1 snowball,
+-- D-pad left dribble, D-pad down reset. E/pick-up is the ProximityPrompt's X.
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.R then
+	local key = input.KeyCode
+	if key == Enum.KeyCode.R or key == Enum.KeyCode.DPadDown then
 		ResetRemote:FireServer()
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.C then
+	if key == Enum.KeyCode.C or key == Enum.KeyCode.ButtonL2 then
 		DefendRemote:FireServer()
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.V then
+	if key == Enum.KeyCode.V or key == Enum.KeyCode.ButtonB then
 		-- Dunk works from a held ball or a live dribble; the server validates.
 		if DunkRemote then
 			DunkRemote:FireServer()
 		end
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.B then
-		-- Keyboard alternative to left-click for firing the snowball gun.
+	if key == Enum.KeyCode.B or key == Enum.KeyCode.ButtonR1 then
+		-- Keyboard/gamepad alternative to left-click for the snowball gun.
 		if FireSnowball then
 			FireSnowball:FireServer()
 		end
@@ -220,18 +224,18 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if not holding then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.F then
+	if key == Enum.KeyCode.F or key == Enum.KeyCode.ButtonY then
 		charging = true
 		charge = 0
 		chargeBack.Visible = true
 		player:SetAttribute("Charging", true)
-	elseif input.KeyCode == Enum.KeyCode.Q then
+	elseif key == Enum.KeyCode.Q or key == Enum.KeyCode.DPadLeft then
 		DribbleRemote:FireServer()
 	end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.F and charging then
+	if (input.KeyCode == Enum.KeyCode.F or input.KeyCode == Enum.KeyCode.ButtonY) and charging then
 		charging = false
 		chargeBack.Visible = false
 		player:SetAttribute("Charging", false)

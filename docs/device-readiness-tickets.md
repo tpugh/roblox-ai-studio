@@ -111,18 +111,18 @@ areas; no `DisplayOrder` anywhere.
 values (HUD < controls < modal).
 **Acceptance:** Nothing hidden under the notch; modal always above controls.
 
-### TICKET-12 — BillboardGui scaling is too coarse — OPEN
+### TICKET-12 — BillboardGui scaling is too coarse — DONE
 **Severity:** Low · Flat `×0.65` / `MaxDistance×0.75` (`mobile_controls.client.lua:344-353`)
 can still let close-up signs dominate short viewports.
 **Fix:** Distance/aspect-aware scale.
 **Acceptance:** No sign covers more than ~25% of viewport height at typical range.
 
-### TICKET-13 — Device-neutral spectator sign text — DEFERRED (console off)
+### TICKET-13 — Device-neutral spectator sign text — DONE
 **Severity:** Low · "press E to watch" is rewritten only on touch
 (`mobile_controls.client.lua:337-343`).
 **Fix:** Use "Interact to watch" or derive from `GetLastInputType()`.
 
-### TICKET-14 — Console gamepad bindings — DEFERRED (console off)
+### TICKET-14 — Console gamepad bindings — DONE
 **Severity:** High if console enabled · Core actions are keyed only
 (`ball_controller.client.lua:194-244`, `nba_street_hud.client.lua:209-225`).
 **Fix:** Move bindings to `ContextActionService` with keyboard + gamepad + touch.

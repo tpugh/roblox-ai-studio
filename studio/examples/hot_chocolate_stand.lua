@@ -107,7 +107,7 @@ watchPrompt.ActionText = "Watch the game"
 watchPrompt.ObjectText = "Spectator deck"
 watchPrompt.MaxActivationDistance = 12
 watchPrompt.Parent = watchPart
-sign("WatchSign", "SPECTATOR DECK\npress E to watch", Vector3.new(5, 4.5, -37), UDim2.fromOffset(320, 110), Color3.fromRGB(200, 225, 255))
+sign("WatchSign", "SPECTATOR DECK\nInteract to watch", Vector3.new(5, 4.5, -37), UDim2.fromOffset(320, 110), Color3.fromRGB(200, 225, 255))
 
 -- Fire pit ------------------------------------------------------------------
 block("FirePit", Vector3.new(3.2, 0.8, 3.2), Vector3.new(13, 0.5, -51), DARK, Enum.Material.Slate)
