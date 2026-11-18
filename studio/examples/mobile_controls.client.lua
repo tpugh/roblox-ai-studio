@@ -218,6 +218,31 @@ local function grabNearest()
 	end
 end
 
+-- Steal / block animations generated for this experience. The rig uses
+-- AnimationConstraint joints, so a real Animation asset is the only way to
+-- pose the arms; direct CFrame writes to limbs are overwritten every frame.
+local SWAT_ANIM = "rbxassetid://128967520392965"
+local BLOCK_ANIM = "rbxassetid://117841130186106"
+local function playDefenseAnimation(animationId)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		return
+	end
+	local animation = Instance.new("Animation")
+	animation.AnimationId = animationId
+	local track = animator:LoadAnimation(animation)
+	track.Priority = Enum.AnimationPriority.Action
+	track:Play()
+	task.delay(1, function()
+		if track.IsPlaying then
+			track:Stop()
+		end
+		animation:Destroy()
+	end)
+end
+
 -- Right-side circular cluster: SHOOT is the anchor, moves ring around it.
 local function at(right, bottom)
 	return UDim2.new(1, -right, 1, -bottom)
@@ -235,6 +260,7 @@ circleButton("MobileTrick", "TRICK", UDim2.fromOffset(78, 78), at(345, 215), fal
 	if Trick then Trick:FireServer() end
 end)
 circleButton("MobileSteal", "STEAL", UDim2.fromOffset(78, 78), at(385, 135), false, function()
+	playDefenseAnimation(SWAT_ANIM)
 	if Defend then Defend:FireServer() end
 end)
 circleButton("MobileBreaker", "BREAKER", UDim2.fromOffset(78, 78), at(345, 50), false, function()
@@ -244,6 +270,16 @@ end)
 -- Support circles form a smaller arc above the hub (no MUSIC button on mobile).
 circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(68, 68), at(185, 335), false, nil, setTurbo)
 circleButton("MobileGrab", "GRAB", UDim2.fromOffset(68, 68), at(270, 360), false, grabNearest)
+-- Defensive block: jump and throw both hands up to swat a shot away.
+circleButton("MobileSwat", "SWAT", UDim2.fromOffset(90, 90), at(345, 215), false, function()
+	playDefenseAnimation(BLOCK_ANIM)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.Jump = true
+	end
+	if Defend then Defend:FireServer() end
+end)
 
 -- When the Gamebreaker meter fills, make the BREAKER button obvious: gold face,
 -- "GO!" label and a pulsing glow ring, so the player knows it is ready.
@@ -325,7 +361,7 @@ for _, entry in ipairs(buttons) do
 	local name = entry.holder.Name
 	if name == "MobileShoot" or name == "MobileDunk" or name == "MobileTrick" or name == "MobileBreaker" then
 		buttonMode[name] = "offense"
-	elseif name == "MobileSteal" or name == "MobileGrab" then
+	elseif name == "MobileSteal" or name == "MobileGrab" or name == "MobileSwat" then
 		buttonMode[name] = "defense"
 	else
 		buttonMode[name] = "both"
@@ -334,8 +370,9 @@ for _, entry in ipairs(buttons) do
 end
 local defenseLayout = {
 	MobileSteal = { 136, 255, 120 },
-	MobileGrab = { 84, 255, 250 },
-	MobileTurbo = { 80, 345, 215 },
+	MobileSwat = { 90, 360, 235 },
+	MobileGrab = { 90, 255, 250 },
+	MobileTurbo = { 80, 185, 335 },
 }
 local inOffense = nil
 local function updateButtonMode()
