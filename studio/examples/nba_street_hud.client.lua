@@ -60,8 +60,21 @@ Candy.corner(meterFill, 9)
 
 local controlPanel = Candy.bubble(gui, "ControlsBubble", UDim2.fromOffset(860, 50),
 	UDim2.new(0, 18, 1, -76), Vector2.new(0, 1), Candy.PINK)
+-- No decorative candy box around the keyboard commands.
+local controlRim = controlPanel.Parent
+controlRim.BackgroundTransparency = 1
+local controlShadow = gui:FindFirstChild("ControlsBubbleShadow")
+if controlShadow then controlShadow.Visible = false end
+controlPanel.BackgroundTransparency = 1
+for _, child in ipairs(controlPanel:GetChildren()) do
+	if child:IsA("Frame") then
+		child.Visible = false
+	end
+end
 local meterLabel = Candy.text(controlPanel, "Label", "X  trick   ·   G  Gamebreaker   ·   Shift  turbo   ·   V  dunk",
 	UDim2.fromScale(0.94, 0.8), 22, Candy.DARK)
+meterLabel.TextStrokeColor3 = Color3.new(1, 1, 1)
+meterLabel.TextStrokeTransparency = 0.4
 
 local chainPanel = Candy.bubble(gui, "ChainBubble", UDim2.fromOffset(760, 88),
 	UDim2.new(0.5, 0, 0.62, 0), Vector2.new(0.5, 0.5), Candy.MINT)

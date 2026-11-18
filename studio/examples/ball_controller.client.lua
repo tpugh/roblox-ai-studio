@@ -52,9 +52,22 @@ local score = Candy.text(scorePanel, "Score", "0 pts", UDim2.fromScale(0.92, 0.8
 
 local hintPanel = Candy.bubble(gui, "HintBubble", UDim2.fromOffset(1120, 62),
 	UDim2.new(0.5, 0, 1, -16), Vector2.new(0.5, 1), Candy.MINT)
+-- Keyboard hints sit on plain text: strip the candy rim, shadow and stripes.
+local hintRim = hintPanel.Parent
+hintRim.BackgroundTransparency = 1
+local hintShadow = gui:FindFirstChild("HintBubbleShadow")
+if hintShadow then hintShadow.Visible = false end
+hintPanel.BackgroundTransparency = 1
+for _, child in ipairs(hintPanel:GetChildren()) do
+	if child:IsA("Frame") then
+		child.Visible = false
+	end
+end
 local hint = Candy.text(hintPanel, "Hints",
 	"E  pick up   ·   F  shoot   ·   V  dunk   ·   Q  dribble   ·   C  block/steal   ·   R  reset",
 	UDim2.fromScale(0.96, 0.78), 26, Candy.DARK)
+hint.TextStrokeColor3 = Color3.new(1, 1, 1)
+hint.TextStrokeTransparency = 0.4
 
 local flashPanel = Candy.bubble(gui, "FlashBubble", UDim2.fromOffset(840, 112),
 	UDim2.new(0.5, 0, 0.34, 0), Vector2.new(0.5, 0.5), Candy.GOLD)
