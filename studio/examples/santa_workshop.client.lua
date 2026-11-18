@@ -182,7 +182,7 @@ local frame = Instance.new("Frame")
 frame.Name = "Menu"
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
 frame.Position = UDim2.fromScale(0.5, 0.5)
-frame.Size = UDim2.fromOffset(720, 550)
+frame.Size = UDim2.fromOffset(880, 550)
 frame.BackgroundColor3 = Color3.fromRGB(32, 24, 28)
 frame.BackgroundTransparency = 0.08
 frame.Visible = false
@@ -225,7 +225,7 @@ player:GetAttributeChangedSignal("CocoaBucks"):Connect(refresh)
 player:GetAttributeChangedSignal("SantaOutfit"):Connect(refresh)
 
 local close = Instance.new("TextButton")
-close.Position = UDim2.fromOffset(624, 12)
+close.Position = UDim2.fromOffset(784, 12)
 close.Size = UDim2.fromOffset(80, 38)
 close.BackgroundColor3 = Color3.fromRGB(150, 44, 52)
 close.BorderSizePixel = 0
@@ -246,7 +246,7 @@ local buyButton
 local detail = Instance.new("Frame")
 detail.Name = "Detail"
 detail.Position = UDim2.fromOffset(18, 292)
-detail.Size = UDim2.fromOffset(684, 180)
+detail.Size = UDim2.fromOffset(844, 180)
 detail.BackgroundColor3 = Color3.fromRGB(44, 32, 38)
 detail.BorderSizePixel = 1
 detail.BorderColor3 = Color3.fromRGB(92, 70, 62)
@@ -254,7 +254,7 @@ detail.Parent = frame
 
 local detailName = Instance.new("TextLabel")
 detailName.Position = UDim2.fromOffset(176, 10)
-detailName.Size = UDim2.fromOffset(494, 38)
+detailName.Size = UDim2.fromOffset(654, 38)
 detailName.BackgroundTransparency = 1
 detailName.Font = Enum.Font.GothamBlack
 detailName.TextSize = 28
@@ -263,7 +263,7 @@ detailName.Parent = detail
 
 local detailBlurb = Instance.new("TextLabel")
 detailBlurb.Position = UDim2.fromOffset(176, 50)
-detailBlurb.Size = UDim2.fromOffset(494, 30)
+detailBlurb.Size = UDim2.fromOffset(654, 30)
 detailBlurb.BackgroundTransparency = 1
 detailBlurb.Font = Enum.Font.Gotham
 detailBlurb.TextSize = 18
@@ -272,7 +272,7 @@ detailBlurb.Parent = detail
 
 local detailHint = Instance.new("TextLabel")
 detailHint.Position = UDim2.fromOffset(176, 84)
-detailHint.Size = UDim2.fromOffset(494, 26)
+detailHint.Size = UDim2.fromOffset(654, 26)
 detailHint.BackgroundTransparency = 1
 detailHint.Font = Enum.Font.GothamBold
 detailHint.TextSize = 16
@@ -349,7 +349,7 @@ end)
 
 local remove = Instance.new("TextButton")
 remove.Position = UDim2.fromOffset(18, 486)
-remove.Size = UDim2.fromOffset(684, 44)
+remove.Size = UDim2.fromOffset(844, 44)
 remove.BackgroundColor3 = Color3.fromRGB(60, 70, 80)
 remove.BorderSizePixel = 0
 remove.Font = Enum.Font.GothamBold
