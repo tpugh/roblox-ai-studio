@@ -17,7 +17,6 @@ local function remote(name)
 	return ball and ball:FindFirstChild(name) or nil
 end
 local Throw = remote("Throw")
-local ResetBalls = remote("ResetBalls")
 local Defend = remote("Defend")
 local Grab = remote("Grab")
 local Dunk = remote("Dunk")
@@ -245,9 +244,6 @@ end)
 -- Support circles form a smaller arc above the hub (no MUSIC button on mobile).
 circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(68, 68), at(185, 335), false, nil, setTurbo)
 circleButton("MobileGrab", "GRAB", UDim2.fromOffset(68, 68), at(270, 360), false, grabNearest)
-circleButton("MobileReset", "RESET", UDim2.fromOffset(64, 64), at(355, 335), false, function()
-	if ResetBalls then ResetBalls:FireServer() end
-end)
 
 local function applyScale()
 	local scale = uiScale()
