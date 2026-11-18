@@ -173,19 +173,53 @@ button("MobileBreaker", "GAME BREAKER", UDim2.fromOffset(168, 54), UDim2.new(0, 
 	end)
 button("MobileTurbo", "TURBO", UDim2.fromOffset(128, 52), UDim2.new(0, 18, 1, -266), Vector2.new(0, 1),
 	Candy.MINT, nil, setTurbo)
-button("MobileDribble", "DRIBBLE", UDim2.fromOffset(128, 52), UDim2.new(0, 18, 1, -324), Vector2.new(0, 1),
-	Candy.PINK, function()
-		if Dribble then Dribble:FireServer() end
-	end)
-button("MobileGrab", "PICK UP", UDim2.fromOffset(128, 52), UDim2.new(0, 18, 1, -382), Vector2.new(0, 1),
+-- No DRIBBLE button: walking over the ball already starts a dribble.
+button("MobileGrab", "PICK UP", UDim2.fromOffset(132, 62), UDim2.new(0, 18, 1, -324), Vector2.new(0, 1),
 	Candy.RED, grabNearest)
-button("MobileReset", "RESET", UDim2.fromOffset(128, 52), UDim2.new(0, 18, 1, -440), Vector2.new(0, 1),
+button("MobileReset", "RESET", UDim2.fromOffset(132, 62), UDim2.new(0, 18, 1, -394), Vector2.new(0, 1),
 	Candy.MINT, function()
 		if ResetBalls then ResetBalls:FireServer() end
 	end)
-button("MobileMute", "MUSIC", UDim2.fromOffset(96, 44), UDim2.new(0, 18, 1, -498), Vector2.new(0, 1),
+button("MobileMute", "MUSIC", UDim2.fromOffset(104, 54), UDim2.new(0, 18, 1, -464), Vector2.new(0, 1),
 	Candy.GOLD, function()
 		if MusicMute then
 			MusicMute:Fire()
 		end
 	end)
+
+-- Phones have much less room: hide the keyboard-hint bubbles and shrink the
+-- in-world sign boards so the court stays readable behind the touch buttons.
+local function slimSigns()
+	local playerGui = player:FindFirstChild("PlayerGui")
+	if playerGui then
+		local ballHud = playerGui:FindFirstChild("BallHUD")
+		local streetHud = playerGui:FindFirstChild("StreetHUD")
+		for _, pair in ipairs({
+			{ ballHud, "HintBubble" }, { ballHud, "HintBubbleShadow" },
+			{ streetHud, "ControlsBubble" }, { streetHud, "ControlsBubbleShadow" },
+		}) do
+			local panel = pair[1] and pair[1]:FindFirstChild(pair[2])
+			if panel then
+				panel.Visible = false
+			end
+		end
+	end
+	for _, object in ipairs(Workspace:GetDescendants()) do
+		if object:IsA("BillboardGui") and not object:GetAttribute("MobileScaled") then
+			local s = object.Size
+			if s.X.Offset > 0 and s.Y.Offset > 0 then
+				object:SetAttribute("MobileScaled", true)
+				object.Size = UDim2.fromOffset(s.X.Offset * 0.65, s.Y.Offset * 0.65)
+				object.MaxDistance = object.MaxDistance * 0.75
+			end
+		end
+	end
+end
+
+slimSigns()
+task.spawn(function()
+	while gui.Enabled do
+		task.wait(2)
+		slimSigns()
+	end
+end)
