@@ -11,9 +11,9 @@ local config = {}
 config.DataStoreName = "StreetHoops_CocoaBucks_v1"
 
 config.Products = {
-	{ id = 0, robux = 25, bucks = 100, name = "100 Cocoa Bucks" },
-	{ id = 0, robux = 60, bucks = 300, name = "300 Cocoa Bucks" },
-	{ id = 0, robux = 175, bucks = 1000, name = "1000 Cocoa Bucks" },
+	{ id = 3732962651, robux = 25, bucks = 100, name = "100 Cocoa Bucks" },
+	{ id = 3732962691, robux = 60, bucks = 300, name = "300 Cocoa Bucks" },
+	{ id = 3732962694, robux = 200, bucks = 1000, name = "1000 Cocoa Bucks" },
 }
 
 return config
