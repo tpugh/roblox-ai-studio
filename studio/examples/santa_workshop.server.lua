@@ -161,20 +161,31 @@ local function applyOutfit(player, id)
 	local torso = character:FindFirstChild("LowerTorso") or character:FindFirstChild("Torso")
 	if head and head:IsA("BasePart") then
 		if def.hat then
-			accessory("Hat", Enum.PartType.Cylinder, Vector3.new(1.5, 1.1, 1.5), def.hat, head,
-				CFrame.new(0, 1.4, 0), CFrame.Angles(0, 0, math.pi / 2))
-			accessory("HatCuff", Enum.PartType.Cylinder, Vector3.new(1.6, 0.35, 1.6), WHITE, head,
-				CFrame.new(0, 1, 0), CFrame.Angles(0, 0, math.pi / 2))
-			accessory("Pom", Enum.PartType.Ball, Vector3.new(0.7, 0.7, 0.7), WHITE, head,
-				CFrame.new(0, 2.1, -0.2))
+			accessory("HatBrim", Enum.PartType.Cylinder, Vector3.new(1.7, 0.22, 1.7), def.hat, head,
+				CFrame.new(0, 0.95, 0), CFrame.Angles(0, 0, math.pi / 2))
+			accessory("HatBody", Enum.PartType.Cylinder, Vector3.new(1.35, 1.5, 1.35), def.hat, head,
+				CFrame.new(0, 1.65, 0), CFrame.Angles(0, 0, math.pi / 2))
+			accessory("HatTip", Enum.PartType.Ball, Vector3.new(0.85, 0.85, 0.85), def.hat, head,
+				CFrame.new(0, 2.6, -0.35))
+			accessory("Pom", Enum.PartType.Ball, Vector3.new(0.75, 0.75, 0.75), WHITE, head,
+				CFrame.new(0, 2.95, -0.5))
+			accessory("HatCuff", Enum.PartType.Cylinder, Vector3.new(1.5, 0.3, 1.5), WHITE, head,
+				CFrame.new(0, 1.0, 0), CFrame.Angles(0, 0, math.pi / 2))
 		end
 		if def.beard then
-			accessory("Beard", Enum.PartType.Ball, Vector3.new(1.7, 1.5, 0.9), WHITE, head,
-				CFrame.new(0, -0.9, -1.1))
-			accessory("BeardLower", Enum.PartType.Ball, Vector3.new(1.5, 1.1, 0.7), WHITE, head,
+			-- Layered balls form a fuller, rounded beard instead of a single flat disc.
+			accessory("BeardTop", Enum.PartType.Ball, Vector3.new(1.55, 0.95, 1.05), WHITE, head,
+				CFrame.new(0, -0.65, -1.05))
+			accessory("BeardMid", Enum.PartType.Ball, Vector3.new(1.75, 1.05, 1.15), WHITE, head,
+				CFrame.new(0, -1.0, -1.1))
+			accessory("BeardLower", Enum.PartType.Ball, Vector3.new(1.45, 0.85, 1.0), WHITE, head,
 				CFrame.new(0, -1.35, -0.9))
-			accessory("Moustache", Enum.PartType.Ball, Vector3.new(0.85, 0.3, 0.45), WHITE, head,
-				CFrame.new(0, 2.42, -0.55))
+			accessory("BeardBottom", Enum.PartType.Ball, Vector3.new(1.15, 0.7, 0.85), WHITE, head,
+				CFrame.new(0, -1.6, -0.7))
+			accessory("MoustacheL", Enum.PartType.Ball, Vector3.new(0.55, 0.22, 0.35), WHITE, head,
+				CFrame.new(-0.3, 2.42, -0.5))
+			accessory("MoustacheR", Enum.PartType.Ball, Vector3.new(0.55, 0.22, 0.35), WHITE, head,
+				CFrame.new(0.3, 2.42, -0.5))
 		end
 		if def.hair then
 			accessory("Hair", Enum.PartType.Ball, Vector3.new(1.8, 1.1, 1.6), WHITE, head,
@@ -184,6 +195,12 @@ local function applyOutfit(player, id)
 			for side = -1, 1, 2 do
 				accessory("Antler", Enum.PartType.Cylinder, Vector3.new(0.2, 1.6, 0.2), BROWN, head,
 					CFrame.new(side * 0.45, 1.6, 0), CFrame.Angles(0, 0, side * 0.45))
+				accessory("AntlerBranch1", Enum.PartType.Cylinder, Vector3.new(0.14, 1.0, 0.14), BROWN, head,
+					CFrame.new(side * 0.9, 2.05, 0.3), CFrame.Angles(0, 0, side * 0.75))
+				accessory("AntlerBranch2", Enum.PartType.Cylinder, Vector3.new(0.14, 0.8, 0.14), BROWN, head,
+					CFrame.new(side * 0.95, 1.85, -0.25), CFrame.Angles(0, 0, side * -0.3))
+				accessory("AntlerTip", Enum.PartType.Ball, Vector3.new(0.22, 0.22, 0.22), BROWN, head,
+					CFrame.new(side * 1.25, 2.35, 0.35))
 			end
 		end
 		if def.nose then

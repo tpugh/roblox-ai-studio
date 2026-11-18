@@ -112,8 +112,10 @@ local function makeAvatarPreview(avatar, parent, size)
 	end
 
 	if avatar.topHat then
-		put("HatBrim", Enum.PartType.Cylinder, Vector3.new(0.9, 0.08, 0.9), Vector3.new(0, 2.86, 0), avatar.hat)
-		put("HatTop", Enum.PartType.Cylinder, Vector3.new(0.62, 0.62, 0.62), Vector3.new(0, 3.18, 0), avatar.hat)
+		put("HatBrim", Enum.PartType.Cylinder, Vector3.new(0.9, 0.22, 0.9), Vector3.new(0, 2.86, 0), avatar.hat)
+		put("HatBody", Enum.PartType.Cylinder, Vector3.new(0.78, 0.3, 0.78), Vector3.new(0, 2.72, 0), avatar.hat)
+		put("HatTop", Enum.PartType.Ball, Vector3.new(0.45, 0.45, 0.45), Vector3.new(0, 3.05, 0), avatar.hat)
+		put("Pom", Enum.PartType.Ball, Vector3.new(0.32, 0.32, 0.32), Vector3.new(0, 3.3, -0.15), WHITE)
 		put("HatBand", Enum.PartType.Cylinder, Vector3.new(0.95, 0.16, 0.95), Vector3.new(0, 2.78, 0), RED)
 		if avatar.id == "snowman" then
 			for i = 0, 2 do
@@ -149,8 +151,11 @@ local function makeAvatarPreview(avatar, parent, size)
 		for _, side in ipairs({ -1, 1 }) do
 			put("Antler", Enum.PartType.Block, Vector3.new(0.12, 0.72, 0.12), Vector3.new(side * 0.3, 3.16, 0), BROWN).CFrame =
 				CFrame.new(side * 0.3, 3.16, 0) * CFrame.Angles(0, 0, side * math.rad(-28))
-			put("AntlerBranch", Enum.PartType.Block, Vector3.new(0.1, 0.36, 0.1), Vector3.new(side * 0.52, 3.32, 0), BROWN).CFrame =
-				CFrame.new(side * 0.52, 3.32, 0) * CFrame.Angles(0, 0, side * math.rad(-55))
+			put("AntlerBranch1", Enum.PartType.Block, Vector3.new(0.1, 0.45, 0.1), Vector3.new(side * 0.5, 3.4, 0.15), BROWN).CFrame =
+				CFrame.new(side * 0.5, 3.4, 0.15) * CFrame.Angles(0, 0, side * math.rad(-55))
+			put("AntlerBranch2", Enum.PartType.Block, Vector3.new(0.1, 0.35, 0.1), Vector3.new(side * 0.52, 3.25, -0.12), BROWN).CFrame =
+				CFrame.new(side * 0.52, 3.25, -0.12) * CFrame.Angles(0, 0, side * math.rad(40))
+			put("AntlerTip", Enum.PartType.Ball, Vector3.new(0.12, 0.12, 0.12), Vector3.new(side * 0.62, 3.5, 0.18), BROWN)
 		end
 	end
 	if avatar.nose then
