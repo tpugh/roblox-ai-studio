@@ -67,7 +67,7 @@ local AVATARS = {
 	},
 	snowman = {
 		name = "Snowman", price = 50, coat = WHITE, pants = WHITE, headColor = WHITE,
-		hat = BLACK, carrot = true, boots = BLACK,
+		hat = BLACK, carrot = true, boots = BLACK, topHat = true,
 	},
 	goldwings = {
 		name = "Golden Wing Boots", price = 70, coat = Color3.fromRGB(120, 80, 30),
@@ -161,77 +161,83 @@ local function applyOutfit(player, id)
 	local torso = character:FindFirstChild("LowerTorso") or character:FindFirstChild("Torso")
 	if head and head:IsA("BasePart") then
 		if def.hat then
-			accessory("HatBrim", Enum.PartType.Cylinder, Vector3.new(1.7, 0.22, 1.7), def.hat, head,
-				CFrame.new(0, 0.95, 0), CFrame.Angles(0, 0, math.pi / 2))
-			accessory("HatBody", Enum.PartType.Cylinder, Vector3.new(1.35, 1.5, 1.35), def.hat, head,
-				CFrame.new(0, 1.65, 0), CFrame.Angles(0, 0, math.pi / 2))
-			accessory("HatTip", Enum.PartType.Ball, Vector3.new(0.85, 0.85, 0.85), def.hat, head,
-				CFrame.new(0, 2.6, -0.35))
-			accessory("Pom", Enum.PartType.Ball, Vector3.new(0.75, 0.75, 0.75), WHITE, head,
-				CFrame.new(0, 2.95, -0.5))
-			accessory("HatCuff", Enum.PartType.Cylinder, Vector3.new(1.5, 0.3, 1.5), WHITE, head,
-				CFrame.new(0, 1.0, 0), CFrame.Angles(0, 0, math.pi / 2))
+			-- Slouching hat: brim, tapered body and a pom, all in head-local space
+			-- (head radius ~0.6, face points +Z).
+			accessory("HatBrim", Enum.PartType.Cylinder, Vector3.new(1.35, 0.18, 1.35), def.hat, head,
+				CFrame.new(0, 0.62, 0), CFrame.Angles(0, 0, math.pi / 2))
+			accessory("HatBody", Enum.PartType.Cylinder, Vector3.new(1.05, 1.15, 1.05), def.hat, head,
+				CFrame.new(0, 1.12, -0.12), CFrame.Angles(0, 0, math.pi / 2))
+			accessory("HatTip", Enum.PartType.Ball, Vector3.new(0.6, 0.6, 0.6), def.hat, head,
+				CFrame.new(0, 1.62, -0.38))
+			accessory("Pom", Enum.PartType.Ball, Vector3.new(0.55, 0.55, 0.55), WHITE, head,
+				CFrame.new(0, 1.85, -0.48))
+			accessory("HatCuff", Enum.PartType.Cylinder, Vector3.new(1.2, 0.22, 1.2), WHITE, head,
+				CFrame.new(0, 0.68, 0), CFrame.Angles(0, 0, math.pi / 2))
 		end
 		if def.beard then
-			-- Layered balls form a fuller, rounded beard instead of a single flat disc.
-			accessory("BeardTop", Enum.PartType.Ball, Vector3.new(1.55, 0.95, 1.05), WHITE, head,
-				CFrame.new(0, -0.65, -1.05))
-			accessory("BeardMid", Enum.PartType.Ball, Vector3.new(1.75, 1.05, 1.15), WHITE, head,
-				CFrame.new(0, -1.0, -1.1))
-			accessory("BeardLower", Enum.PartType.Ball, Vector3.new(1.45, 0.85, 1.0), WHITE, head,
-				CFrame.new(0, -1.35, -0.9))
-			accessory("BeardBottom", Enum.PartType.Ball, Vector3.new(1.15, 0.7, 0.85), WHITE, head,
-				CFrame.new(0, -1.6, -0.7))
-			accessory("MoustacheL", Enum.PartType.Ball, Vector3.new(0.55, 0.22, 0.35), WHITE, head,
-				CFrame.new(-0.3, 2.42, -0.5))
-			accessory("MoustacheR", Enum.PartType.Ball, Vector3.new(0.55, 0.22, 0.35), WHITE, head,
-				CFrame.new(0.3, 2.42, -0.5))
+			-- Layered balls hug the front of the head (+Z, the face direction).
+			accessory("BeardTop", Enum.PartType.Ball, Vector3.new(1.1, 0.55, 0.55), WHITE, head,
+				CFrame.new(0, -0.25, 0.5))
+			accessory("BeardMid", Enum.PartType.Ball, Vector3.new(1.25, 0.6, 0.65), WHITE, head,
+				CFrame.new(0, -0.5, 0.5))
+			accessory("BeardLower", Enum.PartType.Ball, Vector3.new(1.0, 0.5, 0.55), WHITE, head,
+				CFrame.new(0, -0.72, 0.42))
+			accessory("BeardBottom", Enum.PartType.Ball, Vector3.new(0.72, 0.4, 0.45), WHITE, head,
+				CFrame.new(0, -0.9, 0.3))
+			accessory("MoustacheL", Enum.PartType.Ball, Vector3.new(0.45, 0.16, 0.26), WHITE, head,
+				CFrame.new(-0.2, -0.12, 0.62))
+			accessory("MoustacheR", Enum.PartType.Ball, Vector3.new(0.45, 0.16, 0.26), WHITE, head,
+				CFrame.new(0.2, -0.12, 0.62))
 		end
 		if def.hair then
-			accessory("Hair", Enum.PartType.Ball, Vector3.new(1.8, 1.1, 1.6), WHITE, head,
-				CFrame.new(0, 1.1, -0.1))
+			accessory("Hair", Enum.PartType.Ball, Vector3.new(1.28, 0.7, 1.2), WHITE, head,
+				CFrame.new(0, 0.45, -0.1))
+			accessory("HairCurl", Enum.PartType.Ball, Vector3.new(0.38, 0.38, 0.38), WHITE, head,
+				CFrame.new(0.55, 0.35, 0.15))
 		end
 		if def.antlers then
 			for side = -1, 1, 2 do
-				accessory("Antler", Enum.PartType.Cylinder, Vector3.new(0.2, 1.6, 0.2), BROWN, head,
-					CFrame.new(side * 0.45, 1.6, 0), CFrame.Angles(0, 0, side * 0.45))
-				accessory("AntlerBranch1", Enum.PartType.Cylinder, Vector3.new(0.14, 1.0, 0.14), BROWN, head,
-					CFrame.new(side * 0.9, 2.05, 0.3), CFrame.Angles(0, 0, side * 0.75))
-				accessory("AntlerBranch2", Enum.PartType.Cylinder, Vector3.new(0.14, 0.8, 0.14), BROWN, head,
-					CFrame.new(side * 0.95, 1.85, -0.25), CFrame.Angles(0, 0, side * -0.3))
-				accessory("AntlerTip", Enum.PartType.Ball, Vector3.new(0.22, 0.22, 0.22), BROWN, head,
-					CFrame.new(side * 1.25, 2.35, 0.35))
+				accessory("Antler", Enum.PartType.Cylinder, Vector3.new(0.14, 1.1, 0.14), BROWN, head,
+					CFrame.new(side * 0.3, 0.95, -0.1), CFrame.Angles(0, 0, side * 0.35))
+				accessory("AntlerBranch1", Enum.PartType.Cylinder, Vector3.new(0.1, 0.62, 0.1), BROWN, head,
+					CFrame.new(side * 0.6, 1.3, 0.15), CFrame.Angles(0, 0, side * 0.7))
+				accessory("AntlerBranch2", Enum.PartType.Cylinder, Vector3.new(0.1, 0.48, 0.1), BROWN, head,
+					CFrame.new(side * 0.62, 1.15, -0.3), CFrame.Angles(0, 0, side * -0.3))
+				accessory("AntlerTip", Enum.PartType.Ball, Vector3.new(0.18, 0.18, 0.18), BROWN, head,
+					CFrame.new(side * 0.8, 1.55, 0.2))
 			end
+			accessory("Tail", Enum.PartType.Ball, Vector3.new(0.5, 0.45, 0.5), BROWN, torso,
+				CFrame.new(0, -0.35, -0.62))
 		end
 		if def.nose then
-			accessory("Nose", Enum.PartType.Ball, Vector3.new(0.6, 0.6, 0.6), RED, head,
-				CFrame.new(0, -0.2, 1.3))
-		end
-		if def.antlers then
-			accessory("Tail", Enum.PartType.Ball, Vector3.new(0.7, 0.6, 0.7), BROWN, torso,
-				CFrame.new(0, -0.4, -0.9))
+			accessory("Nose", Enum.PartType.Ball, Vector3.new(0.42, 0.42, 0.42), RED, head,
+				CFrame.new(0, -0.05, 0.68))
 		end
 		if def.carrot then
-			accessory("Carrot", Enum.PartType.Cylinder, Vector3.new(0.3, 1.1, 0.3), Color3.fromRGB(240, 140, 40), head,
-				CFrame.new(0, -0.2, 1.5), CFrame.Angles(math.pi / 2, 0, 0))
+			accessory("Carrot", Enum.PartType.Cylinder, Vector3.new(0.2, 0.62, 0.2), Color3.fromRGB(240, 140, 40), head,
+				CFrame.new(0, -0.05, 0.7), CFrame.Angles(math.pi / 2, 0, 0))
 		end
 		if def.topHat then
-			accessory("TopHatBand", Enum.PartType.Cylinder, Vector3.new(1.25, 0.25, 1.25), Color3.fromRGB(190, 38, 46), head,
-				CFrame.new(0, 2.78, 0), CFrame.Angles(0, 0, math.pi / 2))
+			accessory("TopHatBrim", Enum.PartType.Cylinder, Vector3.new(1.25, 0.12, 1.25), BLACK, head,
+				CFrame.new(0, 0.62, 0), CFrame.Angles(0, 0, math.pi / 2))
+			accessory("TopHatBody", Enum.PartType.Cylinder, Vector3.new(0.92, 1.05, 0.92), BLACK, head,
+				CFrame.new(0, 1.12, 0), CFrame.Angles(0, 0, math.pi / 2))
+			accessory("TopHatBand", Enum.PartType.Cylinder, Vector3.new(1.02, 0.2, 1.02), Color3.fromRGB(190, 38, 46), head,
+				CFrame.new(0, 0.75, 0), CFrame.Angles(0, 0, math.pi / 2))
 			for i = 0, 2 do
-				accessory("CoalButton" .. i, Enum.PartType.Ball, Vector3.new(0.28, 0.28, 0.28), BLACK, torso,
-					CFrame.new(0, 1.3 - i * 0.4, 0.6))
+				accessory("CoalButton" .. i, Enum.PartType.Ball, Vector3.new(0.22, 0.22, 0.22), BLACK, torso,
+					CFrame.new(0, 0.5 - i * 0.32, 0.5))
 			end
-			accessory("Scarf", Enum.PartType.Block, Vector3.new(2.0, 0.35, 1.7), Color3.fromRGB(190, 38, 46), torso,
-				CFrame.new(0, 0.35, 0.6))
+			accessory("Scarf", Enum.PartType.Block, Vector3.new(1.6, 0.28, 1.25), Color3.fromRGB(190, 38, 46), torso,
+				CFrame.new(0, 0.78, 0.5))
 		end
 		if def.ears then
 			for side = -1, 1, 2 do
-				accessory("Ear", Enum.PartType.Ball, Vector3.new(0.5, 0.9, 0.4), SKIN, head,
-					CFrame.new(side * 1.05, 0, 0))
+				accessory("Ear", Enum.PartType.Ball, Vector3.new(0.35, 0.6, 0.28), SKIN, head,
+					CFrame.new(side * 0.68, 0, 0))
 			end
-			accessory("JingleBell", Enum.PartType.Ball, Vector3.new(0.45, 0.45, 0.45), GOLD, head,
-				CFrame.new(0, 3.35, 0))
+			accessory("JingleBell", Enum.PartType.Ball, Vector3.new(0.3, 0.3, 0.3), GOLD, head,
+				CFrame.new(0, 1.85, -0.4))
 		end
 	end
 	if def.belt and torso and torso:IsA("BasePart") then
