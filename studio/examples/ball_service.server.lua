@@ -22,7 +22,7 @@ local Workspace = game:GetService("Workspace")
 local COURT_MODEL = "StreetBasketballCourt"
 local COURT_SURFACE = 1.0
 local GRAB_DISTANCE = 9
-local AUTO_GRAB_RADIUS = 3.2 -- walking over a loose ball picks it up
+local AUTO_GRAB_RADIUS = 4.2 -- walking over a loose ball picks it up
 local THROW_SPEED_MIN, THROW_SPEED_MAX = 50, 105
 local GRAB_LOCKOUT = 0.35 -- can't instantly re-grab a ball you just let go
 local THROW_COLLIDE_DELAY = 0.3
@@ -473,8 +473,10 @@ local function autoGrab()
 		if (mode[ball] or "free") ~= "free" or dunkBusy[ball] or (lockout[ball] or 0) > now then
 			continue
 		end
-		if ball.AssemblyLinearVelocity.Magnitude > 14 then
-			continue -- don't snatch a live pass or shot out of the air
+		-- Ground-level rolling balls are still pickable; only a live pass or
+		-- shot high above the floor should be skipped.
+		if ball.AssemblyLinearVelocity.Magnitude > 20 and ball.Position.Y > 2 then
+			continue -- a live pass or shot above the floor is not a loose ball
 		end
 		for _, player in ipairs(Players:GetPlayers()) do
 			if player:GetAttribute("HoldingBall") == true or dribbledBallOf(player) then
@@ -971,6 +973,13 @@ local function dunkBall(player, scoreVolume, gamebreaker)
 	dunkBusy[ball] = true
 	local dunkToken = {}
 	dunkingPlayer[player] = dunkToken
+	-- Server-side watchdog: if the character animation thread is interrupted,
+	-- the guard would otherwise stay set and every later dunk silently fails.
+	task.delay(5, function()
+		if dunkingPlayer[player] == dunkToken then
+			dunkingPlayer[player] = nil
+		end
+	end)
 	dunkNoScore[ball] = os.clock() + DUNK_NO_SCORE_WINDOW
 	mode[ball] = "dunk"
 	ball.Anchored = true
