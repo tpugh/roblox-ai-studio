@@ -31,19 +31,16 @@ local FENCE_Z = 30.0
 local FENCE_HEIGHT = 12
 local POLE_X = 44.6
 
--- New York blacktop palette: deep charcoal asphalt, faded chalk lines, a
--- worn powder-blue key and darker steel. Kept as one table so the live place
--- can be re-skinned without a full rebuild.
 local C = {
-	plaza = Color3.fromRGB(88, 88, 92),
-	asphalt = Color3.fromRGB(26, 26, 29),
-	line = Color3.fromRGB(222, 220, 208),
-	paint = Color3.fromRGB(46, 78, 122),
-	steel = Color3.fromRGB(70, 72, 78),
-	board = Color3.fromRGB(238, 238, 232),
+	plaza = Color3.fromRGB(112, 112, 116),
+	asphalt = Color3.fromRGB(40, 40, 45),
+	line = Color3.fromRGB(238, 238, 230),
+	paint = Color3.fromRGB(26, 62, 82),
+	steel = Color3.fromRGB(92, 92, 100),
+	board = Color3.fromRGB(236, 240, 244),
 	rim = Color3.fromRGB(226, 108, 38),
-	net = Color3.fromRGB(228, 228, 220),
-	bench = Color3.fromRGB(96, 84, 76),
+	net = Color3.fromRGB(232, 232, 232),
+	bench = Color3.fromRGB(122, 86, 58),
 	ball = Color3.fromRGB(214, 34, 48),
 	lamp = Color3.fromRGB(250, 238, 200),
 }
@@ -618,65 +615,6 @@ local function placeSpawn()
 	return spawn
 end
 
--- Playground details that sell the NYC blacktop look: worn asphalt patches,
--- graffiti on the chain-link fence and hand-painted street signs.
-local function buildNYCDetails(model)
-	local folder = Instance.new("Folder")
-	folder.Name = "NYCDetails"
-	folder.Parent = model
-
-	local wear = {
-		Color3.fromRGB(34, 34, 37), Color3.fromRGB(22, 22, 25), Color3.fromRGB(30, 30, 33),
-	}
-	for i, spec in ipairs({
-		{ x = -18, z = -10, w = 16, d = 12 },
-		{ x = 20, z = 9, w = 14, d = 10 },
-		{ x = 0, z = 16, w = 22, d = 8 },
-		{ x = -30, z = 6, w = 10, d = 14 },
-	}) do
-		box(folder, "WearPatch" .. i, Vector3.new(spec.w, 0.02, spec.d),
-			Vector3.new(spec.x, SURFACE + 0.012, spec.z), wear[(i % #wear) + 1], M.asphalt,
-			{ castShadow = false, canCollide = false, transparency = 0.35 })
-	end
-
-	local paint = {
-		Color3.fromRGB(214, 58, 74), Color3.fromRGB(246, 196, 54),
-		Color3.fromRGB(54, 176, 196), Color3.fromRGB(126, 78, 188),
-		Color3.fromRGB(76, 156, 92),
-	}
-	for i = 1, 14 do
-		box(folder, "Graffiti" .. i,
-			Vector3.new(3.5 + (i % 3), 1.8 + (i % 4) * 0.5, 0.08),
-			Vector3.new(-42 + i * 6, 2.4 + (i % 3) * 1.4, -FENCE_Z + 0.25),
-			paint[(i % #paint) + 1], M.plastic,
-			{ castShadow = false, canCollide = false, transparency = 0.55 })
-	end
-
-	local function streetSign(name, x, z, title, subtitle)
-		pillar(folder, name .. "Post", 9, 0.35, Vector3.new(x, 4.5, z), C.steel, M.metal)
-		local boardPart = box(folder, name .. "Board", Vector3.new(0.2, 2.2, 7),
-			Vector3.new(x, 8.2, z), Color3.fromRGB(30, 84, 64), M.plastic, { castShadow = false })
-		local billboard = Instance.new("BillboardGui")
-		billboard.Name = name .. "Label"
-		billboard.Size = UDim2.fromOffset(320, 90)
-		billboard.StudsOffset = Vector3.new(0, 2.6, 0)
-		billboard.MaxDistance = 160
-		billboard.Parent = boardPart
-		local label = Instance.new("TextLabel")
-		label.Size = UDim2.fromScale(1, 1)
-		label.BackgroundTransparency = 1
-		label.Text = title .. "\n" .. subtitle
-		label.Font = Enum.Font.GothamBlack
-		label.TextSize = 28
-		label.TextColor3 = Color3.fromRGB(242, 240, 230)
-		label.TextStrokeColor3 = Color3.fromRGB(12, 30, 22)
-		label.TextStrokeTransparency = 0.3
-		label.Parent = billboard
-	end
-	streetSign("RuckerSign", -9, 31, "RUCKER PARK", "W 155th ST · HARLEM")
-	streetSign("West4thSign", 9, 31, "WEST 4TH ST", "THE PLAYGROUND · NYC")
-end
-
 local function build()
 	local previous = workspace:FindFirstChild("StreetBasketballCourt")
 	if previous then
@@ -695,7 +633,6 @@ local function build()
 	buildHoop(model, -1)
 	buildFence(model)
 	buildProps(model)
-	buildNYCDetails(model)
 	buildAnchors(model)
 	model.Parent = workspace
 
