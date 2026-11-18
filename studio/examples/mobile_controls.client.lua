@@ -34,11 +34,16 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "MobileControls"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.Enabled = UserInputService.TouchEnabled or player:GetAttribute("ForceMobileControls") == true
+local shopOpen = false
+local function baseEnabled()
+	return UserInputService.TouchEnabled or player:GetAttribute("ForceMobileControls") == true
+end
+local function updateEnabled()
+	gui.Enabled = baseEnabled() and not shopOpen
+end
+updateEnabled()
 gui.Parent = player:WaitForChild("PlayerGui")
-player:GetAttributeChangedSignal("ForceMobileControls"):Connect(function()
-	gui.Enabled = UserInputService.TouchEnabled or player:GetAttribute("ForceMobileControls") == true
-end)
+player:GetAttributeChangedSignal("ForceMobileControls"):Connect(updateEnabled)
 
 -- Roblox's default touch JUMP button sits in the same bottom-right corner as
 -- SHOOT. On real touch devices remove it so the two never overlap; our DUNK
@@ -354,5 +359,49 @@ task.spawn(function()
 	while true do
 		task.wait(2)
 		slimSigns()
+	end
+end)
+
+-- Shop menus are fixed 550px tall, which is taller than a landscape phone
+-- viewport. Scale them to fit so the top-right X stays on screen, and hide the
+-- action buttons while a shop is open so they don't cover the shop UI.
+local shopMenus = {
+	{ gui = "CocoaShopUI", frame = "Menu", w = 720, h = 550 },
+	{ gui = "CocoaShopUI", frame = "RobuxMenu", w = 420, h = 260 },
+	{ gui = "SantaWorkshopUI", frame = "Menu", w = 880, h = 550 },
+}
+task.spawn(function()
+	while true do
+		task.wait(0.25)
+		local playerGui = player:FindFirstChild("PlayerGui")
+		if not playerGui then
+			continue
+		end
+		local camera = Workspace.CurrentCamera
+		local viewport = camera and camera.ViewportSize or Vector2.new(1280, 720)
+		local anyOpen = false
+		for _, spec in ipairs(shopMenus) do
+			local screenGui = playerGui:FindFirstChild(spec.gui)
+			local frame = screenGui and screenGui:FindFirstChild(spec.frame)
+			if frame then
+				if frame.Visible then
+					anyOpen = true
+				end
+				local scale = math.min((viewport.X - 24) / spec.w, (viewport.Y - 24) / spec.h, 1)
+				scale = math.floor(scale * 100) / 100
+				local scaler = frame:FindFirstChildOfClass("UIScale")
+				if not scaler then
+					scaler = Instance.new("UIScale")
+					scaler.Parent = frame
+				end
+				if scaler.Scale ~= scale then
+					scaler.Scale = scale
+				end
+			end
+		end
+		if anyOpen ~= shopOpen then
+			shopOpen = anyOpen
+			updateEnabled()
+		end
 	end
 end)
