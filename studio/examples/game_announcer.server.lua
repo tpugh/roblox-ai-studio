@@ -32,16 +32,16 @@ if not label then
 end
 
 local VOICE = {
-	welcome = 113763813805926,
-	bucket = 136152530915050,
-	three = 135686510272453,
-	crossover = 72215520692870,
-	spin = 115975635383452,
-	behindback = 72197064642027,
-	ankle = 78781674330805,
-	style = 117478930036237,
-	gamebreaker = 83311040427554,
-	santascore = 117390797062289,
+	welcome = 86697668093741,
+	bucket = 139612621420164,
+	three = 101787167705462,
+	crossover = 90436566703328,
+	spin = 108698329776843,
+	behindback = 72987300283177,
+	ankle = 92989986149566,
+	style = 86089984286677,
+	gamebreaker = 115218385696504,
+	santascore = 94152099124034,
 }
 local BLARE_ID = "rbxassetid://124140408144336"
 local TRICK_NAMES = { "CROSSOVER", "SPIN MOVE", "AROUND THE BACK", "ANKLE BREAKER", "STYLE POINTS" }
