@@ -189,24 +189,26 @@ end
 
 -- SHOOT is the hub; the four action buttons sit in an arc wrapped around its
 -- top and left (the right/bottom edges are screen boundaries).
-circleButton("MobileShoot", "SHOOT", UDim2.fromOffset(148, 148), at(125, 125), true, nil, setCharging)
-circleButton("MobileDunk", "DUNK", UDim2.fromOffset(84, 84), at(125, 255), false, function()
+-- The cluster sits well left of the corner: Roblox's default touch JUMP button
+-- lives at the bottom-right and used to overlap SHOOT.
+circleButton("MobileShoot", "SHOOT", UDim2.fromOffset(136, 136), at(255, 120), true, nil, setCharging)
+circleButton("MobileDunk", "DUNK", UDim2.fromOffset(78, 78), at(255, 250), false, function()
 	if Dunk then Dunk:FireServer() end
 end)
-circleButton("MobileTrick", "TRICK", UDim2.fromOffset(84, 84), at(215, 220), false, function()
+circleButton("MobileTrick", "TRICK", UDim2.fromOffset(78, 78), at(345, 215), false, function()
 	if Trick then Trick:FireServer() end
 end)
-circleButton("MobileSteal", "STEAL", UDim2.fromOffset(84, 84), at(255, 140), false, function()
+circleButton("MobileSteal", "STEAL", UDim2.fromOffset(78, 78), at(385, 135), false, function()
 	if Defend then Defend:FireServer() end
 end)
-circleButton("MobileBreaker", "BREAKER", UDim2.fromOffset(84, 84), at(215, 55), false, function()
+circleButton("MobileBreaker", "BREAKER", UDim2.fromOffset(78, 78), at(345, 50), false, function()
 	if Gamebreaker then Gamebreaker:FireServer() end
 end)
 
 -- Support circles form a smaller arc above the hub (no MUSIC button on mobile).
-circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(72, 72), at(55, 345), false, nil, setTurbo)
-circleButton("MobileGrab", "GRAB", UDim2.fromOffset(72, 72), at(140, 370), false, grabNearest)
-circleButton("MobileReset", "RESET", UDim2.fromOffset(68, 68), at(225, 345), false, function()
+circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(68, 68), at(185, 335), false, nil, setTurbo)
+circleButton("MobileGrab", "GRAB", UDim2.fromOffset(68, 68), at(270, 360), false, grabNearest)
+circleButton("MobileReset", "RESET", UDim2.fromOffset(64, 64), at(355, 335), false, function()
 	if ResetBalls then ResetBalls:FireServer() end
 end)
 
@@ -250,6 +252,14 @@ local function slimHUD()
 		if not hud or not hud:FindFirstChild(spec.name) then
 			return -- HUD not built yet; try again next tick
 		end
+	end
+	-- CocoaShopUI keeps its own always-on gold wallet with a dark translucent
+	-- backing. It stacks on top of BallHUD's wallet on phones, producing the
+	-- dark bar over the gold text. BallHUD already shows the count, so hide it.
+	local cocoaShop = playerGui:FindFirstChild("CocoaShopUI")
+	local shopWallet = cocoaShop and cocoaShop:FindFirstChild("Wallet")
+	if shopWallet then
+		shopWallet.Visible = false
 	end
 	hudSlimmed = true
 	for _, spec in ipairs(specs) do
