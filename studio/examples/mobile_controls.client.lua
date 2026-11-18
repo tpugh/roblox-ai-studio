@@ -318,6 +318,53 @@ if camera then
 	camera:GetPropertyChangedSignal("ViewportSize"):Connect(applyScale)
 end
 
+-- Offense vs defense: while holding/dribbling the ball the player gets the
+-- shooting set; otherwise the defensive set appears with STEAL as the big hub.
+local buttonMode = {}
+for _, entry in ipairs(buttons) do
+	local name = entry.holder.Name
+	if name == "MobileShoot" or name == "MobileDunk" or name == "MobileTrick" or name == "MobileBreaker" then
+		buttonMode[name] = "offense"
+	elseif name == "MobileSteal" or name == "MobileGrab" then
+		buttonMode[name] = "defense"
+	else
+		buttonMode[name] = "both"
+	end
+	entry.offenseSize, entry.offenseCentre = entry.baseSize, entry.baseCentre
+end
+local defenseLayout = {
+	MobileSteal = { 136, 255, 120 },
+	MobileGrab = { 84, 255, 250 },
+	MobileTurbo = { 80, 345, 215 },
+}
+local inOffense = nil
+local function updateButtonMode()
+	local hasBall = player:GetAttribute("HoldingBall") == true or player:GetAttribute("Dribbling") == true
+	if hasBall == inOffense then
+		return
+	end
+	inOffense = hasBall
+	for _, entry in ipairs(buttons) do
+		local mode = buttonMode[entry.holder.Name] or "both"
+		entry.holder.Visible = mode == "both"
+			or (mode == "offense" and hasBall)
+			or (mode == "defense" and not hasBall)
+		if hasBall then
+			entry.baseSize, entry.baseCentre = entry.offenseSize, entry.offenseCentre
+		else
+			local layout = defenseLayout[entry.holder.Name]
+			if layout then
+				entry.baseSize = UDim2.fromOffset(layout[1], layout[1])
+				entry.baseCentre = at(layout[2], layout[3])
+			end
+		end
+	end
+	applyScale()
+end
+player:GetAttributeChangedSignal("HoldingBall"):Connect(updateButtonMode)
+player:GetAttributeChangedSignal("Dribbling"):Connect(updateButtonMode)
+updateButtonMode()
+
 -- Shrink the Score and Cocoa Bucks bubbles on phones and make them see-through
 -- so they stop covering the court. Keep the numbers readable with a dark stroke.
 local hudSlimmed = false
