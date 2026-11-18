@@ -240,6 +240,10 @@ local function slimHUD()
 		{ gui = "BallHUD", name = "WalletBubble", w = 360, h = 60, font = 19, scale = 0.6 },
 		{ gui = "BallHUD", name = "ScoreBubble", w = 320, h = 76, font = 30, scale = 0.6 },
 		{ gui = "StreetHUD", name = "ScoreboardBubble", w = 480, h = 104, font = 16, scale = 0.5 },
+		-- Transient score / trick pop-ups: see-through so they don't blanket the court.
+		{ gui = "BallHUD", name = "FlashBubble", w = 840, h = 112, font = 30, scale = 0.55 },
+		{ gui = "StreetHUD", name = "FlashBubble", w = 940, h = 128, font = 32, scale = 0.55 },
+		{ gui = "StreetHUD", name = "ChainBubble", w = 760, h = 88, font = 26, scale = 0.55 },
 	}
 	for _, spec in ipairs(specs) do
 		local hud = playerGui:FindFirstChild(spec.gui)
@@ -265,6 +269,9 @@ local function slimHUD()
 				end
 				for _, label in ipairs(inner:GetDescendants()) do
 					if label:IsA("TextLabel") then
+						-- Scale to the shrunken bubble: showFlash() resets TextSize
+						-- on every pop-up, so a fixed mobile font would not stick.
+						label.TextScaled = true
 						label.TextSize = spec.font
 						label.TextStrokeColor3 = Color3.new(1, 1, 1)
 						label.TextStrokeTransparency = 0.45
@@ -294,6 +301,14 @@ local function slimSigns()
 				panel.Visible = false
 			end
 		end
+	end
+	-- The big in-world HOOPSMAS title board eats phone screen space. The voice
+	-- announcer still delivers every callout, so hide the visual board entirely.
+	local announcer = Workspace:FindFirstChild("GameAnnouncer")
+	local anchor = announcer and announcer:FindFirstChild("BubbleAnchor")
+	local titleBoard = anchor and anchor:FindFirstChild("Bubble")
+	if titleBoard and titleBoard:IsA("BillboardGui") then
+		titleBoard.Enabled = false
 	end
 	for _, object in ipairs(Workspace:GetDescendants()) do
 		if object:IsA("BillboardGui") and not object:GetAttribute("MobileScaled") then
