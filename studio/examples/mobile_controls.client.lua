@@ -232,26 +232,28 @@ local function slimHUD()
 	if hudSlimmed then
 		return
 	end
-	local ballHud = player:FindFirstChild("PlayerGui")
-	ballHud = ballHud and ballHud:FindFirstChild("BallHUD")
-	if not ballHud then
+	local playerGui = player:FindFirstChild("PlayerGui")
+	if not playerGui then
 		return
 	end
 	local specs = {
-		{ name = "WalletBubble", w = 360, h = 60, font = 19 },
-		{ name = "ScoreBubble", w = 320, h = 76, font = 30 },
+		{ gui = "BallHUD", name = "WalletBubble", w = 360, h = 60, font = 19, scale = 0.6 },
+		{ gui = "BallHUD", name = "ScoreBubble", w = 320, h = 76, font = 30, scale = 0.6 },
+		{ gui = "StreetHUD", name = "ScoreboardBubble", w = 480, h = 104, font = 16, scale = 0.5 },
 	}
 	for _, spec in ipairs(specs) do
-		if not ballHud:FindFirstChild(spec.name) then
+		local hud = playerGui:FindFirstChild(spec.gui)
+		if not hud or not hud:FindFirstChild(spec.name) then
 			return -- HUD not built yet; try again next tick
 		end
 	end
 	hudSlimmed = true
 	for _, spec in ipairs(specs) do
-		local rim = ballHud:FindFirstChild(spec.name)
-		local shadow = ballHud:FindFirstChild(spec.name .. "Shadow")
+		local hud = playerGui:FindFirstChild(spec.gui)
+		local rim = hud and hud:FindFirstChild(spec.name)
+		local shadow = hud and hud:FindFirstChild(spec.name .. "Shadow")
 		if rim then
-			rim.Size = UDim2.fromOffset(math.floor(spec.w * 0.6), math.floor(spec.h * 0.6))
+			rim.Size = UDim2.fromOffset(math.floor(spec.w * spec.scale), math.floor(spec.h * spec.scale))
 			rim.BackgroundTransparency = 1
 			local inner = rim:FindFirstChild("Inner")
 			if inner then
@@ -305,8 +307,10 @@ local function slimSigns()
 	end
 end
 slimSigns()
+-- Keep retrying even if the mobile GUI was disabled when the script first ran
+-- (ForceMobileControls can be set a moment later). slimHUD guards its own work.
 task.spawn(function()
-	while gui.Enabled do
+	while true do
 		task.wait(2)
 		slimSigns()
 	end
