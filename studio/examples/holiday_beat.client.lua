@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local BPM = 72
@@ -81,10 +82,7 @@ label.TextStrokeTransparency = 0.6
 label.Text = "♪  HOLIDAY PIANO  ·  M mute"
 label.Parent = gui
 
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or input.KeyCode ~= Enum.KeyCode.M then
-		return
-	end
+local function toggleMute()
 	muted = not muted
 	if muted then
 		for _, sound in pairs(voices) do
@@ -94,7 +92,23 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	else
 		label.Text = "♪  HOLIDAY PIANO  ·  M mute"
 	end
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed or input.KeyCode ~= Enum.KeyCode.M then
+		return
+	end
+	toggleMute()
 end)
+
+-- Mobile MUSIC button uses this rather than a keyboard key.
+local muteToggle = ReplicatedStorage:FindFirstChild("MusicMuteToggle")
+if not muteToggle then
+	muteToggle = Instance.new("BindableEvent")
+	muteToggle.Name = "MusicMuteToggle"
+	muteToggle.Parent = ReplicatedStorage
+end
+muteToggle.Event:Connect(toggleMute)
 
 local step = 0
 local total = STEPS_PER_BAR * BARS
