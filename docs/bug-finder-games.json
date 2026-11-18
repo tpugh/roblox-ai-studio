@@ -1,0 +1,12 @@
+{
+  "games": [
+    {
+      "name": "Christmas Street Basketball",
+      "placeId": 115175085615380,
+      "universeId": 10777254903,
+      "repoPath": "studio/examples",
+      "ticketDoc": "docs/device-readiness-tickets.md",
+      "notes": "Holiday streetball: shooting, dunks, Gamebreaker, Cocoa shop, Santa workshop, voice announcer, monetization, mobile touch controls. Console currently disabled; mobile and tablet enabled."
+    }
+  ]
+}
