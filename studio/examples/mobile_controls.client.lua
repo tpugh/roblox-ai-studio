@@ -1,7 +1,8 @@
 --!nonstrict
--- Touch controls for phones and tablets. Mirrors the keyboard bindings through
--- the exact same remotes, so the server still validates every action. Shown on
--- touch devices (or when the player has the ForceMobileControls attribute).
+-- Touch controls for phones and tablets. Circular action buttons cluster on
+-- the right side (opposite the movement joystick), styled after the reference:
+-- one large SHOOT button ringed by smaller move buttons. All buttons fire the
+-- same server remotes as the keyboard keys, so validation stays server-side.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,23 +11,18 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
-local Candy = require(ReplicatedStorage:WaitForChild("CandyUI", 10))
 
 local ball = ReplicatedStorage:WaitForChild("BallRemotes", 10)
-local cocoa = ReplicatedStorage:FindFirstChild("CocoaRemotes")
-
-local function remote(folder, name)
-	return folder and folder:FindFirstChild(name) or nil
+local function remote(name)
+	return ball and ball:FindFirstChild(name) or nil
 end
-
-local Throw = remote(ball, "Throw")
-local Dribble = remote(ball, "Dribble")
-local ResetBalls = remote(ball, "ResetBalls")
-local Defend = remote(ball, "Defend")
-local Grab = remote(ball, "Grab")
-local Dunk = remote(ball, "Dunk")
-local Trick = remote(ball, "Trick")
-local Gamebreaker = remote(ball, "Gamebreaker")
+local Throw = remote("Throw")
+local ResetBalls = remote("ResetBalls")
+local Defend = remote("Defend")
+local Grab = remote("Grab")
+local Dunk = remote("Dunk")
+local Trick = remote("Trick")
+local Gamebreaker = remote("Gamebreaker")
 local MusicMute = ReplicatedStorage:FindFirstChild("MusicMuteToggle", true)
 if not MusicMute then
 	MusicMute = Instance.new("BindableEvent")
@@ -40,50 +36,79 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Enabled = UserInputService.TouchEnabled or player:GetAttribute("ForceMobileControls") == true
 gui.Parent = player:WaitForChild("PlayerGui")
-
 player:GetAttributeChangedSignal("ForceMobileControls"):Connect(function()
 	gui.Enabled = UserInputService.TouchEnabled or player:GetAttribute("ForceMobileControls") == true
 end)
 
-local function button(name, text, size, position, anchor, accent, onTap, onHold)
-	local panel = Candy.bubble(gui, name, size, position, anchor, accent)
-	local tap = Instance.new("TextButton")
-	tap.Name = "Tap"
-	tap.AnchorPoint = Vector2.new(0.5, 0.5)
-	tap.Position = UDim2.fromScale(0.5, 0.44)
-	tap.Size = UDim2.fromScale(0.94, 0.8)
-	tap.BackgroundTransparency = 1
-	tap.Font = Candy.FONT
-	tap.Text = text
-	tap.TextSize = size.Y.Offset > 90 and 30 or 21
-	tap.TextColor3 = Candy.DARK
-	tap.TextStrokeTransparency = 0.9
-	tap.Parent = panel
+local CREAM = Color3.fromRGB(240, 240, 246)
+local INK = Color3.fromRGB(38, 38, 48)
+local GLASS = Color3.fromRGB(66, 58, 50)
 
-	tap.MouseButton1Click:Connect(function()
-		if onTap then
-			onTap()
-		end
-	end)
+-- Landscape phones have a short viewport height, so scale every button and
+-- its offset from the reference height (720). Clamped so tablets stay usable.
+local buttons = {}
+local function uiScale()
+	local camera = Workspace.CurrentCamera
+	local viewport = camera and camera.ViewportSize or Vector2.new(1280, 720)
+	return math.clamp(viewport.Y / 720, 0.6, 1.15)
+end
+
+-- Circular button: a dark/coloured ring with a slightly smaller face inside.
+local function circleButton(name, text, size, centre, big, onTap, onHold)
+	local holder = Instance.new("Frame")
+	holder.Name = name
+	holder.AnchorPoint = Vector2.new(0.5, 0.5)
+	holder.BackgroundTransparency = 1
+	holder.Parent = gui
+	table.insert(buttons, { holder = holder, baseSize = size, baseCentre = centre, big = big })
+
+	local ring = Instance.new("Frame")
+	ring.Size = UDim2.fromScale(1, 1)
+	ring.BackgroundColor3 = big and INK or CREAM
+	ring.BorderSizePixel = 0
+	ring.Parent = holder
+	local ringCorner = Instance.new("UICorner")
+	ringCorner.CornerRadius = UDim.new(0.5, 0)
+	ringCorner.Parent = ring
+
+	local face = Instance.new("TextButton")
+	face.Name = "Tap"
+	face.AnchorPoint = Vector2.new(0.5, 0.5)
+	face.Position = UDim2.fromScale(0.5, 0.5)
+	face.Size = UDim2.new(1, -7, 1, -7)
+	face.BackgroundColor3 = big and CREAM or GLASS
+	face.BackgroundTransparency = big and 0 or 0.15
+	face.BorderSizePixel = 0
+	face.Font = Enum.Font.GothamBlack
+	face.Text = text
+	face.TextColor3 = big and INK or CREAM
+	face.TextScaled = true
+	face.Parent = holder
+	local faceCorner = Instance.new("UICorner")
+	faceCorner.CornerRadius = UDim.new(0.5, 0)
+	faceCorner.Parent = face
+
+	if onTap then
+		face.MouseButton1Click:Connect(onTap)
+	end
 	if onHold then
-		tap.MouseButton1Down:Connect(function()
+		face.MouseButton1Down:Connect(function()
 			onHold(true)
 		end)
-		tap.MouseButton1Up:Connect(function()
+		face.MouseButton1Up:Connect(function()
 			onHold(false)
 		end)
-		tap.MouseLeave:Connect(function()
+		face.MouseLeave:Connect(function()
 			onHold(false)
 		end)
 	end
-	return panel
+	return holder
 end
 
--- Shooting: hold to charge, release to fire, exactly like the F key.
+-- Hold SHOOT to charge, release to fire (mirrors the F key).
 local charging = false
 local charge = 0
 local CHARGE_SECONDS = 1.1
-
 local function setCharging(on)
 	if on == charging then
 		return
@@ -99,13 +124,11 @@ local function setCharging(on)
 		charge = 0
 	end
 end
-
 RunService.RenderStepped:Connect(function(dt)
 	if charging then
 		charge = math.min(1, charge + dt / CHARGE_SECONDS)
 	end
 end)
-
 player:GetAttributeChangedSignal("HoldingBall"):Connect(function()
 	if player:GetAttribute("HoldingBall") ~= true then
 		charging = false
@@ -150,45 +173,51 @@ local function grabNearest()
 	end
 end
 
--- Right thumb cluster: the main actions.
-button("MobileShoot", "SHOOT", UDim2.fromOffset(148, 112), UDim2.new(1, -18, 1, -200), Vector2.new(1, 1),
-	Candy.PINK, nil, setCharging)
-button("MobileDunk", "DUNK", UDim2.fromOffset(132, 56), UDim2.new(1, -18, 1, -322), Vector2.new(1, 1),
-	Candy.RED, function()
-		if Dunk then Dunk:FireServer() end
-	end)
-button("MobileTrick", "TRICK", UDim2.fromOffset(132, 56), UDim2.new(1, -18, 1, -384), Vector2.new(1, 1),
-	Candy.MINT, function()
-		if Trick then Trick:FireServer() end
-	end)
-button("MobileSteal", "STEAL", UDim2.fromOffset(132, 56), UDim2.new(1, -18, 1, -446), Vector2.new(1, 1),
-	Candy.GOLD, function()
-		if Defend then Defend:FireServer() end
-	end)
+-- Right-side circular cluster: SHOOT is the anchor, moves ring around it.
+local function at(right, bottom)
+	return UDim2.new(1, -right, 1, -bottom)
+end
 
--- Left thumb cluster: movement / support actions.
-button("MobileBreaker", "GAME BREAKER", UDim2.fromOffset(168, 54), UDim2.new(0, 18, 1, -206), Vector2.new(0, 1),
-	Candy.GOLD, function()
-		if Gamebreaker then Gamebreaker:FireServer() end
-	end)
-button("MobileTurbo", "TURBO", UDim2.fromOffset(128, 52), UDim2.new(0, 18, 1, -266), Vector2.new(0, 1),
-	Candy.MINT, nil, setTurbo)
--- No DRIBBLE button: walking over the ball already starts a dribble.
-button("MobileGrab", "PICK UP", UDim2.fromOffset(132, 62), UDim2.new(0, 18, 1, -324), Vector2.new(0, 1),
-	Candy.RED, grabNearest)
-button("MobileReset", "RESET", UDim2.fromOffset(132, 62), UDim2.new(0, 18, 1, -394), Vector2.new(0, 1),
-	Candy.MINT, function()
-		if ResetBalls then ResetBalls:FireServer() end
-	end)
-button("MobileMute", "MUSIC", UDim2.fromOffset(104, 54), UDim2.new(0, 18, 1, -464), Vector2.new(0, 1),
-	Candy.GOLD, function()
-		if MusicMute then
-			MusicMute:Fire()
-		end
-	end)
+circleButton("MobileShoot", "SHOOT", UDim2.fromOffset(152, 152), at(115, 100), true, nil, setCharging)
+circleButton("MobileDunk", "DUNK", UDim2.fromOffset(90, 90), at(160, 215), false, function()
+	if Dunk then Dunk:FireServer() end
+end)
+circleButton("MobileTrick", "TRICK", UDim2.fromOffset(90, 90), at(70, 240), false, function()
+	if Trick then Trick:FireServer() end
+end)
+circleButton("MobileSteal", "STEAL", UDim2.fromOffset(90, 90), at(155, 310), false, function()
+	if Defend then Defend:FireServer() end
+end)
+circleButton("MobileBreaker", "BREAKER", UDim2.fromOffset(90, 90), at(70, 335), false, function()
+	if Gamebreaker then Gamebreaker:FireServer() end
+end)
 
--- Phones have much less room: hide the keyboard-hint bubbles and shrink the
--- in-world sign boards so the court stays readable behind the touch buttons.
+-- Smaller support circles above the main cluster.
+circleButton("MobileTurbo", "TURBO", UDim2.fromOffset(76, 76), at(150, 410), false, nil, setTurbo)
+circleButton("MobileGrab", "GRAB", UDim2.fromOffset(76, 76), at(80, 435), false, grabNearest)
+circleButton("MobileReset", "RESET", UDim2.fromOffset(70, 70), at(140, 495), false, function()
+	if ResetBalls then ResetBalls:FireServer() end
+end)
+circleButton("MobileMute", "MUSIC", UDim2.fromOffset(66, 66), at(75, 505), false, function()
+	if MusicMute then MusicMute:Fire() end
+end)
+
+local function applyScale()
+	local scale = uiScale()
+	for _, entry in ipairs(buttons) do
+		local s = entry.baseSize
+		local c = entry.baseCentre
+		entry.holder.Size = UDim2.fromOffset(s.X.Offset * scale, s.Y.Offset * scale)
+		entry.holder.Position = UDim2.new(1, c.X.Offset * scale, 1, c.Y.Offset * scale)
+	end
+end
+applyScale()
+local camera = Workspace.CurrentCamera
+if camera then
+	camera:GetPropertyChangedSignal("ViewportSize"):Connect(applyScale)
+end
+
+-- Phones have less room: hide keyboard hints and shrink the world sign boards.
 local function slimSigns()
 	local playerGui = player:FindFirstChild("PlayerGui")
 	if playerGui then
@@ -215,7 +244,6 @@ local function slimSigns()
 		end
 	end
 end
-
 slimSigns()
 task.spawn(function()
 	while gui.Enabled do
