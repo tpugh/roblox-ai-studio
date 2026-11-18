@@ -1,7 +1,7 @@
 --!nonstrict
--- Game announcer: calls out buckets, tricks, Gamebreakers and Santa-court
--- scores on a billboard above the street court. It only reads attributes and
--- scoreboard text, so it never touches game state.
+-- Game announcer: a voiced TV-style broadcaster calling buckets, tricks,
+-- Gamebreakers and Santa-court scores, with the bubble text to match. It only
+-- reads attributes and scoreboard text, so it never touches game state.
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
@@ -17,17 +17,49 @@ if not label then
 	return
 end
 
-local BLARE_ID = "rbxassetid://124140408144336"
-local TRICKS = {
-	"CROSSOVER",
-	"SPIN MOVE",
-	"AROUND THE BACK",
-	"ANKLE BREAKER",
-	"STYLE POINTS",
+local VOICE = {
+	welcome = 113763813805926,
+	bucket = 136152530915050,
+	three = 135686510272453,
+	crossover = 72215520692870,
+	spin = 115975635383452,
+	behindback = 72197064642027,
+	ankle = 78781674330805,
+	style = 117478930036237,
+	gamebreaker = 83311040427554,
+	santascore = 117390797062289,
 }
+local BLARE_ID = "rbxassetid://124140408144336"
+local TRICK_NAMES = { "CROSSOVER", "SPIN MOVE", "AROUND THE BACK", "ANKLE BREAKER", "STYLE POINTS" }
+local TRICK_VOICE = { "crossover", "spin", "behindback", "ankle", "style" }
 
 local queue = {}
 local running = false
+
+local function speak(key)
+	if not anchor then
+		return
+	end
+	local id = key and VOICE[key]
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.Name = "AnnouncerVoice"
+	sound.SoundId = "rbxassetid://" .. tostring(id)
+	sound.Volume = 1
+	sound.PlaybackSpeed = 1
+	sound.RollOffMode = Enum.RollOffMode.InverseTapered
+	sound.RollOffMinDistance = 12
+	sound.RollOffMaxDistance = 0 -- heard anywhere on the court
+	sound.Parent = anchor
+	sound:Play()
+	task.delay(4, function()
+		if sound.Parent then
+			sound:Destroy()
+		end
+	end)
+end
 
 local function blare()
 	if not anchor then
@@ -36,7 +68,7 @@ local function blare()
 	local sound = Instance.new("Sound")
 	sound.Name = "AnnouncerBlare"
 	sound.SoundId = BLARE_ID
-	sound.Volume = 0.24
+	sound.Volume = 0.18
 	sound.PlaybackSpeed = 1.35
 	sound.Parent = anchor
 	sound:Play()
@@ -45,22 +77,13 @@ local function blare()
 			sound:Destroy()
 		end
 	end)
-
-	local home = anchor.Position
-	task.spawn(function()
-		for _, lift in ipairs({ 0.5, 0.25, 0 }) do
-			anchor.Position = home + Vector3.new(0, lift, 0)
-			task.wait(0.08)
-		end
-		anchor.Position = home
-	end)
 end
 
-local function say(text, priority)
+local function say(text, voiceKey, priority)
 	if priority then
-		table.clear(queue) -- a live play by the player cuts in front of filler
+		table.clear(queue) -- a live play cuts in front of filler
 	end
-	table.insert(queue, text)
+	table.insert(queue, { text = text, voice = voiceKey })
 	if #queue > 5 then
 		table.remove(queue, 1)
 	end
@@ -70,10 +93,23 @@ local function say(text, priority)
 	running = true
 	task.spawn(function()
 		while #queue > 0 do
-			local message = table.remove(queue, 1)
-			label.Text = message
-			blare()
-			task.wait(2.2)
+			local call = table.remove(queue, 1)
+			label.Text = call.text
+			if call.voice then
+				speak(call.voice)
+			else
+				blare()
+			end
+			task.wait(call.voice and 2.6 or 2.2)
+
+			local home = anchor.Position
+			task.spawn(function()
+				for _, lift in ipairs({ 0.5, 0.25, 0 }) do
+					anchor.Position = home + Vector3.new(0, lift, 0)
+					task.wait(0.08)
+				end
+				anchor.Position = home
+			end)
 		end
 		label.Text = "HOOPSMAS STREETBALL"
 		running = false
@@ -87,29 +123,29 @@ local function watchPlayer(player)
 		local gained = value - lastScore
 		lastScore = value
 		if gained >= 3 then
-			say("THREE POINTER! " .. player.Name .. " IS ON FIRE!", true)
+			say("THREE POINTER! " .. player.Name .. " IS ON FIRE!", "three", true)
 		elseif gained >= 2 then
-			say("BUCKET! " .. player.Name .. " SCORES!", true)
+			say("BUCKET! " .. player.Name .. " SCORES!", "bucket", true)
 		end
 	end)
 
 	player:GetAttributeChangedSignal("TrickChain"):Connect(function()
 		local chain = player:GetAttribute("TrickChain") or 0
-		if chain >= 1 and chain <= #TRICKS then
-			say(TRICKS[chain] .. "! NICE HANDLES!", true)
+		if chain >= 1 and chain <= #TRICK_NAMES then
+			say(TRICK_NAMES[chain] .. "! NICE HANDLES!", TRICK_VOICE[chain], true)
 		end
 	end)
 
 	player:GetAttributeChangedSignal("GamebreakerActive"):Connect(function()
 		if player:GetAttribute("GamebreakerActive") == true then
-			say("GAME BREAKER DUNK!", true)
+			say("GAME BREAKER DUNK!", "gamebreaker", true)
 		end
 	end)
 
 	player:GetAttributeChangedSignal("StreetScore"):Connect(function()
 		local value = player:GetAttribute("StreetScore") or 0
 		if value >= 5 then
-			say("STREET LEGEND: " .. player.Name .. "!")
+			say("STREET LEGEND: " .. player.Name .. "!", "style")
 		end
 	end)
 end
@@ -144,7 +180,7 @@ if body then
 				end
 				if changed and os.clock() - lastSantaCall > 8 then
 					lastSantaCall = os.clock()
-					say("SANTA COURT: " .. teamA.Text .. "  -  " .. teamB.Text)
+					say("SANTA COURT: " .. teamA.Text .. "  -  " .. teamB.Text, "santascore")
 				end
 			end
 		end)
@@ -152,5 +188,5 @@ if body then
 end
 
 task.delay(4, function()
-	say("WELCOME TO HOOPSMAS STREETBALL!")
+	say("WELCOME TO HOOPSMAS STREETBALL!", "welcome")
 end)
