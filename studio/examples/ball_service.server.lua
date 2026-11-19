@@ -314,7 +314,17 @@ local function endDribble(ball, recatch)
 		player:SetAttribute("HoldingBall", false)
 	end
 	if recatch and player and player.Parent then
-		grab(player, ball)
+		local caught = grab(player, ball)
+		-- The ball can bounce a little far during the last dribble beat, so a
+		-- single recatch attempt can miss. Retry briefly so a stationary player
+		-- always ends up holding the ball again instead of losing it.
+		if not caught then
+			task.delay(0.2, function()
+				if ball.Parent and player.Parent and player:GetAttribute("HoldingBall") ~= true then
+					grab(player, ball)
+				end
+			end)
+		end
 	end
 end
 
@@ -502,6 +512,33 @@ end
 RunService.Heartbeat:Connect(function(dt)
 	updateDribbles(dt)
 	autoGrab()
+end)
+
+-- Keep the replicated possession attributes in sync with the authoritative
+-- hold/dribble tables. Character respawns and stray attribute writes could
+-- otherwise clear HoldingBall while the server still has the ball welded to
+-- the player's hand, which makes pickups and dribbles appear to fail.
+task.spawn(function()
+	while true do
+		task.wait(0.3)
+		for ball, data in pairs(held) do
+			local player = data.player
+			if ball.Parent and player and player.Parent and player:GetAttribute("HoldingBall") ~= true then
+				player:SetAttribute("HoldingBall", true)
+			end
+		end
+		for ball, data in pairs(dribbling) do
+			local player = data.player
+			if ball.Parent and player and player.Parent then
+				if player:GetAttribute("Dribbling") ~= true then
+					player:SetAttribute("Dribbling", true)
+				end
+				if player:GetAttribute("HoldingBall") ~= true then
+					player:SetAttribute("HoldingBall", true)
+				end
+			end
+		end
+	end
 end)
 
 -- --------------------------------------------------------------- ballistics
